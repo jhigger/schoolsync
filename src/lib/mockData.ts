@@ -2,8 +2,8 @@ export interface DashboardStats {
   attentionCount: number;
   computersWorking: number;
   computersTotal: number;
-  printersFix: number;
-  worthALook: number;
+  printersNeedingFix: number;
+  issuesWorthReviewing: number;
 }
 
 export interface DashboardTask {
@@ -15,9 +15,18 @@ export interface DashboardTask {
   actionLabel: string;
 }
 
+export interface DashboardFeedItem {
+  id: string;
+  text: string;
+  time: string;
+  type: 'g' | 'a' | 'r';
+  techDetails?: string;
+}
+
 export interface DashboardData {
   stats: DashboardStats;
   tasks: DashboardTask[];
+  feed: DashboardFeedItem[];
 }
 
 const mockDashboardData: DashboardData = {
@@ -25,8 +34,8 @@ const mockDashboardData: DashboardData = {
     attentionCount: 2,
     computersWorking: 61,
     computersTotal: 64,
-    printersFix: 1,
-    worthALook: 3,
+    printersNeedingFix: 1,
+    issuesWorthReviewing: 3,
   },
   tasks: [
     {
@@ -43,6 +52,28 @@ const mockDashboardData: DashboardData = {
       badges: ['Lab 1 • PC 12', 'Lab 3 • PC 4', 'Office • PC 9'],
       severity: 'medium',
       actionLabel: 'Check now',
+    },
+  ],
+  feed: [
+    {
+      id: 'f1',
+      text: 'The Office printer stopped working.',
+      time: '11:42 AM',
+      type: 'r',
+      techDetails: 'printer.spooler • code 0x709 • host=OFFICE-PRN1',
+    },
+    {
+      id: 'f2',
+      text: 'A computer in Lab 3 was slow to respond.',
+      time: '11:20 AM',
+      type: 'a',
+      techDetails: 'perf.slow • cpu=98% • host=LAB3-PC04',
+    },
+    {
+      id: 'f3',
+      text: '5 new student accounts were added.',
+      time: '10:55 AM',
+      type: 'g',
     },
   ],
 };

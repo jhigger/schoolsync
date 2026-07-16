@@ -2,17 +2,29 @@ import { CheckSquare } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 import { Badge } from '../ui/badge'
-import { Skeleton } from '../ui/skeleton'
 import type { DashboardTask } from '../../lib/mockData'
 
 type TaskItemProps = {
   task: DashboardTask
 }
 
+const severityConfig = {
+  high: {
+    accentClass: 'bg-destructive',
+    buttonVariant: 'default' as const,
+  },
+  medium: {
+    accentClass: 'bg-amber-500',
+    buttonVariant: 'outline' as const,
+  },
+}
+
 function TaskItem({ task }: TaskItemProps) {
+  const config = severityConfig[task.severity]
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
-      <div className={`hidden sm:block w-1 self-stretch rounded-full shrink-0 ${task.severity === 'high' ? 'bg-destructive' : 'bg-amber-500'}`}></div>
+      <div className={`hidden sm:block w-1 self-stretch rounded-full shrink-0 ${config.accentClass}`}></div>
       
       <div className="flex-1 flex flex-col gap-1">
         <div className="font-semibold text-foreground">{task.title}</div>
@@ -26,37 +38,18 @@ function TaskItem({ task }: TaskItemProps) {
         </div>
       </div>
       
-      <Button variant={task.severity === 'high' ? 'default' : 'outline'} className="w-full sm:w-auto">
+      <Button variant={config.buttonVariant} className="w-full sm:w-auto">
         {task.actionLabel}
       </Button>
     </div>
   )
 }
 
-export function HeroTaskList({ tasks, isLoading }: { tasks?: DashboardTask[], isLoading?: boolean }) {
-  if (isLoading || !tasks) {
-    return (
-      <Card className="p-5 sm:p-6 flex flex-col gap-4 sm:gap-5">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <CheckSquare className="w-5 h-5" /> What to do now
-        </h2>
-        
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-[88px] w-full rounded-md" />
-          <Skeleton className="h-[88px] w-full rounded-md" />
-        </div>
-        
-        <div className="text-sm text-muted-foreground mt-1">
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </Card>
-    )
-  }
-
+export function HeroTaskList({ tasks, className }: { tasks: DashboardTask[], className?: string }) {
   return (
-    <Card className="p-5 sm:p-6 flex flex-col gap-4 sm:gap-5">
-      <h2 className="text-lg font-semibold flex items-center gap-2">
-        <CheckSquare className="w-5 h-5" /> What to do now
+    <Card className={`p-5 sm:p-6 flex flex-col gap-4 sm:gap-5 ${className || ''}`}>
+      <h2 className="text-[12.5px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
+        <CheckSquare className="w-[15px] h-[15px]" /> What to do now
       </h2>
       
       <div className="flex flex-col gap-3">
