@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,6 +9,8 @@ import {
 import { Search, Download } from 'lucide-react'
 import { fetchActivityLogData, type ActivityLogEvent } from '@/lib/mockData'
 import { useStore } from '@/store'
+import { useQuery } from '@tanstack/react-query'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const CATEGORY_STYLES: Record<string, string> = {
   fix: 'bg-[hsl(var(--destructive))]',
@@ -23,13 +25,12 @@ const SEVERITY_STYLES: Record<string, string> = {
 }
 
 export function ActivityComponent() {
-  const [data, setData] = useState<ActivityLogEvent[]>([])
+  const { data = [], isLoading } = useQuery({
+    queryKey: ['activityLogData'],
+    queryFn: fetchActivityLogData,
+  })
   const viewMode = useStore((state) => state.viewMode)
   const isDetailed = viewMode === 'detailed'
-
-  useEffect(() => {
-    fetchActivityLogData().then(setData)
-  }, [])
 
   const columns = useMemo<ColumnDef<ActivityLogEvent>[]>(
     () => [
@@ -123,6 +124,41 @@ export function ActivityComponent() {
       {label}
     </button>
   )
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-[12px] h-full w-full animate-pulse">
+        {/* Controls */}
+        <div className="flex flex-wrap gap-[10px] items-center shrink-0">
+          <Skeleton className="h-[44px] flex-1 min-w-[200px] rounded-[10px]" />
+          {isDetailed && (
+            <>
+              <Skeleton className="h-[44px] w-[120px] rounded-[10px]" />
+              <Skeleton className="h-[44px] w-[120px] rounded-[10px]" />
+              <Skeleton className="h-[46px] w-[120px] rounded-[calc(var(--radius)-2px)]" />
+            </>
+          )}
+        </div>
+
+        {/* Pills */}
+        <div className="flex gap-[8px] shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+          <Skeleton className="h-[38px] w-[60px] rounded-full" />
+          <Skeleton className="h-[38px] w-[120px] rounded-full" />
+          <Skeleton className="h-[38px] w-[120px] rounded-full" />
+          <Skeleton className="h-[38px] w-[100px] rounded-full" />
+        </div>
+
+        {/* Log */}
+        <div className="flex-1 overflow-y-auto bg-white dark:bg-card border border-border rounded-[var(--radius)] px-[16px] py-[16px] flex flex-col gap-[16px]">
+          <Skeleton className="h-[60px] w-full rounded-md" />
+          <Skeleton className="h-[60px] w-full rounded-md" />
+          <Skeleton className="h-[60px] w-full rounded-md" />
+          <Skeleton className="h-[60px] w-full rounded-md" />
+          <Skeleton className="h-[60px] w-full rounded-md" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-[12px] h-full w-full">

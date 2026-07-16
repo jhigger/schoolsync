@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { fetchAlertsData, fetchRulesData } from '@/lib/mockData'
 import type { AlertItem, RuleItem } from '@/lib/mockData'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const Route = createFileRoute('/_app/alerts')({
   component: AlertsRoute,
@@ -53,7 +54,11 @@ function AlertsRoute() {
       {/* TAB: Needs review */}
       <div className={cn("tabpanel", activeTab === 'review' && "active")} data-panel="review">
         {loading ? (
-          <div className="p-4 text-muted-foreground">Loading alerts...</div>
+          <div className="list">
+            <Skeleton className="h-[140px] w-full rounded-xl" />
+            <Skeleton className="h-[140px] w-full rounded-xl" />
+            <Skeleton className="h-[140px] w-full rounded-xl" />
+          </div>
         ) : alerts.length > 0 ? (
           <div className="list" id="alertList">
             {alerts.map(alert => (
@@ -74,7 +79,13 @@ function AlertsRoute() {
       {/* TAB: Rules */}
       <div className={cn("tabpanel", activeTab === 'rules' && "active")} data-panel="rules">
         {loading ? (
-          <div className="p-4 text-muted-foreground">Loading rules...</div>
+          <div className="list">
+            <div className="section-label">Tell me when…</div>
+            <Skeleton className="h-[80px] w-full rounded-lg" />
+            <Skeleton className="h-[80px] w-full rounded-lg" />
+            <div className="section-label" style={{ marginTop: '8px' }}>How I’m told</div>
+            <Skeleton className="h-[80px] w-full rounded-lg" />
+          </div>
         ) : (
           <div className="list">
             <div className="section-label">Tell me when…</div>
