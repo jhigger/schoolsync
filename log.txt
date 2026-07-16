@@ -1,2 +1,0 @@
-2c9d545 docs: mark 04-activity-log-ui.md tasks as done
-1af33b3 feat: implement Activity Log UI
