@@ -1,6 +1,10 @@
+import { useEffect } from 'react'
 import { useStore } from '../store'
-import { LogOut } from 'lucide-react'
+import { LogOut, Sun, Moon } from 'lucide-react'
 import { useRouterState, useNavigate } from '@tanstack/react-router'
+import { SidebarTrigger } from './ui/sidebar'
+import { Switch } from './ui/switch'
+import { Label } from './ui/label'
 
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -13,6 +17,10 @@ const ROUTE_TITLES: Record<string, string> = {
 
 export default function Topbar() {
   const setAuthRole = useStore((state) => state.setAuthRole)
+  const theme = useStore((state) => state.theme)
+  const setTheme = useStore((state) => state.setTheme)
+  const viewMode = useStore((state) => state.viewMode)
+  const setViewMode = useStore((state) => state.setViewMode)
   const navigate = useNavigate()
   const router = useRouterState()
 
@@ -21,18 +29,59 @@ export default function Topbar() {
     navigate({ to: '/signin' })
   }
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+  }
+
+  // Effect to apply theme to document
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.remove('light', 'dark')
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      root.classList.add(systemTheme)
+    } else {
+      root.classList.add(theme)
+    }
+    // Also sync with the script that runs before React loads
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
   const path = router.location.pathname
   const title = ROUTE_TITLES[path] || 'App'
 
   return (
     <header className="h-14 md:h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-30">
-      <h1 className="text-lg md:text-xl font-bold">{title}</h1>
+      <div className="flex items-center gap-4">
+        <SidebarTrigger className="-ml-2" />
+        <h1 className="text-lg md:text-xl font-bold">{title}</h1>
+      </div>
       
       <div className="flex items-center gap-4">
-        <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground border border-border px-3 py-1.5 rounded-full">
+        <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground border border-border px-3 py-1.5 rounded-full mr-2">
           <span className="w-2 h-2 rounded-full bg-green-500"></span>
           Updated 2 min ago
         </div>
+
+        <div className="flex items-center gap-2">
+          <Switch 
+            id="view-mode" 
+            checked={viewMode === 'detailed'}
+            onCheckedChange={(checked) => setViewMode(checked ? 'detailed' : 'simple')}
+          />
+          <Label htmlFor="view-mode" className="text-sm font-medium cursor-pointer">
+            {viewMode === 'detailed' ? 'Detailed' : 'Simple'}
+          </Label>
+        </div>
+
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-accent-foreground"
+          aria-label="Toggle theme"
+        >
+          {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+        </button>
         
         <button 
           onClick={signOut}

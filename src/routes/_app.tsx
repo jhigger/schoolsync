@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { SidebarProvider, SidebarInset } from '../components/ui/sidebar'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 import { getStoredAuthRole } from '../store'
@@ -13,16 +14,17 @@ export const Route = createFileRoute('/_app')({
 })
 
 function AppLayout() {
-
   return (
-    <div className="flex h-screen w-full bg-background flex-col md:flex-row overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <Outlet />
-        </main>
+    <SidebarProvider>
+      <div className="flex h-screen w-full bg-background overflow-hidden">
+        <Sidebar />
+        <SidebarInset className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <Topbar />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            <Outlet />
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
