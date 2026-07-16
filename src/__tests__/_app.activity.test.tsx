@@ -9,23 +9,20 @@ vi.spyOn(mockData, 'fetchActivityLogData').mockResolvedValue(mockData.mockActivi
 
 describe('ActivityRoute', () => {
   const queryClient = new QueryClient()
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  )
 
   it('renders the search input', async () => {
-    render(
-      <QueryClientProvider client={queryClient}>
-        <ActivityComponent />
-      </QueryClientProvider>
-    )
+    render(<ActivityComponent />, { wrapper })
     const searchInput = await screen.findByPlaceholderText('Type to search… (example: Lab 1, printer, Maria)')
     expect(searchInput).toBeInTheDocument()
   })
 
   it('renders the mocked activity log events', async () => {
-    render(
-      <QueryClientProvider client={queryClient}>
-        <ActivityComponent />
-      </QueryClientProvider>
-    )
+    render(<ActivityComponent />, { wrapper })
     
     // Check if initial items are loaded
     await waitFor(() => {

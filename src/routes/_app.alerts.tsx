@@ -55,9 +55,9 @@ function AlertsRoute() {
       <div className={cn("tabpanel", activeTab === 'review' && "active")} data-panel="review">
         {loading ? (
           <div className="list">
-            <Skeleton className="h-[140px] w-full rounded-xl" />
-            <Skeleton className="h-[140px] w-full rounded-xl" />
-            <Skeleton className="h-[140px] w-full rounded-xl" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-[140px] w-full rounded-xl" />
+            ))}
           </div>
         ) : alerts.length > 0 ? (
           <div className="list" id="alertList">
@@ -81,8 +81,9 @@ function AlertsRoute() {
         {loading ? (
           <div className="list">
             <div className="section-label">Tell me when…</div>
-            <Skeleton className="h-[80px] w-full rounded-lg" />
-            <Skeleton className="h-[80px] w-full rounded-lg" />
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Skeleton key={`tell-${i}`} className="h-[80px] w-full rounded-lg" />
+            ))}
             <div className="section-label" style={{ marginTop: '8px' }}>How I’m told</div>
             <Skeleton className="h-[80px] w-full rounded-lg" />
           </div>

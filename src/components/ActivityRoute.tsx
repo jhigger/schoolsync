@@ -125,41 +125,6 @@ export function ActivityComponent() {
     </button>
   )
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-[12px] h-full w-full animate-pulse">
-        {/* Controls */}
-        <div className="flex flex-wrap gap-[10px] items-center shrink-0">
-          <Skeleton className="h-[44px] flex-1 min-w-[200px] rounded-[10px]" />
-          {isDetailed && (
-            <>
-              <Skeleton className="h-[44px] w-[120px] rounded-[10px]" />
-              <Skeleton className="h-[44px] w-[120px] rounded-[10px]" />
-              <Skeleton className="h-[46px] w-[120px] rounded-[calc(var(--radius)-2px)]" />
-            </>
-          )}
-        </div>
-
-        {/* Pills */}
-        <div className="flex gap-[8px] shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
-          <Skeleton className="h-[38px] w-[60px] rounded-full" />
-          <Skeleton className="h-[38px] w-[120px] rounded-full" />
-          <Skeleton className="h-[38px] w-[120px] rounded-full" />
-          <Skeleton className="h-[38px] w-[100px] rounded-full" />
-        </div>
-
-        {/* Log */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-card border border-border rounded-[var(--radius)] px-[16px] py-[16px] flex flex-col gap-[16px]">
-          <Skeleton className="h-[60px] w-full rounded-md" />
-          <Skeleton className="h-[60px] w-full rounded-md" />
-          <Skeleton className="h-[60px] w-full rounded-md" />
-          <Skeleton className="h-[60px] w-full rounded-md" />
-          <Skeleton className="h-[60px] w-full rounded-md" />
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-[12px] h-full w-full">
       {/* Controls */}
@@ -209,7 +174,13 @@ export function ActivityComponent() {
 
       {/* Log */}
       <div className="flex-1 overflow-y-auto bg-white dark:bg-card border border-border rounded-[var(--radius)] px-[16px] pb-[16px]">
-        {Object.entries(groupedRows).length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col gap-[16px] pt-[16px]">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-[60px] w-full rounded-md" />
+            ))}
+          </div>
+        ) : Object.entries(groupedRows).length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-[8px] py-[60px] px-[20px] text-muted-foreground text-center">
             <Search className="w-[34px] h-[34px] stroke-[1.6px]" />
             <div className="text-[16px] font-bold text-foreground">Nothing to display</div>
