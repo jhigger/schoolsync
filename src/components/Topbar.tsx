@@ -1,10 +1,10 @@
-import { useEffect } from 'react'
 import { useStore } from '../store'
 import { LogOut, Sun, Moon } from 'lucide-react'
 import { useRouterState, useNavigate } from '@tanstack/react-router'
 import { SidebarTrigger } from './ui/sidebar'
 import { Switch } from './ui/switch'
 import { Label } from './ui/label'
+import { useThemeSync } from '../hooks/use-theme-sync'
 
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -30,23 +30,14 @@ export default function Topbar() {
   }
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
+    let currentTheme = theme
+    if (currentTheme === 'system') {
+      currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
+    setTheme(currentTheme === 'light' ? 'dark' : 'light')
   }
 
-  // Effect to apply theme to document
-  useEffect(() => {
-    const root = document.documentElement
-    root.classList.remove('light', 'dark')
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      root.classList.add(systemTheme)
-    } else {
-      root.classList.add(theme)
-    }
-    // Also sync with the script that runs before React loads
-    localStorage.setItem('theme', theme)
-  }, [theme])
+  useThemeSync()
 
   const path = router.location.pathname
   const title = ROUTE_TITLES[path] || 'App'
@@ -80,7 +71,8 @@ export default function Topbar() {
           className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-accent-foreground"
           aria-label="Toggle theme"
         >
-          {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          <Moon className="w-5 h-5 hidden dark:block" />
+          <Sun className="w-5 h-5 dark:hidden" />
         </button>
         
         <button 

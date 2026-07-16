@@ -17,7 +17,7 @@ export const useStore = create<AppState>()(
     (set) => ({
       authRole: null,
       theme: 'system',
-      viewMode: 'default',
+      viewMode: 'simple',
       setAuthRole: (role) => set({ authRole: role }),
       setTheme: (theme) => set({ theme }),
       setViewMode: (mode) => set({ viewMode: mode }),

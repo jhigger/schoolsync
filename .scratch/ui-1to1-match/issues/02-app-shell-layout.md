@@ -4,10 +4,11 @@
 
 **Blocked by:** 01 — Sign-In Route & Global State Foundation
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] App shell uses Shadcn's Sidebar component for navigation.
-- [ ] Sidebar collapses gracefully or converts to a drawer on mobile screens.
-- [ ] Top header includes a working Simple/Detailed mode toggle that updates Zustand.
-- [ ] Top header includes a working Dark/Light theme toggle that updates Zustand and applies the correct CSS variables.
-- [ ] Unauthenticated users are redirected to the Sign-In page.
+- [x] App shell uses Shadcn's Sidebar component for navigation.
+- [x] Sidebar collapses gracefully or converts to a drawer on mobile screens.
+- [x] Top header includes a working Simple/Detailed mode toggle that updates Zustand.
+- [x] Top header includes a working Dark/Light theme toggle that updates Zustand and applies the correct CSS variables.
+- [x] Unauthenticated users are redirected to the Sign-In page.
+
