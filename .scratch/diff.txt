@@ -1,0 +1,727 @@
+diff --git a/src/components/Sidebar.tsx b/src/components/Sidebar.tsx
+new file mode 100644
+index 0000000..371345e
+--- /dev/null
++++ b/src/components/Sidebar.tsx
+@@ -0,0 +1,52 @@
++import { Link } from '@tanstack/react-router'
++import { LayoutDashboard, Activity, MonitorSmartphone, Bell, Settings } from 'lucide-react'
++
++const navItems = [
++  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
++  { to: '/activity', label: 'Activity Log', icon: Activity },
++  { to: '/devices', label: 'Rooms & Devices', icon: MonitorSmartphone },
++  { to: '/alerts', label: 'Alerts', icon: Bell },
++  { to: '/settings', label: 'Settings', icon: Settings },
++]
++
++export default function Sidebar() {
++  return (
++    <aside className="bg-white border-t md:border-t-0 md:border-r border-gray-200 flex-shrink-0
++      fixed md:static bottom-0 left-0 right-0 z-40
++      md:w-64 flex md:flex-col p-2 md:p-4 justify-around md:justify-start"
++    >
++      <div className="hidden md:flex items-center gap-2 px-2 py-4 mb-4">
++        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
++          S
++        </div>
++        <span className="font-bold text-lg">SchoolSync</span>
++      </div>
++
++      <nav className="flex md:flex-col w-full gap-1">
++        {navItems.map((item) => {
++          const Icon = item.icon
++          return (
++            <Link
++              key={item.to}
++              to={item.to}
++              className="flex-1 md:flex-none flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-3 py-2 md:py-3 rounded-lg text-xs md:text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors [&.active]:bg-primary [&.active]:text-primary-foreground"
++            >
++              <Icon className="w-5 h-5 md:w-4 md:h-4" />
++              <span>{item.label}</span>
++            </Link>
++          )
++        })}
++      </nav>
++      
++      <div className="hidden md:flex mt-auto p-4 border-t border-gray-200 items-center gap-3">
++        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
++          U
++        </div>
++        <div className="flex flex-col">
++          <span className="text-sm font-semibold">User</span>
++          <span className="text-xs text-gray-500">Admin</span>
++        </div>
++      </div>
++    </aside>
++  )
++}
+diff --git a/src/components/Topbar.tsx b/src/components/Topbar.tsx
+new file mode 100644
+index 0000000..8eab274
+--- /dev/null
++++ b/src/components/Topbar.tsx
+@@ -0,0 +1,34 @@
++import { useAuth } from '../lib/auth'
++import { LogOut } from 'lucide-react'
++import { useRouterState } from '@tanstack/react-router'
++
++export default function Topbar() {
++  const { signOut } = useAuth()
++  const router = useRouterState()
++  
++  // A simple way to get title from current path
++  const path = router.location.pathname
++  const title = path === '/' ? 'Dashboard' 
++    : path.split('/')[1]?.charAt(0).toUpperCase() + path.split('/')[1]?.slice(1) || 'App'
++
++  return (
++    <header className="h-14 md:h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-30">
++      <h1 className="text-lg md:text-xl font-bold">{title}</h1>
++      
++      <div className="flex items-center gap-4">
++        <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-full">
++          <span className="w-2 h-2 rounded-full bg-green-500"></span>
++          Updated 2 min ago
++        </div>
++        
++        <button 
++          onClick={signOut}
++          className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2 rounded-md hover:bg-gray-100"
++        >
++          <LogOut className="w-4 h-4" />
++          <span className="hidden md:inline">Sign Out</span>
++        </button>
++      </div>
++    </header>
++  )
++}
+diff --git a/src/components/dashboard/HeroTaskList.tsx b/src/components/dashboard/HeroTaskList.tsx
+new file mode 100644
+index 0000000..ef69fc7
+--- /dev/null
++++ b/src/components/dashboard/HeroTaskList.tsx
+@@ -0,0 +1,51 @@
++import { CheckSquare } from 'lucide-react'
++import { Button } from '../ui/button'
++import { Card } from '../ui/card'
++import { Badge } from '../ui/badge'
++
++export function HeroTaskList() {
++  return (
++    <Card className="p-5 sm:p-6 flex flex-col gap-4 sm:gap-5">
++      <h2 className="text-lg font-semibold flex items-center gap-2">
++        <CheckSquare className="w-5 h-5" /> What to do now
++      </h2>
++      
++      <div className="flex flex-col gap-3">
++        {/* Task 1 */}
++        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
++          <div className="hidden sm:block w-1 self-stretch rounded-full shrink-0 bg-destructive"></div>
++          
++          <div className="flex-1 flex flex-col gap-1">
++            <div className="font-semibold text-foreground">Fix the Office printer</div>
++            <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
++              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Office</Badge> 
++              <span>stopped working at 11:42 AM</span>
++            </div>
++          </div>
++          
++          <Button className="w-full sm:w-auto">Ask IT for help</Button>
++        </div>
++
++        {/* Task 2 */}
++        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
++          <div className="hidden sm:block w-1 self-stretch rounded-full shrink-0 bg-amber-500"></div>
++          
++          <div className="flex-1 flex flex-col gap-1">
++            <div className="font-semibold text-foreground">Check 3 computers</div>
++            <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
++              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Lab 1 • PC 12</Badge>
++              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Lab 3 • PC 4</Badge>
++              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Office • PC 9</Badge>
++            </div>
++          </div>
++          
++          <Button variant="outline" className="w-full sm:w-auto">Check now</Button>
++        </div>
++      </div>
++      
++      <div className="text-sm text-muted-foreground mt-1">
++        0 of 2 handled today
++      </div>
++    </Card>
++  )
++}
+diff --git a/src/components/dashboard/StatusAlert.tsx b/src/components/dashboard/StatusAlert.tsx
+new file mode 100644
+index 0000000..ac762df
+--- /dev/null
++++ b/src/components/dashboard/StatusAlert.tsx
+@@ -0,0 +1,16 @@
++import { AlertTriangle } from 'lucide-react'
++
++export function StatusAlert() {
++  return (
++    <div
++      className="flex items-center gap-3 rounded-lg px-4 py-3 shrink-0 bg-orange-50 border border-orange-200 dark:bg-orange-950 dark:border-orange-800"
++      role="status"
++      aria-live="polite"
++    >
++      <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0" />
++      <div className="text-orange-900 dark:text-orange-300 font-medium">
++        2 things need your attention
++      </div>
++    </div>
++  )
++}
+diff --git a/src/components/dashboard/SummaryStrip.tsx b/src/components/dashboard/SummaryStrip.tsx
+new file mode 100644
+index 0000000..f5ab44f
+--- /dev/null
++++ b/src/components/dashboard/SummaryStrip.tsx
+@@ -0,0 +1,20 @@
++export function SummaryStrip() {
++  return (
++    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 flex-wrap text-sm text-gray-700 dark:text-muted-foreground bg-card border border-border rounded-lg px-4 py-3 shrink-0 shadow-sm">
++      <span>
++        <span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1.5 bg-green-500"></span>
++        <b>61 of 64</b> computers are working fine
++      </span>
++      <span className="hidden sm:inline text-border">•</span>
++      <span>
++        <span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1.5 bg-destructive"></span>
++        <b>1</b> printer needs fixing
++      </span>
++      <span className="hidden sm:inline text-border">•</span>
++      <span>
++        <span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1.5 bg-amber-500"></span>
++        <b>3</b> worth a look
++      </span>
++    </div>
++  )
++}
+diff --git a/src/lib/auth.tsx b/src/lib/auth.tsx
+new file mode 100644
+index 0000000..e4c60ab
+--- /dev/null
++++ b/src/lib/auth.tsx
+@@ -0,0 +1,44 @@
++import React, { createContext, useContext, useState, useEffect } from 'react'
++
++export type AuthContextType = {
++  isAuthenticated: boolean
++  signIn: () => void
++  signOut: () => void
++}
++
++const AuthContext = createContext<AuthContextType | null>(null)
++
++export function AuthProvider({ children }: { children: React.ReactNode }) {
++  const [isAuthenticated, setIsAuthenticated] = useState(false)
++
++  useEffect(() => {
++    const stored = localStorage.getItem('auth')
++    if (stored === 'true') {
++      setIsAuthenticated(true)
++    }
++  }, [])
++
++  const signIn = () => {
++    localStorage.setItem('auth', 'true')
++    setIsAuthenticated(true)
++  }
++
++  const signOut = () => {
++    localStorage.removeItem('auth')
++    setIsAuthenticated(false)
++  }
++
++  return (
++    <AuthContext.Provider value={{ isAuthenticated, signIn, signOut }}>
++      {children}
++    </AuthContext.Provider>
++  )
++}
++
++export function useAuth() {
++  const context = useContext(AuthContext)
++  if (!context) {
++    throw new Error('useAuth must be used within an AuthProvider')
++  }
++  return context
++}
+diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
+index 421daf2..49e1104 100644
+--- a/src/routeTree.gen.ts
++++ b/src/routeTree.gen.ts
+@@ -9,48 +9,143 @@
+ // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
+ 
+ import { Route as rootRouteImport } from './routes/__root'
++import { Route as SigninRouteImport } from './routes/signin'
+ import { Route as AboutRouteImport } from './routes/about'
++import { Route as AppRouteImport } from './routes/_app'
+ import { Route as IndexRouteImport } from './routes/index'
++import { Route as AppSettingsRouteImport } from './routes/_app.settings'
++import { Route as AppDevicesRouteImport } from './routes/_app.devices'
++import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
++import { Route as AppAlertsRouteImport } from './routes/_app.alerts'
++import { Route as AppActivityRouteImport } from './routes/_app.activity'
+ 
++const SigninRoute = SigninRouteImport.update({
++  id: '/signin',
++  path: '/signin',
++  getParentRoute: () => rootRouteImport,
++} as any)
+ const AboutRoute = AboutRouteImport.update({
+   id: '/about',
+   path: '/about',
+   getParentRoute: () => rootRouteImport,
+ } as any)
++const AppRoute = AppRouteImport.update({
++  id: '/_app',
++  getParentRoute: () => rootRouteImport,
++} as any)
+ const IndexRoute = IndexRouteImport.update({
+   id: '/',
+   path: '/',
+   getParentRoute: () => rootRouteImport,
+ } as any)
++const AppSettingsRoute = AppSettingsRouteImport.update({
++  id: '/settings',
++  path: '/settings',
++  getParentRoute: () => AppRoute,
++} as any)
++const AppDevicesRoute = AppDevicesRouteImport.update({
++  id: '/devices',
++  path: '/devices',
++  getParentRoute: () => AppRoute,
++} as any)
++const AppDashboardRoute = AppDashboardRouteImport.update({
++  id: '/dashboard',
++  path: '/dashboard',
++  getParentRoute: () => AppRoute,
++} as any)
++const AppAlertsRoute = AppAlertsRouteImport.update({
++  id: '/alerts',
++  path: '/alerts',
++  getParentRoute: () => AppRoute,
++} as any)
++const AppActivityRoute = AppActivityRouteImport.update({
++  id: '/activity',
++  path: '/activity',
++  getParentRoute: () => AppRoute,
++} as any)
+ 
+ export interface FileRoutesByFullPath {
+   '/': typeof IndexRoute
+   '/about': typeof AboutRoute
++  '/signin': typeof SigninRoute
++  '/activity': typeof AppActivityRoute
++  '/alerts': typeof AppAlertsRoute
++  '/dashboard': typeof AppDashboardRoute
++  '/devices': typeof AppDevicesRoute
++  '/settings': typeof AppSettingsRoute
+ }
+ export interface FileRoutesByTo {
+   '/': typeof IndexRoute
+   '/about': typeof AboutRoute
++  '/signin': typeof SigninRoute
++  '/activity': typeof AppActivityRoute
++  '/alerts': typeof AppAlertsRoute
++  '/dashboard': typeof AppDashboardRoute
++  '/devices': typeof AppDevicesRoute
++  '/settings': typeof AppSettingsRoute
+ }
+ export interface FileRoutesById {
+   __root__: typeof rootRouteImport
+   '/': typeof IndexRoute
++  '/_app': typeof AppRouteWithChildren
+   '/about': typeof AboutRoute
++  '/signin': typeof SigninRoute
++  '/_app/activity': typeof AppActivityRoute
++  '/_app/alerts': typeof AppAlertsRoute
++  '/_app/dashboard': typeof AppDashboardRoute
++  '/_app/devices': typeof AppDevicesRoute
++  '/_app/settings': typeof AppSettingsRoute
+ }
+ export interface FileRouteTypes {
+   fileRoutesByFullPath: FileRoutesByFullPath
+-  fullPaths: '/' | '/about'
++  fullPaths:
++    | '/'
++    | '/about'
++    | '/signin'
++    | '/activity'
++    | '/alerts'
++    | '/dashboard'
++    | '/devices'
++    | '/settings'
+   fileRoutesByTo: FileRoutesByTo
+-  to: '/' | '/about'
+-  id: '__root__' | '/' | '/about'
++  to:
++    | '/'
++    | '/about'
++    | '/signin'
++    | '/activity'
++    | '/alerts'
++    | '/dashboard'
++    | '/devices'
++    | '/settings'
++  id:
++    | '__root__'
++    | '/'
++    | '/_app'
++    | '/about'
++    | '/signin'
++    | '/_app/activity'
++    | '/_app/alerts'
++    | '/_app/dashboard'
++    | '/_app/devices'
++    | '/_app/settings'
+   fileRoutesById: FileRoutesById
+ }
+ export interface RootRouteChildren {
+   IndexRoute: typeof IndexRoute
++  AppRoute: typeof AppRouteWithChildren
+   AboutRoute: typeof AboutRoute
++  SigninRoute: typeof SigninRoute
+ }
+ 
+ declare module '@tanstack/react-router' {
+   interface FileRoutesByPath {
++    '/signin': {
++      id: '/signin'
++      path: '/signin'
++      fullPath: '/signin'
++      preLoaderRoute: typeof SigninRouteImport
++      parentRoute: typeof rootRouteImport
++    }
+     '/about': {
+       id: '/about'
+       path: '/about'
+@@ -58,6 +153,13 @@ declare module '@tanstack/react-router' {
+       preLoaderRoute: typeof AboutRouteImport
+       parentRoute: typeof rootRouteImport
+     }
++    '/_app': {
++      id: '/_app'
++      path: ''
++      fullPath: '/'
++      preLoaderRoute: typeof AppRouteImport
++      parentRoute: typeof rootRouteImport
++    }
+     '/': {
+       id: '/'
+       path: '/'
+@@ -65,12 +167,67 @@ declare module '@tanstack/react-router' {
+       preLoaderRoute: typeof IndexRouteImport
+       parentRoute: typeof rootRouteImport
+     }
++    '/_app/settings': {
++      id: '/_app/settings'
++      path: '/settings'
++      fullPath: '/settings'
++      preLoaderRoute: typeof AppSettingsRouteImport
++      parentRoute: typeof AppRoute
++    }
++    '/_app/devices': {
++      id: '/_app/devices'
++      path: '/devices'
++      fullPath: '/devices'
++      preLoaderRoute: typeof AppDevicesRouteImport
++      parentRoute: typeof AppRoute
++    }
++    '/_app/dashboard': {
++      id: '/_app/dashboard'
++      path: '/dashboard'
++      fullPath: '/dashboard'
++      preLoaderRoute: typeof AppDashboardRouteImport
++      parentRoute: typeof AppRoute
++    }
++    '/_app/alerts': {
++      id: '/_app/alerts'
++      path: '/alerts'
++      fullPath: '/alerts'
++      preLoaderRoute: typeof AppAlertsRouteImport
++      parentRoute: typeof AppRoute
++    }
++    '/_app/activity': {
++      id: '/_app/activity'
++      path: '/activity'
++      fullPath: '/activity'
++      preLoaderRoute: typeof AppActivityRouteImport
++      parentRoute: typeof AppRoute
++    }
+   }
+ }
+ 
++interface AppRouteChildren {
++  AppActivityRoute: typeof AppActivityRoute
++  AppAlertsRoute: typeof AppAlertsRoute
++  AppDashboardRoute: typeof AppDashboardRoute
++  AppDevicesRoute: typeof AppDevicesRoute
++  AppSettingsRoute: typeof AppSettingsRoute
++}
++
++const AppRouteChildren: AppRouteChildren = {
++  AppActivityRoute: AppActivityRoute,
++  AppAlertsRoute: AppAlertsRoute,
++  AppDashboardRoute: AppDashboardRoute,
++  AppDevicesRoute: AppDevicesRoute,
++  AppSettingsRoute: AppSettingsRoute,
++}
++
++const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
++
+ const rootRouteChildren: RootRouteChildren = {
+   IndexRoute: IndexRoute,
++  AppRoute: AppRouteWithChildren,
+   AboutRoute: AboutRoute,
++  SigninRoute: SigninRoute,
+ }
+ export const routeTree = rootRouteImport
+   ._addFileChildren(rootRouteChildren)
+diff --git a/src/routes/__root.tsx b/src/routes/__root.tsx
+index 3f7f8c2..3fe4192 100644
+--- a/src/routes/__root.tsx
++++ b/src/routes/__root.tsx
+@@ -1,8 +1,7 @@
+ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+ import { TanStackDevtools } from '@tanstack/react-devtools'
+-import Footer from '../components/Footer'
+-import Header from '../components/Header'
++import { AuthProvider } from '../lib/auth'
+ 
+ import appCss from '../styles.css?url'
+ 
+@@ -40,9 +39,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
+         <HeadContent />
+       </head>
+       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+-        <Header />
+-        {children}
+-        <Footer />
++        <AuthProvider>
++          {children}
++        </AuthProvider>
+         <TanStackDevtools
+           config={{
+             position: 'bottom-right',
+diff --git a/src/routes/_app.activity.tsx b/src/routes/_app.activity.tsx
+new file mode 100644
+index 0000000..414ebcc
+--- /dev/null
++++ b/src/routes/_app.activity.tsx
+@@ -0,0 +1,16 @@
++import { createFileRoute } from '@tanstack/react-router'
++
++export const Route = createFileRoute('/_app/activity')({
++  component: ActivityComponent,
++})
++
++function ActivityComponent() {
++  return (
++    <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[60vh] flex items-center justify-center">
++      <div className="text-center">
++        <h2 className="text-2xl font-semibold text-gray-700">Activity Log</h2>
++        <p className="text-gray-500 mt-2">Placeholder for activity log content.</p>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/routes/_app.alerts.tsx b/src/routes/_app.alerts.tsx
+new file mode 100644
+index 0000000..5b9d27e
+--- /dev/null
++++ b/src/routes/_app.alerts.tsx
+@@ -0,0 +1,16 @@
++import { createFileRoute } from '@tanstack/react-router'
++
++export const Route = createFileRoute('/_app/alerts')({
++  component: AlertsComponent,
++})
++
++function AlertsComponent() {
++  return (
++    <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[60vh] flex items-center justify-center">
++      <div className="text-center">
++        <h2 className="text-2xl font-semibold text-gray-700">Alerts</h2>
++        <p className="text-gray-500 mt-2">Placeholder for alerts content.</p>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/routes/_app.dashboard.tsx b/src/routes/_app.dashboard.tsx
+new file mode 100644
+index 0000000..8bafe05
+--- /dev/null
++++ b/src/routes/_app.dashboard.tsx
+@@ -0,0 +1,35 @@
++import { createFileRoute, Link } from '@tanstack/react-router'
++import { Printer } from 'lucide-react'
++import { StatusAlert } from '../components/dashboard/StatusAlert'
++import { SummaryStrip } from '../components/dashboard/SummaryStrip'
++import { HeroTaskList } from '../components/dashboard/HeroTaskList'
++import { Button } from '../components/ui/button'
++
++export const Route = createFileRoute('/_app/dashboard')({
++  component: DashboardComponent,
++})
++
++function DashboardComponent() {
++  return (
++    <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full pb-8">
++      <StatusAlert />
++      
++      <SummaryStrip />
++
++      <HeroTaskList />
++
++      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
++        <Button size="lg" className="gap-2 w-full sm:w-auto">
++          <Printer className="w-5 h-5" />
++          Print today's report
++        </Button>
++        <Button variant="outline" size="lg" className="w-full sm:w-auto p-0">
++          <Link to="/activity" className="w-full h-full flex items-center justify-center px-8">See full activity log</Link>
++        </Button>
++        <span className="text-sm text-muted-foreground hidden lg:inline">
++          Printing makes a plain one-page summary of today.
++        </span>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/routes/_app.devices.tsx b/src/routes/_app.devices.tsx
+new file mode 100644
+index 0000000..545b88c
+--- /dev/null
++++ b/src/routes/_app.devices.tsx
+@@ -0,0 +1,16 @@
++import { createFileRoute } from '@tanstack/react-router'
++
++export const Route = createFileRoute('/_app/devices')({
++  component: DevicesComponent,
++})
++
++function DevicesComponent() {
++  return (
++    <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[60vh] flex items-center justify-center">
++      <div className="text-center">
++        <h2 className="text-2xl font-semibold text-gray-700">Rooms & Devices</h2>
++        <p className="text-gray-500 mt-2">Placeholder for rooms and devices content.</p>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/routes/_app.settings.tsx b/src/routes/_app.settings.tsx
+new file mode 100644
+index 0000000..68a1293
+--- /dev/null
++++ b/src/routes/_app.settings.tsx
+@@ -0,0 +1,16 @@
++import { createFileRoute } from '@tanstack/react-router'
++
++export const Route = createFileRoute('/_app/settings')({
++  component: SettingsComponent,
++})
++
++function SettingsComponent() {
++  return (
++    <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[60vh] flex items-center justify-center">
++      <div className="text-center">
++        <h2 className="text-2xl font-semibold text-gray-700">Settings</h2>
++        <p className="text-gray-500 mt-2">Placeholder for settings content.</p>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/routes/_app.tsx b/src/routes/_app.tsx
+new file mode 100644
+index 0000000..4aa29a2
+--- /dev/null
++++ b/src/routes/_app.tsx
+@@ -0,0 +1,36 @@
++import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router'
++import { useAuth } from '../lib/auth'
++import Sidebar from '../components/Sidebar'
++import Topbar from '../components/Topbar'
++import { useEffect } from 'react'
++
++export const Route = createFileRoute('/_app')({
++  component: AppLayout,
++})
++
++function AppLayout() {
++  const { isAuthenticated } = useAuth()
++  const router = useRouter()
++
++  useEffect(() => {
++    if (!isAuthenticated) {
++      router.navigate({ to: '/signin' })
++    }
++  }, [isAuthenticated, router])
++
++  if (!isAuthenticated) {
++    return null
++  }
++
++  return (
++    <div className="flex h-screen w-full bg-gray-50 flex-col md:flex-row overflow-hidden">
++      <Sidebar />
++      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
++        <Topbar />
++        <main className="flex-1 overflow-y-auto p-4 md:p-6">
++          <Outlet />
++        </main>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/routes/signin.tsx b/src/routes/signin.tsx
+new file mode 100644
+index 0000000..1e098c3
+--- /dev/null
++++ b/src/routes/signin.tsx
+@@ -0,0 +1,37 @@
++import { createFileRoute, useNavigate } from '@tanstack/react-router'
++import { useAuth } from '../lib/auth'
++
++export const Route = createFileRoute('/signin')({
++  component: SignInComponent,
++})
++
++function SignInComponent() {
++  const { signIn, isAuthenticated } = useAuth()
++  const navigate = useNavigate()
++
++  if (isAuthenticated) {
++    navigate({ to: '/dashboard' })
++  }
++
++  const handleSignIn = () => {
++    signIn()
++    navigate({ to: '/dashboard' })
++  }
++
++  return (
++    <div className="flex h-screen w-full items-center justify-center bg-gray-50">
++      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-md">
++        <div className="text-center">
++          <h1 className="text-3xl font-bold">Sign In</h1>
++          <p className="text-gray-500 mt-2">Sign in to access your dashboard</p>
++        </div>
++        <button
++          onClick={handleSignIn}
++          className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
++        >
++          Sign In
++        </button>
++      </div>
++    </div>
++  )
++}

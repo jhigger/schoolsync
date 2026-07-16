@@ -1,17 +1,18 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
 import { useAuth } from '../lib/auth'
 
 export const Route = createFileRoute('/signin')({
+  beforeLoad: () => {
+    if (localStorage.getItem('auth') === 'true') {
+      throw redirect({ to: '/dashboard' })
+    }
+  },
   component: SignInComponent,
 })
 
 function SignInComponent() {
-  const { signIn, isAuthenticated } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
-
-  if (isAuthenticated) {
-    navigate({ to: '/dashboard' })
-  }
 
   const handleSignIn = () => {
     signIn()

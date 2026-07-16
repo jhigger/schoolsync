@@ -1,26 +1,17 @@
-import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router'
-import { useAuth } from '../lib/auth'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
-import { useEffect } from 'react'
 
 export const Route = createFileRoute('/_app')({
+  beforeLoad: () => {
+    if (localStorage.getItem('auth') !== 'true') {
+      throw redirect({ to: '/signin' })
+    }
+  },
   component: AppLayout,
 })
 
 function AppLayout() {
-  const { isAuthenticated } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.navigate({ to: '/signin' })
-    }
-  }, [isAuthenticated, router])
-
-  if (!isAuthenticated) {
-    return null
-  }
 
   return (
     <div className="flex h-screen w-full bg-gray-50 flex-col md:flex-row overflow-hidden">

@@ -1,7 +1,48 @@
+
 import { CheckSquare } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 import { Badge } from '../ui/badge'
+
+type TaskItemProps = {
+  title: string
+  badges: string[]
+  description?: string
+  accentColor: string
+  actionLabel: string
+  actionVariant?: 'default' | 'outline'
+}
+
+function TaskItem({
+  title,
+  badges,
+  description,
+  accentColor,
+  actionLabel,
+  actionVariant = 'default',
+}: TaskItemProps) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
+      <div className={`hidden sm:block w-1 self-stretch rounded-full shrink-0 ${accentColor}`}></div>
+      
+      <div className="flex-1 flex flex-col gap-1">
+        <div className="font-semibold text-foreground">{title}</div>
+        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+          {badges.map((badge, idx) => (
+            <Badge key={idx} variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">
+              {badge}
+            </Badge>
+          ))}
+          {description && <span>{description}</span>}
+        </div>
+      </div>
+      
+      <Button variant={actionVariant} className="w-full sm:w-auto">
+        {actionLabel}
+      </Button>
+    </div>
+  )
+}
 
 export function HeroTaskList() {
   return (
@@ -11,36 +52,20 @@ export function HeroTaskList() {
       </h2>
       
       <div className="flex flex-col gap-3">
-        {/* Task 1 */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
-          <div className="hidden sm:block w-1 self-stretch rounded-full shrink-0 bg-destructive"></div>
-          
-          <div className="flex-1 flex flex-col gap-1">
-            <div className="font-semibold text-foreground">Fix the Office printer</div>
-            <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Office</Badge> 
-              <span>stopped working at 11:42 AM</span>
-            </div>
-          </div>
-          
-          <Button className="w-full sm:w-auto">Ask IT for help</Button>
-        </div>
-
-        {/* Task 2 */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
-          <div className="hidden sm:block w-1 self-stretch rounded-full shrink-0 bg-amber-500"></div>
-          
-          <div className="flex-1 flex flex-col gap-1">
-            <div className="font-semibold text-foreground">Check 3 computers</div>
-            <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Lab 1 • PC 12</Badge>
-              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Lab 3 • PC 4</Badge>
-              <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">Office • PC 9</Badge>
-            </div>
-          </div>
-          
-          <Button variant="outline" className="w-full sm:w-auto">Check now</Button>
-        </div>
+        <TaskItem
+          title="Fix the Office printer"
+          badges={['Office']}
+          description="stopped working at 11:42 AM"
+          accentColor="bg-destructive"
+          actionLabel="Ask IT for help"
+        />
+        <TaskItem
+          title="Check 3 computers"
+          badges={['Lab 1 • PC 12', 'Lab 3 • PC 4', 'Office • PC 9']}
+          accentColor="bg-amber-500"
+          actionLabel="Check now"
+          actionVariant="outline"
+        />
       </div>
       
       <div className="text-sm text-muted-foreground mt-1">

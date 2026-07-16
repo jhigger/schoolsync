@@ -2,14 +2,21 @@ import { useAuth } from '../lib/auth'
 import { LogOut } from 'lucide-react'
 import { useRouterState } from '@tanstack/react-router'
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/dashboard': 'Dashboard',
+  '/activity': 'Activity Log',
+  '/devices': 'Rooms & Devices',
+  '/alerts': 'Alerts',
+  '/settings': 'Settings',
+}
+
 export default function Topbar() {
   const { signOut } = useAuth()
   const router = useRouterState()
   
-  // A simple way to get title from current path
   const path = router.location.pathname
-  const title = path === '/' ? 'Dashboard' 
-    : path.split('/')[1]?.charAt(0).toUpperCase() + path.split('/')[1]?.slice(1) || 'App'
+  const title = ROUTE_TITLES[path] || 'App'
 
   return (
     <header className="h-14 md:h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-30">

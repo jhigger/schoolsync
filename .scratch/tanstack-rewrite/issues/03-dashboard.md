@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: done
 Blockers: 02-app-shell.md
 
 # 03 - Dashboard View
