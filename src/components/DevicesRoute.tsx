@@ -15,12 +15,30 @@ const ICON_OTHER = (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="12" cy="10" r="2"/></svg>
 )
 
-function devIcon(t: string) { return t==="printer"?ICON_PRN : t==="other"?ICON_OTHER : ICON_PC; }
+const DEVICE_ICONS: Record<string, any> = {
+  printer: ICON_PRN,
+  other: ICON_OTHER,
+  pc: ICON_PC,
+}
 
-function statusOf(room: Room) {
-  if(room.devices.some(d=>d.status==="down")) return "down";
-  if(room.devices.some(d=>d.status==="warn")) return "warn";
-  return "ok";
+function getDeviceIcon(type: string) {
+  return DEVICE_ICONS[type] || ICON_PC
+}
+
+function getRoomStatus(room: Room) {
+  if (room.devices.some(d => d.status === "down")) return "down"
+  if (room.devices.some(d => d.status === "warn")) return "warn"
+  return "ok"
+}
+
+function getBadgeForStatus(status: string, issueCount: number = 0) {
+  if (status === 'down') {
+    return <Badge variant="destructive">✗ {issueCount} issue{issueCount !== 1 ? 's' : ''}</Badge>
+  }
+  if (status === 'warn') {
+    return <Badge variant="warning">! {issueCount} issue{issueCount !== 1 ? 's' : ''}</Badge>
+  }
+  return <Badge variant="success">✓ OK</Badge>
 }
 
 export function DevicesRoute() {
@@ -42,10 +60,12 @@ export function DevicesRoute() {
 
   const filteredRooms = useMemo(() => {
     return rooms.filter(room => {
-      const s = statusOf(room);
-      const passFilter = activeFilter==="all" || (activeFilter==="problems" && s!=="ok");
-      const passSearch = !query || room.name.toLowerCase().includes(query) || room.devices.some(d=>d.name.toLowerCase().includes(query));
-      return passFilter && passSearch;
+      const roomStatus = getRoomStatus(room)
+      const passesFilter = activeFilter === "all" || (activeFilter === "problems" && roomStatus !== "ok")
+      const passesSearch = !query || 
+                           room.name.toLowerCase().includes(query) || 
+                           room.devices.some(d => d.name.toLowerCase().includes(query))
+      return passesFilter && passesSearch
     })
   }, [rooms, activeFilter, query])
 
@@ -61,44 +81,60 @@ export function DevicesRoute() {
   }, [selectedRoom, query])
 
   const { totalDevices, workingCount, attentionCount } = useMemo(() => {
-    let t = 0, w = 0, a = 0;
-    rooms.forEach(r => {
-      r.devices.forEach(d => {
-        t++;
-        if (d.status === 'ok') w++;
-        else a++;
+    let total = 0
+    let working = 0
+    let attention = 0
+    
+    rooms.forEach(room => {
+      room.devices.forEach(device => {
+        total++
+        if (device.status === 'ok') {
+          working++
+        } else {
+          attention++
+        }
       })
     })
-    return { totalDevices: t, workingCount: w, attentionCount: a }
+    
+    return { totalDevices: total, workingCount: working, attentionCount: attention }
   }, [rooms])
 
   if (isLoading) {
     return (
-      <div className="rd-view p-4 md:p-6 lg:p-8 animate-pulse">
-        <div className="rd-summary">
+      <div className="flex flex-col gap-3 h-full p-4 md:p-6 lg:p-8 animate-pulse">
+        <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
         </div>
-        <div className="rd-controls mt-2">
+        <div className="flex gap-[10px] items-center shrink-0 mt-2">
           <Skeleton className="h-[42px] w-full max-w-sm rounded-[10px]" />
           <Skeleton className="h-[42px] w-[100px] rounded-full" />
           <Skeleton className="h-[42px] w-[120px] rounded-full" />
         </div>
-        <div className="rd-panes mt-2">
-          <Skeleton className="rd-rooms" />
-          <Skeleton className="rd-devices" />
+        <div className="flex-1 flex gap-[14px] min-h-0 overflow-hidden max-[900px]:flex-col max-[900px]:overflow-visible max-[900px]:min-h-auto mt-2">
+          <Skeleton className="w-[288px] bg-muted border border-border rounded-lg overflow-y-auto shrink-0 p-2 max-[900px]:w-full max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:border-b max-[900px]:gap-2 max-[900px]:scrollbar-none" />
+          <Skeleton className="flex-1 bg-muted border border-border rounded-lg flex flex-col min-w-0 overflow-hidden" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="rd-view p-4 md:p-6 lg:p-8">
-      <div className="rd-summary">
-        <div className="rd-sum-chip"><span className="n">{totalDevices}</span><span className="l">Devices<br/>in total</span></div>
-        <div className="rd-sum-chip"><span className="n">{workingCount}</span><span className="l">Working<br/>normally</span></div>
-        <div className="rd-sum-chip bad"><span className="n">{attentionCount}</span><span className="l">Need<br/>attention</span></div>
+    <div className="flex flex-col gap-3 h-full p-4 md:p-6 lg:p-8">
+      <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
+        <div className="flex items-center gap-[9px] bg-card border border-border rounded-[10px] py-[10px] px-[14px]">
+          <span className="text-[20px] font-extrabold tracking-tight">{totalDevices}</span>
+          <span className="text-[12.5px] text-muted-foreground">Devices<br/>in total</span>
+        </div>
+        <div className="flex items-center gap-[9px] bg-card border border-border rounded-[10px] py-[10px] px-[14px]">
+          <span className="text-[20px] font-extrabold tracking-tight">{workingCount}</span>
+          <span className="text-[12.5px] text-muted-foreground">Working<br/>normally</span>
+        </div>
+        <div className="flex items-center gap-[9px] bg-card border border-border rounded-[10px] py-[10px] px-[14px]">
+          <span className="text-[20px] font-extrabold tracking-tight text-destructive">{attentionCount}</span>
+          <span className="text-[12.5px] text-muted-foreground">Need<br/>attention</span>
+        </div>
         <div className="flex-1"></div>
         <Button variant="outline" size="sm" className="self-center hidden sm:flex h-[38px] px-[14px]">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
@@ -106,110 +142,124 @@ export function DevicesRoute() {
         </Button>
       </div>
 
-      <div className="rd-controls">
-        <div className="rd-search">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <div className="flex gap-[10px] items-center shrink-0">
+        <div className="flex-1 flex items-center gap-2 h-[42px] bg-card border border-border rounded-[10px] px-3">
+          <svg className="text-muted-foreground" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input 
             type="text" 
+            className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
             placeholder="Search a room or device… (example: Lab 1, printer, PC 12)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <div className="rd-pills">
-          <button className={`rd-pill ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>All rooms</button>
-          <button className={`rd-pill ${activeFilter === 'problems' ? 'active' : ''}`} onClick={() => setActiveFilter('problems')}>Has problems</button>
+        <div className="flex gap-2">
+          <button 
+            className={`h-[42px] px-4 rounded-full border border-border text-[14px] font-semibold transition-colors duration-200 cursor-pointer ${activeFilter === 'all' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
+            onClick={() => setActiveFilter('all')}
+          >
+            All rooms
+          </button>
+          <button 
+            className={`h-[42px] px-4 rounded-full border border-border text-[14px] font-semibold transition-colors duration-200 cursor-pointer ${activeFilter === 'problems' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
+            onClick={() => setActiveFilter('problems')}
+          >
+            Has problems
+          </button>
         </div>
       </div>
 
-      <div className="rd-panes">
-        <div className="rd-rooms">
+      <div className="flex-1 flex gap-[14px] min-h-0 overflow-hidden max-[900px]:flex-col max-[900px]:overflow-visible max-[900px]:min-h-auto">
+        <div className="w-[288px] bg-card border border-border rounded-lg overflow-y-auto shrink-0 p-2 max-[900px]:w-full max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:border-b max-[900px]:gap-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {filteredRooms.length === 0 ? (
-            <div style={{ padding: '30px 16px', textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '14px' }}>
+            <div className="py-[30px] px-4 text-center text-muted-foreground text-[14px]">
               No rooms match.
             </div>
           ) : (
             filteredRooms.map(room => {
-              const s = statusOf(room);
-              const issues = room.devices.filter(d => d.status !== 'ok').length;
+              const roomStatus = getRoomStatus(room)
+              const issueCount = room.devices.filter(d => d.status !== 'ok').length
               return (
-                <div key={room.id} className={`rd-room ${room.id === selectedId ? 'active' : ''}`} onClick={() => setSelectedId(room.id)}>
-                  <div className="r-icon">{ICON_PC}</div>
-                  <div className="r-body">
-                    <div className="r-name">{room.name}</div>
-                    <div className="r-sub">{issues ? `${issues} need attention` : "All working"}</div>
+                <div 
+                  key={room.id} 
+                  className={`flex items-center gap-[10px] py-[13px] px-[12px] rounded-[9px] cursor-pointer transition-colors duration-100 hover:bg-muted max-[900px]:py-[10px] max-[900px]:px-[14px] max-[900px]:whitespace-nowrap ${room.id === selectedId ? 'bg-accent outline outline-[1.5px] outline-primary' : ''}`} 
+                  onClick={() => setSelectedId(room.id)}
+                >
+                  <div className="w-[34px] h-[34px] rounded-lg bg-muted flex items-center justify-center text-muted-foreground max-[900px]:w-[28px] max-[900px]:h-[28px] shrink-0">
+                    {ICON_PC}
                   </div>
-                  {s === 'down' && <Badge variant="destructive">✗ {issues} issue{issues > 1 ? 's' : ''}</Badge>}
-                  {s === 'warn' && <Badge variant="warning">! {issues} issue{issues > 1 ? 's' : ''}</Badge>}
-                  {s === 'ok' && <Badge variant="success">✓ OK</Badge>}
+                  <div className="flex-1 min-w-0 max-[900px]:hidden">
+                    <div className="text-[14.5px] font-bold text-foreground">{room.name}</div>
+                    <div className="text-[12.5px] text-muted-foreground mt-[1px]">{issueCount ? `${issueCount} need attention` : "All working"}</div>
+                  </div>
+                  {getBadgeForStatus(roomStatus, issueCount)}
                 </div>
               )
             })
           )}
         </div>
         
-        <div className="rd-devices">
+        <div className="flex-1 bg-card border border-border rounded-lg flex flex-col min-w-0 overflow-hidden">
           {selectedRoom && (
             <>
-              <div className="rd-dev-head">
-                <div style={{ flex: 1 }}>
-                  <div className="dh-title">{selectedRoom.name}</div>
-                  <div className="dh-sub">
+              <div className="flex items-center gap-3 py-4 px-[18px] border-b border-border shrink-0">
+                <div className="flex-1">
+                  <div className="text-[16px] font-bold text-foreground">{selectedRoom.name}</div>
+                  <div className="text-[12.5px] text-muted-foreground mt-[2px]">
                     {(() => {
-                      const issues = selectedRoom.devices.filter(d => d.status !== 'ok').length;
-                      return issues ? `${issues} device${issues > 1 ? 's' : ''} need attention` : "Everything here is working";
+                      const issueCount = selectedRoom.devices.filter(d => d.status !== 'ok').length
+                      return issueCount ? `${issueCount} device${issueCount !== 1 ? 's' : ''} need attention` : "Everything here is working"
                     })()}
                   </div>
                 </div>
-                {(() => {
-                  const s = statusOf(selectedRoom);
-                  const issues = selectedRoom.devices.filter(d => d.status !== 'ok').length;
-                  if (s === 'down') return <Badge variant="destructive">✗ {issues} issue{issues > 1 ? 's' : ''}</Badge>;
-                  if (s === 'warn') return <Badge variant="warning">! {issues} issue{issues > 1 ? 's' : ''}</Badge>;
-                  return <Badge variant="success">✓ OK</Badge>;
-                })()}
+                {getBadgeForStatus(getRoomStatus(selectedRoom), selectedRoom.devices.filter(d => d.status !== 'ok').length)}
               </div>
 
-              <div className="rd-dev-grid">
+              <div className="flex-1 overflow-y-auto py-4 px-[18px] grid grid-cols-1 xl:grid-cols-2 gap-3 content-start">
                 {filteredDevices.length === 0 ? (
-                  <div style={{ gridColumn: '1/3', padding: '30px', textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '14px' }}>
+                  <div className="col-span-1 xl:col-span-2 p-[30px] text-center text-muted-foreground text-[14px]">
                     No devices match your search.
                   </div>
                 ) : (
-                  filteredDevices.map((d, idx) => (
-                    <div key={`${d.name}-${idx}`} className={`rd-dev ${d.status === 'down' ? 'down' : d.status === 'warn' ? 'warn' : ''}`}>
-                      <div className="rd-dev-top">
-                        <div className="rd-dev-ic">{devIcon(d.type)}</div>
+                  filteredDevices.map((device, idx) => (
+                    <div 
+                      key={`${device.name}-${idx}`} 
+                      className={`border border-border rounded-[calc(var(--radius)-2px)] p-[14px] flex flex-col gap-2 bg-card ${device.status === 'down' ? 'border-l-4 border-l-destructive bg-destructive/5' : device.status === 'warn' ? 'border-l-4 border-l-warning bg-warning/5' : ''}`}
+                    >
+                      <div className="flex items-center gap-[10px]">
+                        <div className={`w-[32px] h-[32px] rounded-lg flex items-center justify-center ${device.status === 'down' ? 'bg-destructive/10 text-destructive' : device.status === 'warn' ? 'bg-warning/15 text-warning' : 'bg-muted text-muted-foreground'}`}>
+                          {getDeviceIcon(device.type)}
+                        </div>
                         <div>
-                          <div className="rd-dev-name">{d.name}</div>
+                          <div className="text-[14.5px] font-bold text-foreground">{device.name}</div>
                         </div>
                       </div>
                       
-                      {d.host && (
-                        <div className="rd-dev-tech hidden sm:block">
-                          {d.host} · {d.ip}<br/>
-                          {d.model} · last seen {d.seen}
+                      {device.host && (
+                        <div className="text-[11.5px] text-muted-foreground font-mono leading-relaxed hidden sm:block">
+                          {device.host} · {device.ip}<br/>
+                          {device.model} · last seen {device.seen}
                         </div>
                       )}
                       
-                      <div className="rd-dev-foot">
-                        {d.status === 'down' ? <Badge variant="destructive">✗ Broken</Badge> : d.status === 'warn' ? <Badge variant="warning">! Not responding</Badge> : <Badge variant="success">✓ Working</Badge>}
+                      <div className="flex items-center justify-between gap-2 mt-auto">
+                        {device.status === 'down' ? <Badge variant="destructive">✗ Broken</Badge> : device.status === 'warn' ? <Badge variant="warning">! Not responding</Badge> : <Badge variant="success">✓ Working</Badge>}
                         
-                        {d.status === 'down' ? (
+                        {device.status === 'down' ? (
                           <Button size="sm" className="h-[38px] px-[14px]">Ask IT for help</Button>
-                        ) : d.status === 'warn' ? (
-                          <Button size="sm" variant="outline" className="h-[38px] px-[14px]" onClick={() => setShownReports(prev => ({ ...prev, [d.name]: !prev[d.name] }))}>
-                            {shownReports[d.name] ? 'Hide report' : 'Show report'}
+                        ) : device.status === 'warn' ? (
+                          <Button size="sm" variant="outline" className="h-[38px] px-[14px]" onClick={() => setShownReports(prev => ({ ...prev, [device.name]: !prev[device.name] }))}>
+                            {shownReports[device.name] ? 'Hide report' : 'Show report'}
                           </Button>
                         ) : (
                           <span></span>
                         )}
                       </div>
                       
-                      {d.report && (
-                        <div className={`rd-dev-report ${shownReports[d.name] ? 'block' : 'hidden'}`}>
-                          <div className="dr-title">Activity report</div>
-                          {d.report}
+                      {device.report && (
+                        <div className={`text-[12.5px] text-foreground leading-relaxed bg-muted rounded-lg py-[10px] px-3 mt-[2px] ${shownReports[device.name] ? 'block' : 'hidden'}`}>
+                          <div className="font-bold text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Activity report</div>
+                          {device.report}
                         </div>
                       )}
                     </div>
