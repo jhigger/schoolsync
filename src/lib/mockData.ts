@@ -303,3 +303,82 @@ export async function fetchRoomsData(): Promise<Room[]> {
     }, 1000);
   });
 }
+
+export interface AlertItem {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  time: string;
+  severity: 'high' | 'medium';
+  techDetails: string;
+}
+
+export const mockAlertsData: AlertItem[] = [
+  {
+    id: 'a1',
+    title: 'A printer went offline',
+    description: 'The Office printer stopped responding. It may be unplugged, out of paper, or broken — staff can’t print until it’s working again.',
+    location: 'Office',
+    time: 'Today · 11:42 AM',
+    severity: 'high',
+    techDetails: 'The front-office printer stopped answering at 11:42 AM. It had been printing normally all morning, so it most likely lost power, ran out of paper, or had a cable knocked loose. No one in the office can print until it’s back. Try checking that it’s switched on and connected, then print a test page — if that doesn’t help, IT can take a closer look.',
+  },
+  {
+    id: 'a2',
+    title: 'Someone tried a wrong password several times',
+    description: 'A person typed the wrong password 4 times in a row in Lab 2. This could be someone who forgot it — or someone who shouldn’t be signing in.',
+    location: 'Lab 2',
+    time: 'Today · 10:15 AM',
+    severity: 'medium',
+    techDetails: 'At 10:15 AM someone entered the wrong password four times in a row on a computer in Lab 2. Usually this is just a student or teacher who forgot their password or left caps lock on. Once in a while it can mean someone is trying to get into an account that isn’t theirs. It’s worth asking who was using that computer mid-morning, and offering a password reset if they were simply locked out.',
+  },
+  {
+    id: 'a3',
+    title: 'A student opened a program they’re not allowed to use',
+    description: 'A blocked program was opened on a computer in Lab 1. It was stopped automatically, but you may want to check who was using it.',
+    location: 'Lab 1 · PC 12',
+    time: 'Today · 9:38 AM',
+    severity: 'medium',
+    techDetails: 'At 9:38 AM a program that students aren’t allowed to run was opened on PC 12 in Lab 1. The system blocked it right away, so nothing was harmed — but it’s a sign someone was trying to use a tool they shouldn’t. You may want to check who was signed in at that time and remind them which programs are off-limits.',
+  }
+];
+
+export async function fetchAlertsData(): Promise<AlertItem[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockAlertsData);
+    }, 1000);
+  });
+}
+
+export interface RuleItem {
+  id: string;
+  title: string;
+  sub: string;
+  type: 'switch' | 'threshold';
+  thresholdText?: string;
+  thresholdValue?: number;
+  thresholdUnit?: string;
+  defaultOn: boolean;
+  section: string;
+}
+
+export const mockRulesData: RuleItem[] = [
+  { id: 'r1', section: 'Tell me when…', title: 'A device stops working', sub: 'A printer or computer goes offline or breaks down.', type: 'switch', defaultOn: true },
+  { id: 'r2', section: 'Tell me when…', title: 'Someone types a wrong password too many times', sub: 'Could mean a forgotten password — or someone who shouldn’t be there.', type: 'threshold', thresholdText: 'Alert me after', thresholdValue: 4, thresholdUnit: 'failed tries', defaultOn: true },
+  { id: 'r3', section: 'Tell me when…', title: 'A restricted program is opened', sub: 'Apps that students aren’t allowed to use.', type: 'switch', defaultOn: true },
+  { id: 'r4', section: 'Tell me when…', title: 'A computer overheats', sub: 'A machine gets too hot and may shut down.', type: 'threshold', thresholdText: 'Alert me above', thresholdValue: 85, thresholdUnit: '°C', defaultOn: true },
+  { id: 'r5', section: 'Tell me when…', title: 'A USB drive is plugged in', sub: 'Off by default — turn on if your school tracks USB use.', type: 'switch', defaultOn: false },
+  
+  { id: 'r6', section: 'How I’m told', title: 'Show alerts on this screen', sub: 'The red number on “Alerts” in the menu.', type: 'switch', defaultOn: true },
+  { id: 'r7', section: 'How I’m told', title: 'Email me a daily summary', sub: 'One message each evening with the day’s alerts.', type: 'switch', defaultOn: false },
+];
+
+export async function fetchRulesData(): Promise<RuleItem[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockRulesData);
+    }, 1000);
+  });
+}

@@ -1,87 +1,149 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { fetchAlertsData, fetchRulesData } from '@/lib/mockData'
+import type { AlertItem, RuleItem } from '@/lib/mockData'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_app/alerts')({
-  component: AlertsComponent,
+  component: AlertsRoute,
 })
 
-function AlertsComponent() {
+function AlertsRoute() {
+  const [activeTab, setActiveTab] = useState<'review' | 'rules'>('review')
+  const [alerts, setAlerts] = useState<AlertItem[]>([])
+  const [rules, setRules] = useState<RuleItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true)
+      const [alertsData, rulesData] = await Promise.all([
+        fetchAlertsData(),
+        fetchRulesData()
+      ])
+      setAlerts(alertsData)
+      setRules(rulesData)
+      setLoading(false)
+    }
+    loadData()
+  }, [])
+
+  const reviewCount = alerts.length
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">System Alerts</h2>
-        <p className="text-muted-foreground">
-          Monitor active issues and configure your alert thresholds.
-        </p>
+    <section className="view active" data-view="alerts" id="view-alerts">
+      <div className="tabs">
+        <button 
+          className={cn("tab", activeTab === 'review' && "active")} 
+          onClick={() => setActiveTab('review')}
+        >
+          Needs review {reviewCount > 0 && <span className="badge destructive" id="tabBadge">{reviewCount}</span>}
+        </button>
+        <button 
+          className={cn("tab", activeTab === 'rules' && "active")} 
+          onClick={() => setActiveTab('rules')}
+        >
+          What I get alerted about
+        </button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Active Alerts</h3>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>High CPU Usage</AlertTitle>
-            <AlertDescription>
-              Server Alpha is experiencing CPU usage above 90% for the last 5 minutes.
-            </AlertDescription>
-          </Alert>
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertTitle>Maintenance Scheduled</AlertTitle>
-            <AlertDescription>
-              Database optimization scheduled for tonight at 2:00 AM UTC.
-            </AlertDescription>
-          </Alert>
-          <Alert className="border-green-200 bg-green-50 text-green-900 dark:border-green-900 dark:bg-green-900/20 dark:text-green-400">
-            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500" />
-            <AlertTitle>System Healthy</AlertTitle>
-            <AlertDescription>
-              All monitoring services are reporting normal status.
-            </AlertDescription>
-          </Alert>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Threshold Configuration</CardTitle>
-            <CardDescription>
-              Configure when system alerts should be triggered.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="email-alerts" className="flex flex-col space-y-1">
-                <span>Email Notifications</span>
-                <span className="font-normal text-sm text-muted-foreground">Receive critical alerts via email.</span>
-              </Label>
-              <Switch id="email-alerts" defaultChecked />
+      {/* TAB: Needs review */}
+      <div className={cn("tabpanel", activeTab === 'review' && "active")} data-panel="review">
+        {loading ? (
+          <div className="p-4 text-muted-foreground">Loading alerts...</div>
+        ) : alerts.length > 0 ? (
+          <div className="list" id="alertList">
+            {alerts.map(alert => (
+              <AlertCard key={alert.id} alert={alert} onReview={(id) => setAlerts(alerts.filter(a => a.id !== id))} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty shown" id="emptyReview">
+            <div className="icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
+            <div className="e-title">You’re all caught up</div>
+            <div>No alerts need your review right now. Anything new will show up here.</div>
+          </div>
+        )}
+      </div>
+
+      {/* TAB: Rules */}
+      <div className={cn("tabpanel", activeTab === 'rules' && "active")} data-panel="rules">
+        {loading ? (
+          <div className="p-4 text-muted-foreground">Loading rules...</div>
+        ) : (
+          <div className="list">
+            <div className="section-label">Tell me when…</div>
+            {rules.filter(r => r.section === 'Tell me when…').map(rule => (
+              <RuleCard key={rule.id} rule={rule} />
+            ))}
             
-            <div className="space-y-3">
-              <Label htmlFor="cpu-threshold">CPU Usage Threshold (%)</Label>
-              <Input id="cpu-threshold" type="number" defaultValue={85} />
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="memory-threshold">Memory Usage Threshold (%)</Label>
-              <Input id="memory-threshold" type="number" defaultValue={90} />
-            </div>
-
-            <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="auto-resolve" className="flex flex-col space-y-1">
-                <span>Auto-resolve Alerts</span>
-                <span className="font-normal text-sm text-muted-foreground">Automatically close alerts when metrics return to normal.</span>
-              </Label>
-              <Switch id="auto-resolve" defaultChecked />
-            </div>
-          </CardContent>
-        </Card>
+            <div className="section-label" style={{ marginTop: '8px' }}>How I’m told</div>
+            {rules.filter(r => r.section === 'How I’m told').map(rule => (
+              <RuleCard key={rule.id} rule={rule} />
+            ))}
+          </div>
+        )}
       </div>
+    </section>
+  )
+}
+
+function AlertCard({ alert, onReview }: { alert: AlertItem, onReview: (id: string) => void }) {
+  const [showDetails, setShowDetails] = useState(false)
+
+  return (
+    <div className={cn("alert-card", alert.severity === 'high' ? 'high' : 'med')} data-alert>
+      <div className="ac-icon">
+        {alert.severity === 'high' ? (
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+        ) : alert.title.toLowerCase().includes('password') ? (
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        ) : (
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        )}
+      </div>
+      <div className="ac-body">
+        <div className="ac-title">{alert.title}</div>
+        <div className="ac-desc">{alert.description}</div>
+        <div className="ac-meta">
+          <span className="chip">{alert.location}</span>
+          <span className="ac-time">{alert.time}</span>
+          <span className={cn("badge only-detailed", alert.severity === 'high' ? 'destructive' : 'warning')}>
+            {alert.severity === 'high' ? 'High' : 'Medium'}
+          </span>
+        </div>
+        <div className={cn("ac-tech", showDetails && "shown")}>
+          {alert.techDetails}
+        </div>
+      </div>
+      <div className="ac-actions">
+        <button className="btn btn-primary btn-sm" data-review onClick={() => onReview(alert.id)}>Mark as reviewed</button>
+        <button className="btn btn-outline btn-sm" data-details onClick={() => setShowDetails(!showDetails)}>
+          {showDetails ? 'Hide details' : 'See details'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function RuleCard({ rule }: { rule: RuleItem }) {
+  const [isOn, setIsOn] = useState(rule.defaultOn)
+  const [thresholdVal, setThresholdVal] = useState(rule.thresholdValue || '')
+
+  return (
+    <div className="rule">
+      <div className="r-body">
+        <div className="r-title">{rule.title}</div>
+        <div className="r-sub">{rule.sub}</div>
+        {rule.type === 'threshold' && (
+          <div className="threshold only-detailed">
+            {rule.thresholdText} <input type="number" value={thresholdVal} onChange={e => setThresholdVal(e.target.value)} /> {rule.thresholdUnit}
+          </div>
+        )}
+      </div>
+      <div className={cn("switch", isOn && "on")} onClick={() => setIsOn(!isOn)}></div>
     </div>
   )
 }
