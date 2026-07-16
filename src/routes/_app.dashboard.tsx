@@ -1,22 +1,29 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Printer } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { StatusAlert } from '../components/dashboard/StatusAlert'
 import { SummaryStrip } from '../components/dashboard/SummaryStrip'
 import { HeroTaskList } from '../components/dashboard/HeroTaskList'
 import { Button } from '../components/ui/button'
+import { fetchDashboardData } from '../lib/mockData'
 
 export const Route = createFileRoute('/_app/dashboard')({
   component: DashboardComponent,
 })
 
 function DashboardComponent() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['dashboardData'],
+    queryFn: fetchDashboardData,
+  })
+
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full pb-8">
-      <StatusAlert />
+      <StatusAlert count={data?.stats.attentionCount} isLoading={isLoading} />
       
-      <SummaryStrip />
+      <SummaryStrip stats={data?.stats} isLoading={isLoading} />
 
-      <HeroTaskList />
+      <HeroTaskList tasks={data?.tasks} isLoading={isLoading} />
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
         <Button size="lg" className="gap-2 w-full sm:w-auto">
