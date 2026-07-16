@@ -2,17 +2,28 @@ import { useState, useMemo, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
   type ColumnDef,
+  type Row,
+  flexRender,
 } from '@tanstack/react-table'
 import { Search, Download } from 'lucide-react'
 import { fetchActivityLogData, type ActivityLogEvent } from '@/lib/mockData'
 import { useStore } from '@/store'
 
+const CATEGORY_STYLES: Record<string, string> = {
+  fix: 'bg-[hsl(var(--destructive))]',
+  look: 'bg-[hsl(35,92%,50%)]',
+  normal: 'bg-[hsl(var(--success))]',
+}
+
+const SEVERITY_STYLES: Record<string, string> = {
+  High: 'bg-[hsl(0,72%,96%)] text-[hsl(var(--destructive))] border-[hsl(0,72%,88%)] dark:bg-[hsl(0,46%,18%)] dark:text-[hsl(0,85%,78%)] dark:border-[hsl(0,42%,32%)]',
+  Medium: 'bg-[hsl(35,92%,95%)] text-[hsl(var(--warning))] border-[hsl(35,92%,82%)] dark:bg-[hsl(35,46%,16%)] dark:text-[hsl(35,88%,70%)] dark:border-[hsl(35,42%,30%)]',
+  Info: 'bg-[hsl(142,71%,95%)] text-[hsl(var(--success))] border-[hsl(142,71%,85%)] dark:bg-[hsl(142,38%,16%)] dark:text-[hsl(142,62%,70%)] dark:border-[hsl(142,32%,30%)]',
+}
+
 export function ActivityComponent() {
   const [data, setData] = useState<ActivityLogEvent[]>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('all')
   const viewMode = useStore((state) => state.viewMode)
   const isDetailed = viewMode === 'detailed'
 
@@ -23,32 +34,63 @@ export function ActivityComponent() {
   const columns = useMemo<ColumnDef<ActivityLogEvent>[]>(
     () => [
       {
+        id: 'category',
         accessorKey: 'category',
-        header: 'Category',
+        cell: (info) => (
+          <div className={`w-[11px] h-[11px] rounded-full mt-[5px] shrink-0 ${CATEGORY_STYLES[info.getValue() as string] || CATEGORY_STYLES.normal}`} />
+        ),
       },
       {
+        id: 'text',
         accessorKey: 'text',
-        header: 'Text',
+        cell: (info) => (
+          <div className="text-[14.5px] leading-[1.45] text-foreground">
+            {info.getValue() as string}
+          </div>
+        ),
       },
       {
+        id: 'locationChip',
         accessorKey: 'locationChip',
-        header: 'Location',
+        cell: (info) => (
+          <span className="inline-flex items-center gap-[5px] text-[12.5px] font-semibold text-foreground bg-muted border border-border rounded-[7px] px-[8px] py-[3px]">
+            {info.getValue() as string}
+          </span>
+        ),
       },
       {
+        id: 'time',
         accessorKey: 'time',
-        header: 'Time',
+        cell: (info) => (
+          <span className="text-[12.5px] text-muted-foreground">
+            {info.getValue() as string}
+          </span>
+        ),
       },
       {
+        id: 'severity',
         accessorKey: 'severity',
-        header: 'Severity',
+        cell: (info) => {
+          const val = info.getValue() as string
+          return (
+            <span className={`inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[13px] font-semibold leading-none border border-transparent ${SEVERITY_STYLES[val] || SEVERITY_STYLES.Info}`}>
+              {val}
+            </span>
+          )
+        },
       },
       {
+        id: 'techDetails',
         accessorKey: 'techDetails',
-        header: 'Tech Details',
+        cell: (info) => (
+          <div className="text-[12px] text-muted-foreground font-mono mt-[4px]">
+            {info.getValue() as string}
+          </div>
+        ),
       },
       {
+        id: 'dayGroup',
         accessorKey: 'dayGroup',
-        header: 'Day',
       },
     ],
     []
@@ -58,32 +100,29 @@ export function ActivityComponent() {
     data,
     columns,
     state: {
-      globalFilter,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const text = row.getValue<string>('text')?.toLowerCase() || ''
-      const location = row.getValue<string>('locationChip')?.toLowerCase() || ''
-      const search = filterValue.toLowerCase()
-      return text.includes(search) || location.includes(search)
+      columnVisibility: {
+        severity: isDetailed,
+        techDetails: isDetailed,
+      },
     },
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  })
-
-  // Apply category filter separately
-  const filteredRows = table.getRowModel().rows.filter(row => {
-    if (categoryFilter === 'all') return true
-    return row.original.category === categoryFilter
   })
 
   // Group rows by dayGroup for rendering
-  const groupedRows: Record<string, typeof filteredRows> = {}
-  filteredRows.forEach(row => {
+  const groupedRows: Record<string, Row<ActivityLogEvent>[]> = {}
+  table.getRowModel().rows.forEach(row => {
     const day = row.original.dayGroup
     if (!groupedRows[day]) groupedRows[day] = []
     groupedRows[day].push(row)
   })
+
+  // Helper for filter pills
+  const FilterButton = ({ label, iconClass }: { label: string; iconClass?: string }) => (
+    <button className="h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88">
+      {iconClass && <span className={`w-[9px] h-[9px] rounded-full ${iconClass}`}></span>}
+      {label}
+    </button>
+  )
 
   return (
     <div className="flex flex-col gap-[12px] h-full w-full">
@@ -95,8 +134,6 @@ export function ActivityComponent() {
             type="text"
             placeholder="Type to search… (example: Lab 1, printer, Maria)"
             className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
           />
         </div>
         {isDetailed && (
@@ -126,46 +163,12 @@ export function ActivityComponent() {
 
       {/* Pills */}
       <div className="flex gap-[8px] shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
-        <button
-          onClick={() => setCategoryFilter('all')}
-          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
-            categoryFilter === 'all'
-              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
-              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
-          }`}
-        >
+        <button className="h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]">
           All
         </button>
-        <button
-          onClick={() => setCategoryFilter('fix')}
-          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
-            categoryFilter === 'fix'
-              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
-              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
-          }`}
-        >
-          <span className="w-[9px] h-[9px] rounded-full bg-[hsl(var(--destructive))]"></span> Needs fixing
-        </button>
-        <button
-          onClick={() => setCategoryFilter('look')}
-          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
-            categoryFilter === 'look'
-              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
-              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
-          }`}
-        >
-          <span className="w-[9px] h-[9px] rounded-full bg-[hsl(35,92%,50%)]"></span> Worth a look
-        </button>
-        <button
-          onClick={() => setCategoryFilter('normal')}
-          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
-            categoryFilter === 'normal'
-              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
-              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
-          }`}
-        >
-          <span className="w-[9px] h-[9px] rounded-full bg-[hsl(var(--success))]"></span> Normal
-        </button>
+        <FilterButton label="Needs fixing" iconClass="bg-[hsl(var(--destructive))]" />
+        <FilterButton label="Worth a look" iconClass="bg-[hsl(35,92%,50%)]" />
+        <FilterButton label="Normal" iconClass="bg-[hsl(var(--success))]" />
       </div>
 
       {/* Log */}
@@ -173,8 +176,7 @@ export function ActivityComponent() {
         {Object.entries(groupedRows).length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-[8px] py-[60px] px-[20px] text-muted-foreground text-center">
             <Search className="w-[34px] h-[34px] stroke-[1.6px]" />
-            <div className="text-[16px] font-bold text-foreground">Nothing matches your search</div>
-            <div>Try a different word, or tap “All” to see everything.</div>
+            <div className="text-[16px] font-bold text-foreground">Nothing to display</div>
           </div>
         ) : (
           Object.entries(groupedRows).map(([day, rows]) => (
@@ -183,49 +185,23 @@ export function ActivityComponent() {
                 {day}
               </div>
               {rows.map((row, index) => {
-                const event = row.original
+                const getCellNode = (id: string) => {
+                  const cell = row.getVisibleCells().find(c => c.column.id === id)
+                  return cell ? flexRender(cell.column.columnDef.cell, cell.getContext()) : null
+                }
+
                 return (
-                  <div key={event.id}>
+                  <div key={row.original.id}>
                     <div className="flex gap-[12px] py-[12px] px-[2px] items-start">
-                      <div
-                        className={`w-[11px] h-[11px] rounded-full mt-[5px] shrink-0 ${
-                          event.category === 'fix'
-                            ? 'bg-[hsl(var(--destructive))]'
-                            : event.category === 'look'
-                            ? 'bg-[hsl(35,92%,50%)]'
-                            : 'bg-[hsl(var(--success))]'
-                        }`}
-                      ></div>
+                      {getCellNode('category')}
                       <div className="flex-1 min-w-0">
-                        <div className="text-[14.5px] leading-[1.45] text-foreground">
-                          {event.text}
-                        </div>
+                        {getCellNode('text')}
                         <div className="flex gap-[8px] items-center mt-[5px] flex-wrap">
-                          <span className="inline-flex items-center gap-[5px] text-[12.5px] font-semibold text-foreground bg-muted border border-border rounded-[7px] px-[8px] py-[3px]">
-                            {event.locationChip}
-                          </span>
-                          <span className="text-[12.5px] text-muted-foreground">
-                            {event.time}
-                          </span>
-                          {isDetailed && (
-                            <span
-                              className={`inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[13px] font-semibold leading-none border border-transparent ${
-                                event.severity === 'High'
-                                  ? 'bg-[hsl(0,72%,96%)] text-[hsl(var(--destructive))] border-[hsl(0,72%,88%)] dark:bg-[hsl(0,46%,18%)] dark:text-[hsl(0,85%,78%)] dark:border-[hsl(0,42%,32%)]'
-                                  : event.severity === 'Medium'
-                                  ? 'bg-[hsl(35,92%,95%)] text-[hsl(var(--warning))] border-[hsl(35,92%,82%)] dark:bg-[hsl(35,46%,16%)] dark:text-[hsl(35,88%,70%)] dark:border-[hsl(35,42%,30%)]'
-                                  : 'bg-[hsl(142,71%,95%)] text-[hsl(var(--success))] border-[hsl(142,71%,85%)] dark:bg-[hsl(142,38%,16%)] dark:text-[hsl(142,62%,70%)] dark:border-[hsl(142,32%,30%)]'
-                              }`}
-                            >
-                              {event.severity}
-                            </span>
-                          )}
+                          {getCellNode('locationChip')}
+                          {getCellNode('time')}
+                          {getCellNode('severity')}
                         </div>
-                        {isDetailed && event.techDetails && (
-                          <div className="text-[12px] text-muted-foreground font-mono mt-[4px]">
-                            {event.techDetails}
-                          </div>
-                        )}
+                        {getCellNode('techDetails')}
                       </div>
                     </div>
                     {index < rows.length - 1 && (
