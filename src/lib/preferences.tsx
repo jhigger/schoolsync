@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext } from 'react'
+import { useLocalStorage } from './useLocalStorage'
 
 export type Theme = 'light' | 'dark' | 'auto'
 export type ViewMode = 'simple' | 'detailed'
@@ -13,23 +14,10 @@ export type PreferencesContextType = {
 const PreferencesContext = createContext<PreferencesContextType | null>(null)
 
 export function PreferencesProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('auto')
-  const [viewMode, setViewModeState] = useState<ViewMode>('simple')
-
-  useEffect(() => {
-    const storedTheme = localStorage.getItem('theme') as Theme | null
-    if (storedTheme) {
-      setThemeState(storedTheme)
-    }
-
-    const storedViewMode = localStorage.getItem('viewMode') as ViewMode | null
-    if (storedViewMode) {
-      setViewModeState(storedViewMode)
-    }
-  }, [])
+  const [theme, setThemeState] = useLocalStorage<Theme>('theme', 'auto')
+  const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode', 'simple')
 
   const setTheme = (newTheme: Theme) => {
-    localStorage.setItem('theme', newTheme)
     setThemeState(newTheme)
     
     // Update document class for Tailwind dark mode
@@ -46,11 +34,6 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
       root.setAttribute('data-theme', newTheme)
     }
     root.style.colorScheme = resolved
-  }
-
-  const setViewMode = (newViewMode: ViewMode) => {
-    localStorage.setItem('viewMode', newViewMode)
-    setViewModeState(newViewMode)
   }
 
   return (

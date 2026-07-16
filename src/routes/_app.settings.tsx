@@ -2,12 +2,25 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Label } from '../components/ui/label'
 import { Switch } from '../components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { usePreferences, type Theme } from '../lib/preferences'
+import { usePreferences } from '../lib/preferences'
 
 export const Route = createFileRoute('/_app/settings')({
   component: SettingsComponent,
 })
+
+function SettingRow({ title, description, children }: { title: string, description: string, children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="space-y-0.5">
+        <Label>{title}</Label>
+        <p className="text-sm text-muted-foreground">
+          {description}
+        </p>
+      </div>
+      {children}
+    </div>
+  )
+}
 
 function SettingsComponent() {
   const { theme, setTheme, viewMode, setViewMode } = usePreferences()
@@ -30,40 +43,15 @@ function SettingsComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Theme</Label>
-                <p className="text-sm text-muted-foreground">
-                  Select your preferred theme.
-                </p>
-              </div>
-              <Select
-                value={theme}
-                onValueChange={(value) => setTheme(value as Theme)}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="auto">System Default</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Dark Mode Toggle</Label>
-                <p className="text-sm text-muted-foreground">
-                  Quickly toggle dark mode on or off.
-                </p>
-              </div>
+            <SettingRow 
+              title="Dark Mode" 
+              description="Quickly toggle dark mode on or off."
+            >
               <Switch
                 checked={theme === 'dark'}
                 onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
               />
-            </div>
+            </SettingRow>
           </CardContent>
         </Card>
 
@@ -75,18 +63,15 @@ function SettingsComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Detailed View</Label>
-                <p className="text-sm text-muted-foreground">
-                  Show detailed information across the dashboard.
-                </p>
-              </div>
+            <SettingRow 
+              title="Detailed View" 
+              description="Show detailed information across the dashboard."
+            >
               <Switch
                 checked={viewMode === 'detailed'}
                 onCheckedChange={(checked) => setViewMode(checked ? 'detailed' : 'simple')}
               />
-            </div>
+            </SettingRow>
           </CardContent>
         </Card>
       </div>
