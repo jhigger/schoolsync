@@ -3,7 +3,7 @@ import { useAuth } from '../lib/auth'
 
 export const Route = createFileRoute('/signin')({
   beforeLoad: () => {
-    if (localStorage.getItem('auth') === 'true') {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('auth') === 'true') {
       throw redirect({ to: '/dashboard' })
     }
   },
