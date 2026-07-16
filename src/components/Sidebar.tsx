@@ -10,8 +10,17 @@ const navItems = [
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
+const ROLE_PROFILES: Record<string, { name: string, title: string, initial: string }> = {
+  Admin: { name: 'Maria Reyes', title: 'Admin assistant', initial: 'M' },
+  Staff: { name: 'David Smith', title: 'Teacher', initial: 'D' },
+  Student: { name: 'Alex Johnson', title: 'Student', initial: 'A' },
+}
+
 export default function Sidebar() {
   const authRole = useStore((state) => state.authRole)
+  const profile = authRole && ROLE_PROFILES[authRole] 
+    ? ROLE_PROFILES[authRole] 
+    : { name: 'User', title: 'Guest', initial: 'U' }
 
   return (
     <aside className="bg-card text-card-foreground border-t md:border-t-0 md:border-r border-border flex-shrink-0
@@ -43,11 +52,11 @@ export default function Sidebar() {
       
       <div className="hidden md:flex mt-auto p-4 border-t border-border items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-          {authRole ? authRole.charAt(0) : 'U'}
+          {profile.initial}
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold">{authRole === 'Admin' ? 'Maria Reyes' : (authRole || 'User')}</span>
-          <span className="text-xs text-muted-foreground">{authRole === 'Admin' ? 'Admin assistant' : authRole}</span>
+          <span className="text-sm font-semibold">{profile.name}</span>
+          <span className="text-xs text-muted-foreground">{profile.title}</span>
         </div>
       </div>
     </aside>

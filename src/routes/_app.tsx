@@ -1,17 +1,11 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
+import { getStoredAuthRole } from '../store'
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: () => {
-    if (typeof localStorage !== 'undefined') {
-      const storage = localStorage.getItem('app-storage');
-      if (storage) {
-        try {
-          const parsed = JSON.parse(storage);
-          if (parsed?.state?.authRole) return;
-        } catch (e) {}
-      }
+    if (!getStoredAuthRole()) {
       throw redirect({ to: '/signin' })
     }
   },

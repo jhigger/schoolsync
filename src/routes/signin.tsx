@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
-import { useStore, type AuthRole } from '../store'
+import { useStore, getStoredAuthRole, type AuthRole } from '../store'
 import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
 import { Input } from '../components/ui/input'
@@ -7,20 +7,8 @@ import { Label } from '../components/ui/label'
 
 export const Route = createFileRoute('/signin')({
   beforeLoad: () => {
-    if (typeof localStorage !== 'undefined') {
-      const storage = localStorage.getItem('app-storage');
-      if (storage) {
-        try {
-          const parsed = JSON.parse(storage);
-          if (parsed?.state?.authRole) {
-            throw redirect({ to: '/dashboard' })
-          }
-        } catch (e) {
-          if (e instanceof Error && e.message === 'REDIRECT') throw e;
-          // Catch redirect and re-throw, ignore JSON parse errors
-          if ((e as any)?.status === 302) throw e;
-        }
-      }
+    if (getStoredAuthRole()) {
+      throw redirect({ to: '/dashboard' })
     }
   },
   component: SignInComponent,

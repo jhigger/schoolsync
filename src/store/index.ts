@@ -27,3 +27,15 @@ export const useStore = create<AppState>()(
     }
   )
 );
+
+export function getStoredAuthRole(): AuthRole {
+  if (typeof localStorage === 'undefined') return null;
+  const storage = localStorage.getItem('app-storage');
+  if (!storage) return null;
+  try {
+    const parsed = JSON.parse(storage);
+    return parsed?.state?.authRole || null;
+  } catch (e) {
+    return null;
+  }
+}
