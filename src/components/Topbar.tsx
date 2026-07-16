@@ -1,9 +1,10 @@
 import { useStore } from '../store'
-import { LogOut, Sun, Moon } from 'lucide-react'
+import { LogOut, Sun, Moon, CircleHelp } from 'lucide-react'
 import { useRouterState, useNavigate } from '@tanstack/react-router'
 import { SidebarTrigger } from './ui/sidebar'
 import { Switch } from './ui/switch'
 import { Label } from './ui/label'
+import { Button } from './ui/button'
 import { useThemeSync } from '../hooks/use-theme-sync'
 
 const ROUTE_TITLES: Record<string, string> = {
@@ -21,6 +22,8 @@ export default function Topbar() {
   const setTheme = useStore((state) => state.setTheme)
   const viewMode = useStore((state) => state.viewMode)
   const setViewMode = useStore((state) => state.setViewMode)
+  const helpOpen = useStore((state) => state.helpOpen)
+  const setHelpOpen = useStore((state) => state.setHelpOpen)
   const navigate = useNavigate()
   const router = useRouterState()
 
@@ -65,6 +68,17 @@ export default function Topbar() {
             {viewMode === 'detailed' ? 'Detailed' : 'Simple'}
           </Label>
         </div>
+
+        <Button 
+          variant={helpOpen ? 'default' : 'outline'} 
+          size="sm" 
+          className="hidden md:flex gap-2"
+          onClick={() => setHelpOpen(!helpOpen)}
+          aria-label="Help"
+        >
+          <CircleHelp className="w-4 h-4" />
+          Help
+        </Button>
 
         <button
           onClick={toggleTheme}
