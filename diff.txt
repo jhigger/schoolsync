@@ -1,776 +1,312 @@
-diff --git a/.scratch/ui-1to1-match/PRD.md b/.scratch/ui-1to1-match/PRD.md
-new file mode 100644
-index 0000000..56c5de2
---- /dev/null
-+++ b/.scratch/ui-1to1-match/PRD.md
-@@ -0,0 +1,49 @@
-+Status: ready-for-agent
-+
-+## Problem Statement
-+
-+The user has a monolithic, 94kb `index.html` prototype of "SchoolSync" which contains a fully fleshed out UI/UX using custom CSS classes modeled after Shadcn zinc tokens. A rewrite into a modern TanStack (Router, Query, Table) + React + Shadcn stack has begun, but the current React implementation lacks the polish, precise styling, and 1:1 structural fidelity of the original HTML. The goal is to perfectly replicate the look, feel, and content structure of the original prototype, but built upon an industry-standard, typesafe foundation.
-+
-+## Solution
-+
-+We will execute a 1:1 UI/UX match by translating the original custom CSS and HTML structure into idiomatic Tailwind CSS utility classes and Shadcn components. To support the interactive elements of the UI without a real backend, we will extract hardcoded data into strictly typed TypeScript mock data files and use TanStack Query with simulated async delays to fetch it. Global states—such as the active Mock Auth Role, Dark/Light Theme, and Simple/Detailed Mode—will be managed via a typesafe Zustand store. Tabular data will be rendered using TanStack Table, and the app shell will leverage Shadcn's new Sidebar component for robust, accessible navigation.
-+
-+## User Stories
-+
-+1. As a user, I want the Sign-In page to display three buttons (Admin, Staff, Student) so that I can mock-authenticate into different roles.
-+2. As a user, I want the App Shell to use a robust Sidebar for navigation so that I can easily move between the Dashboard, Activity Log, Rooms & Devices, Alerts, and Settings.
-+3. As a user, I want the App Shell sidebar to gracefully handle mobile layouts so that the app remains usable on smaller screens.
-+4. As a user, I want to toggle a "Simple/Detailed" mode from the settings or header so that advanced technical data is hidden when I don't need it, exactly matching the original HTML behavior.
-+5. As a user, I want to toggle between light and dark themes so that the app matches my system preference or environment.
-+6. As a user, I want to see loading states (skeletons) when navigating to a new route so that I know data is being fetched.
-+7. As a user viewing the Dashboard, I want to see the summary cards, alert strips, and a quick feed so that I get a high-level overview of the system's status.
-+8. As a user viewing the Activity Log, I want to see a fully structured, typesafe table (via TanStack Table) containing the event logs so that the presentation matches the original HTML's detailed view.
-+9. As a user viewing the Rooms & Devices page, I want to see grid layouts of devices with correct status badges (success, warning, destructive) so that the visual hierarchy matches the original design.
-+10. As a user viewing the Alerts page, I want to see system alerts and thresholds styled exactly like the original prototype.
-+11. As a developer, I want all mock data to be strictly typed and fetched via TanStack Query so that the codebase is completely typesafe and ready for a real backend in the future.
-+
-+## Implementation Decisions
-+
-+- **Styling translation**: We will not port the raw CSS classes (e.g., `.btn-primary`) from `index.html`. Instead, we will map them to the equivalent Shadcn component variants and Tailwind utility classes to maintain idiomatic code.
-+- **Global State**: We will use Zustand to manage the `authRole`, `theme`, and `viewMode` (Simple vs. Detailed).
-+- **Mock Data Layer**: Hardcoded HTML data will be extracted into a `lib/mockData.ts` (or similar) file. We will write mock API functions that return this data wrapped in a `setTimeout` to simulate network latency.
-+- **Data Fetching**: We will use TanStack Query to call the mock API functions. This enforces proper loading/error state handling via Shadcn skeletons.
-+- **Tables**: We will use TanStack Table for complex lists/tables (like the Activity Log).
-+- **Layout**: We will use Shadcn's `Sidebar` component for the primary app shell navigation.
-+
-+## Testing Decisions
-+
-+- **What makes a good test**: Tests will focus purely on external behavior and visual structural rendering, not the internal Tailwind classes used. For example, we test that clicking the "Detailed Mode" button causes the detailed stats to appear in the document.
-+- **Seams**: The primary testing seam will be at the **Route/Page Level**. 
-+- **Modules tested**: `<DashboardRoute />`, `<ActivityLogRoute />`, `<DevicesRoute />`, `<AlertsRoute />`, `<SettingsRoute />`, and the `<AppShell />` layout.
-+- **Prior Art**: We will wrap the rendered route in a Test Provider that supplies a fresh Zustand store and a mock TanStack Query client to ensure tests are isolated and don't share state.
-+
-+## Out of Scope
-+
-+- Implementing a real authentication backend or real database connections.
-+- Pixel-perfect CSS replication if it strictly violates Shadcn's design system—we will prioritize "soul and content" over exact pixel values.
-+- Writing E2E tests via Playwright/Cypress (we will stick to Integration tests at the Route seam).
-+
-+## Further Notes
-+
-+- The original `index.html` is 94kb of pure markup. The effort to extract the data will be significant, so breaking this down by route (Dashboard, Activity Log, etc.) in the next phase (`/to-tickets`) is critical.
-diff --git a/.scratch/ui-1to1-match/issues/01-sign-in-route.md b/.scratch/ui-1to1-match/issues/01-sign-in-route.md
-new file mode 100644
-index 0000000..6ae2289
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/01-sign-in-route.md
-@@ -0,0 +1,11 @@
-+# 01 — Sign-In Route & Global State Foundation
-+
-+**What to build:** A fully functional, 1:1 styled Sign-In screen (using Shadcn/Tailwind) that updates a new Zustand global store with the selected auth role (Admin, Staff, Student) and mock-authenticates the user.
-+
-+**Blocked by:** None — can start immediately.
-+
-+**Status:** ready-for-agent
-+
-+- [ ] Zustand store is created with `authRole`, `theme`, and `viewMode` state.
-+- [ ] Sign-In page matches the original 94kb `index.html` sign-in overlay layout 1:1 using Tailwind/Shadcn.
-+- [ ] Clicking Admin, Staff, or Student updates the Zustand store and redirects to the Dashboard.
-diff --git a/.scratch/ui-1to1-match/issues/02-app-shell-layout.md b/.scratch/ui-1to1-match/issues/02-app-shell-layout.md
-new file mode 100644
-index 0000000..51f839c
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/02-app-shell-layout.md
-@@ -0,0 +1,13 @@
-+# 02 — App Shell Layout (Sidebar & Header)
-+
-+**What to build:** The authenticated shell leveraging Shadcn's Sidebar component. It includes the top header, the responsive navigation, and the global toggles for Dark/Light Mode and Simple/Detailed Mode (wired up to the Zustand store).
-+
-+**Blocked by:** 01 — Sign-In Route & Global State Foundation
-+
-+**Status:** ready-for-agent
-+
-+- [ ] App shell uses Shadcn's Sidebar component for navigation.
-+- [ ] Sidebar collapses gracefully or converts to a drawer on mobile screens.
-+- [ ] Top header includes a working Simple/Detailed mode toggle that updates Zustand.
-+- [ ] Top header includes a working Dark/Light theme toggle that updates Zustand and applies the correct CSS variables.
-+- [ ] Unauthenticated users are redirected to the Sign-In page.
-diff --git a/.scratch/ui-1to1-match/issues/03-dashboard-mock-data.md b/.scratch/ui-1to1-match/issues/03-dashboard-mock-data.md
-new file mode 100644
-index 0000000..a40f9f3
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/03-dashboard-mock-data.md
-@@ -0,0 +1,12 @@
-+# 03 — Dashboard UI & Mock Data Foundation
-+
-+**What to build:** Sets up the TanStack Query provider and the `mockData.ts` typed data layer. It fully builds the 1:1 styled Dashboard route (summary cards, feed, alert strips) consuming this simulated async data with proper Shadcn loading skeletons.
-+
-+**Blocked by:** 02 — App Shell Layout (Sidebar & Header)
-+
-+**Status:** ready-for-agent
-+
-+- [ ] `lib/mockData.ts` is created with strictly typed TypeScript interfaces for dashboard data.
-+- [ ] TanStack Query is configured with simulated async delays (e.g., `setTimeout`).
-+- [ ] Dashboard route styling perfectly matches the original HTML (summary strips, alerts, cards).
-+- [ ] Loading states display Shadcn skeleton loaders while fetching data.
-diff --git a/.scratch/ui-1to1-match/issues/04-activity-log-ui.md b/.scratch/ui-1to1-match/issues/04-activity-log-ui.md
-new file mode 100644
-index 0000000..3386728
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/04-activity-log-ui.md
-@@ -0,0 +1,11 @@
-+# 04 — Activity Log UI (TanStack Table)
-+
-+**What to build:** A 1:1 styled Activity Log route utilizing TanStack Table to render the event logs, complete with the mode-specific visibility (Simple vs. Detailed) driven by Zustand.
-+
-+**Blocked by:** 03 — Dashboard UI & Mock Data Foundation
-+
-+**Status:** ready-for-agent
-+
-+- [ ] Activity Log uses TanStack Table to render structured mock data.
-+- [ ] Table styling strictly mirrors the original HTML design.
-+- [ ] Advanced technical columns/data are correctly hidden when the Zustand store's viewMode is set to "Simple".
-diff --git a/.scratch/ui-1to1-match/issues/05-rooms-devices-ui.md b/.scratch/ui-1to1-match/issues/05-rooms-devices-ui.md
-new file mode 100644
-index 0000000..bd727f3
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/05-rooms-devices-ui.md
-@@ -0,0 +1,11 @@
-+# 05 — Rooms & Devices UI
-+
-+**What to build:** A 1:1 styled Rooms & Devices route, showcasing the device grid layouts and status badges (Success, Warning, Destructive) mapped from the mock data.
-+
-+**Blocked by:** 03 — Dashboard UI & Mock Data Foundation
-+
-+**Status:** ready-for-agent
-+
-+- [ ] Device grids and layouts match the original HTML exactly.
-+- [ ] Status badges utilize Shadcn variants (or equivalent Tailwind) to show Success, Warning, and Destructive states.
-+- [ ] Data is fetched via TanStack Query with loading skeletons.
-diff --git a/.scratch/ui-1to1-match/issues/06-alerts-ui.md b/.scratch/ui-1to1-match/issues/06-alerts-ui.md
-new file mode 100644
-index 0000000..574899c
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/06-alerts-ui.md
-@@ -0,0 +1,10 @@
-+# 06 — Alerts UI
-+
-+**What to build:** A 1:1 styled Alerts route, displaying system alerts and thresholds that match the original HTML's presentation.
-+
-+**Blocked by:** 03 — Dashboard UI & Mock Data Foundation
-+
-+**Status:** ready-for-agent
-+
-+- [ ] Alerts UI perfectly replicates the layout and typography of the original prototype.
-+- [ ] Data is driven by the simulated async mock API.
-diff --git a/.scratch/ui-1to1-match/issues/07-settings-ui.md b/.scratch/ui-1to1-match/issues/07-settings-ui.md
-new file mode 100644
-index 0000000..a3d5330
---- /dev/null
-+++ b/.scratch/ui-1to1-match/issues/07-settings-ui.md
-@@ -0,0 +1,10 @@
-+# 07 — Settings UI
-+
-+**What to build:** A 1:1 styled Settings route, ensuring any remaining user preferences are polished and perfectly match the original HTML.
-+
-+**Blocked by:** 03 — Dashboard UI & Mock Data Foundation
-+
-+**Status:** ready-for-agent
-+
-+- [ ] Settings page matches the original structural fidelity and CSS design using Tailwind/Shadcn.
-+- [ ] User preferences visually interact with global state where applicable.
-diff --git a/package.json b/package.json
-index 5bc7efb..c47cc3a 100644
---- a/package.json
-+++ b/package.json
-@@ -30,7 +30,8 @@
-     "shadcn": "^4.13.0",
-     "tailwind-merge": "^3.6.0",
-     "tailwindcss": "^4.1.18",
--    "tw-animate-css": "^1.4.0"
-+    "tw-animate-css": "^1.4.0",
-+    "zustand": "^5.0.14"
-   },
-   "devDependencies": {
-     "@tailwindcss/typography": "^0.5.16",
-diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
-index 3a9beb7..08e8d44 100644
---- a/pnpm-lock.yaml
-+++ b/pnpm-lock.yaml
-@@ -62,6 +62,9 @@ importers:
-       tw-animate-css:
-         specifier: ^1.4.0
-         version: 1.4.0
-+      zustand:
-+        specifier: ^5.0.14
-+        version: 5.0.14(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
-     devDependencies:
-       '@tailwindcss/typography':
-         specifier: ^0.5.16
-@@ -2838,6 +2841,24 @@ packages:
-   zod@4.4.3:
-     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
- 
-+  zustand@5.0.14:
-+    resolution: {integrity: sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==}
-+    engines: {node: '>=12.20.0'}
-+    peerDependencies:
-+      '@types/react': '>=18.0.0'
-+      immer: '>=9.0.6'
-+      react: '>=18.0.0'
-+      use-sync-external-store: '>=1.2.0'
-+    peerDependenciesMeta:
-+      '@types/react':
-+        optional: true
-+      immer:
-+        optional: true
-+      react:
-+        optional: true
-+      use-sync-external-store:
-+        optional: true
-+
- snapshots:
- 
-   '@acemir/cssom@0.9.31': {}
-@@ -5441,3 +5462,9 @@ snapshots:
-   zod@3.25.76: {}
- 
-   zod@4.4.3: {}
-+
-+  zustand@5.0.14(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)):
-+    optionalDependencies:
-+      '@types/react': 19.2.17
-+      react: 19.2.7
-+      use-sync-external-store: 1.6.0(react@19.2.7)
-diff --git a/src/components/Sidebar.tsx b/src/components/Sidebar.tsx
-index 905f3e8..efdac5e 100644
---- a/src/components/Sidebar.tsx
-+++ b/src/components/Sidebar.tsx
-@@ -1,5 +1,6 @@
- import { Link } from '@tanstack/react-router'
- import { LayoutDashboard, Activity, MonitorSmartphone, Bell, Settings } from 'lucide-react'
-+import { useStore } from '../store'
- 
- const navItems = [
-   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-@@ -10,6 +11,8 @@ const navItems = [
- ]
- 
- export default function Sidebar() {
-+  const authRole = useStore((state) => state.authRole)
-+
-   return (
-     <aside className="bg-card text-card-foreground border-t md:border-t-0 md:border-r border-border flex-shrink-0
-       fixed md:static bottom-0 left-0 right-0 z-40
-@@ -17,7 +20,7 @@ export default function Sidebar() {
-     >
-       <div className="hidden md:flex items-center gap-2 px-2 py-4 mb-4">
-         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
--          S
-+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-         </div>
-         <span className="font-bold text-lg">SchoolSync</span>
-       </div>
-@@ -40,11 +43,11 @@ export default function Sidebar() {
-       
-       <div className="hidden md:flex mt-auto p-4 border-t border-border items-center gap-3">
-         <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
--          U
-+          {authRole ? authRole.charAt(0) : 'U'}
-         </div>
-         <div className="flex flex-col">
--          <span className="text-sm font-semibold">User</span>
--          <span className="text-xs text-muted-foreground">Admin</span>
-+          <span className="text-sm font-semibold">{authRole === 'Admin' ? 'Maria Reyes' : (authRole || 'User')}</span>
-+          <span className="text-xs text-muted-foreground">{authRole === 'Admin' ? 'Admin assistant' : authRole}</span>
-         </div>
-       </div>
-     </aside>
-diff --git a/src/components/Topbar.tsx b/src/components/Topbar.tsx
-index 3ad2165..8d4d2f6 100644
---- a/src/components/Topbar.tsx
-+++ b/src/components/Topbar.tsx
-@@ -1,6 +1,6 @@
--import { useAuth } from '../lib/auth'
-+import { useStore } from '../store'
- import { LogOut } from 'lucide-react'
--import { useRouterState } from '@tanstack/react-router'
-+import { useRouterState, useNavigate } from '@tanstack/react-router'
- 
- const ROUTE_TITLES: Record<string, string> = {
-   '/': 'Dashboard',
-@@ -12,9 +12,15 @@ const ROUTE_TITLES: Record<string, string> = {
+diff --git a/src/lib/mockData.ts b/src/lib/mockData.ts
+index 84740e0..03015d6 100644
+--- a/src/lib/mockData.ts
++++ b/src/lib/mockData.ts
+@@ -303,3 +303,82 @@ export async function fetchRoomsData(): Promise<Room[]> {
+     }, 1000);
+   });
  }
- 
- export default function Topbar() {
--  const { signOut } = useAuth()
-+  const setAuthRole = useStore((state) => state.setAuthRole)
-+  const navigate = useNavigate()
-   const router = useRouterState()
--  
 +
-+  const signOut = () => {
-+    setAuthRole(null)
-+    navigate({ to: '/signin' })
++export interface AlertItem {
++  id: string;
++  title: string;
++  description: string;
++  location: string;
++  time: string;
++  severity: 'high' | 'medium';
++  techDetails: string;
++}
++
++export const mockAlertsData: AlertItem[] = [
++  {
++    id: 'a1',
++    title: 'A printer went offline',
++    description: 'The Office printer stopped responding. It may be unplugged, out of paper, or broken — staff can’t print until it’s working again.',
++    location: 'Office',
++    time: 'Today · 11:42 AM',
++    severity: 'high',
++    techDetails: 'The front-office printer stopped answering at 11:42 AM. It had been printing normally all morning, so it most likely lost power, ran out of paper, or had a cable knocked loose. No one in the office can print until it’s back. Try checking that it’s switched on and connected, then print a test page — if that doesn’t help, IT can take a closer look.',
++  },
++  {
++    id: 'a2',
++    title: 'Someone tried a wrong password several times',
++    description: 'A person typed the wrong password 4 times in a row in Lab 2. This could be someone who forgot it — or someone who shouldn’t be signing in.',
++    location: 'Lab 2',
++    time: 'Today · 10:15 AM',
++    severity: 'medium',
++    techDetails: 'At 10:15 AM someone entered the wrong password four times in a row on a computer in Lab 2. Usually this is just a student or teacher who forgot their password or left caps lock on. Once in a while it can mean someone is trying to get into an account that isn’t theirs. It’s worth asking who was using that computer mid-morning, and offering a password reset if they were simply locked out.',
++  },
++  {
++    id: 'a3',
++    title: 'A student opened a program they’re not allowed to use',
++    description: 'A blocked program was opened on a computer in Lab 1. It was stopped automatically, but you may want to check who was using it.',
++    location: 'Lab 1 · PC 12',
++    time: 'Today · 9:38 AM',
++    severity: 'medium',
++    techDetails: 'At 9:38 AM a program that students aren’t allowed to run was opened on PC 12 in Lab 1. The system blocked it right away, so nothing was harmed — but it’s a sign someone was trying to use a tool they shouldn’t. You may want to check who was signed in at that time and remind them which programs are off-limits.',
 +  }
++];
 +
-   const path = router.location.pathname
-   const title = ROUTE_TITLES[path] || 'App'
++export async function fetchAlertsData(): Promise<AlertItem[]> {
++  return new Promise((resolve) => {
++    setTimeout(() => {
++      resolve(mockAlertsData);
++    }, 1000);
++  });
++}
++
++export interface RuleItem {
++  id: string;
++  title: string;
++  sub: string;
++  type: 'switch' | 'threshold';
++  thresholdText?: string;
++  thresholdValue?: number;
++  thresholdUnit?: string;
++  defaultOn: boolean;
++  section: string;
++}
++
++export const mockRulesData: RuleItem[] = [
++  { id: 'r1', section: 'Tell me when…', title: 'A device stops working', sub: 'A printer or computer goes offline or breaks down.', type: 'switch', defaultOn: true },
++  { id: 'r2', section: 'Tell me when…', title: 'Someone types a wrong password too many times', sub: 'Could mean a forgotten password — or someone who shouldn’t be there.', type: 'threshold', thresholdText: 'Alert me after', thresholdValue: 4, thresholdUnit: 'failed tries', defaultOn: true },
++  { id: 'r3', section: 'Tell me when…', title: 'A restricted program is opened', sub: 'Apps that students aren’t allowed to use.', type: 'switch', defaultOn: true },
++  { id: 'r4', section: 'Tell me when…', title: 'A computer overheats', sub: 'A machine gets too hot and may shut down.', type: 'threshold', thresholdText: 'Alert me above', thresholdValue: 85, thresholdUnit: '°C', defaultOn: true },
++  { id: 'r5', section: 'Tell me when…', title: 'A USB drive is plugged in', sub: 'Off by default — turn on if your school tracks USB use.', type: 'switch', defaultOn: false },
++  
++  { id: 'r6', section: 'How I’m told', title: 'Show alerts on this screen', sub: 'The red number on “Alerts” in the menu.', type: 'switch', defaultOn: true },
++  { id: 'r7', section: 'How I’m told', title: 'Email me a daily summary', sub: 'One message each evening with the day’s alerts.', type: 'switch', defaultOn: false },
++];
++
++export async function fetchRulesData(): Promise<RuleItem[]> {
++  return new Promise((resolve) => {
++    setTimeout(() => {
++      resolve(mockRulesData);
++    }, 1000);
++  });
++}
+diff --git a/src/routes/_app.alerts.tsx b/src/routes/_app.alerts.tsx
+index 10694b5..0672ae9 100644
+--- a/src/routes/_app.alerts.tsx
++++ b/src/routes/_app.alerts.tsx
+@@ -1,87 +1,149 @@
+ import { createFileRoute } from '@tanstack/react-router'
+-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+-import { Switch } from '@/components/ui/switch'
+-import { Label } from '@/components/ui/label'
+-import { Input } from '@/components/ui/input'
+-import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
++import { useState, useEffect } from 'react'
++import { fetchAlertsData, fetchRulesData } from '@/lib/mockData'
++import type { AlertItem, RuleItem } from '@/lib/mockData'
++import { cn } from '@/lib/utils'
  
-diff --git a/src/lib/auth.tsx b/src/lib/auth.tsx
-deleted file mode 100644
-index e4c60ab..0000000
---- a/src/lib/auth.tsx
-+++ /dev/null
-@@ -1,44 +0,0 @@
--import React, { createContext, useContext, useState, useEffect } from 'react'
--
--export type AuthContextType = {
--  isAuthenticated: boolean
--  signIn: () => void
--  signOut: () => void
--}
--
--const AuthContext = createContext<AuthContextType | null>(null)
--
--export function AuthProvider({ children }: { children: React.ReactNode }) {
--  const [isAuthenticated, setIsAuthenticated] = useState(false)
--
--  useEffect(() => {
--    const stored = localStorage.getItem('auth')
--    if (stored === 'true') {
--      setIsAuthenticated(true)
--    }
--  }, [])
--
--  const signIn = () => {
--    localStorage.setItem('auth', 'true')
--    setIsAuthenticated(true)
--  }
--
--  const signOut = () => {
--    localStorage.removeItem('auth')
--    setIsAuthenticated(false)
--  }
--
--  return (
--    <AuthContext.Provider value={{ isAuthenticated, signIn, signOut }}>
--      {children}
--    </AuthContext.Provider>
--  )
--}
--
--export function useAuth() {
--  const context = useContext(AuthContext)
--  if (!context) {
--    throw new Error('useAuth must be used within an AuthProvider')
--  }
--  return context
--}
-diff --git a/src/routes/__root.tsx b/src/routes/__root.tsx
-index d6969a8..fcda1f6 100644
---- a/src/routes/__root.tsx
-+++ b/src/routes/__root.tsx
-@@ -1,7 +1,6 @@
- import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
- import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
- import { TanStackDevtools } from '@tanstack/react-devtools'
--import { AuthProvider } from '../lib/auth'
- import { PreferencesProvider } from '../lib/preferences'
- 
- import appCss from '../styles.css?url'
-@@ -41,9 +40,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
-       </head>
-       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
-         <PreferencesProvider>
--          <AuthProvider>
--            {children}
--          </AuthProvider>
-+          {children}
-         </PreferencesProvider>
-         <TanStackDevtools
-           config={{
-diff --git a/src/routes/_app.tsx b/src/routes/_app.tsx
-index 8c82a93..4f57495 100644
---- a/src/routes/_app.tsx
-+++ b/src/routes/_app.tsx
-@@ -4,7 +4,14 @@ import Topbar from '../components/Topbar'
- 
- export const Route = createFileRoute('/_app')({
-   beforeLoad: () => {
--    if (typeof localStorage !== 'undefined' && localStorage.getItem('auth') !== 'true') {
-+    if (typeof localStorage !== 'undefined') {
-+      const storage = localStorage.getItem('app-storage');
-+      if (storage) {
-+        try {
-+          const parsed = JSON.parse(storage);
-+          if (parsed?.state?.authRole) return;
-+        } catch (e) {}
-+      }
-       throw redirect({ to: '/signin' })
-     }
-   },
-diff --git a/src/routes/signin.tsx b/src/routes/signin.tsx
-index 2dc2b22..2a57bc8 100644
---- a/src/routes/signin.tsx
-+++ b/src/routes/signin.tsx
-@@ -1,38 +1,79 @@
- import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
--import { useAuth } from '../lib/auth'
-+import { useStore, type AuthRole } from '../store'
-+import { Button } from '../components/ui/button'
-+import { Card } from '../components/ui/card'
-+import { Input } from '../components/ui/input'
-+import { Label } from '../components/ui/label'
- 
- export const Route = createFileRoute('/signin')({
-   beforeLoad: () => {
--    if (typeof localStorage !== 'undefined' && localStorage.getItem('auth') === 'true') {
--      throw redirect({ to: '/dashboard' })
-+    if (typeof localStorage !== 'undefined') {
-+      const storage = localStorage.getItem('app-storage');
-+      if (storage) {
-+        try {
-+          const parsed = JSON.parse(storage);
-+          if (parsed?.state?.authRole) {
-+            throw redirect({ to: '/dashboard' })
-+          }
-+        } catch (e) {
-+          if (e instanceof Error && e.message === 'REDIRECT') throw e;
-+          // Catch redirect and re-throw, ignore JSON parse errors
-+          if ((e as any)?.status === 302) throw e;
-+        }
-+      }
-     }
-   },
-   component: SignInComponent,
+ export const Route = createFileRoute('/_app/alerts')({
+-  component: AlertsComponent,
++  component: AlertsRoute,
  })
  
- function SignInComponent() {
--  const { signIn } = useAuth()
-+  const setAuthRole = useStore((state) => state.setAuthRole)
-   const navigate = useNavigate()
- 
--  const handleSignIn = () => {
--    signIn()
-+  const handleSignIn = (role: AuthRole) => {
-+    setAuthRole(role)
-     navigate({ to: '/dashboard' })
-   }
- 
-   return (
--    <div className="flex h-screen w-full items-center justify-center bg-background">
--      <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-xl shadow-md border">
--        <div className="text-center">
--          <h1 className="text-3xl font-bold">Sign In</h1>
--          <p className="text-muted-foreground mt-2">Sign in to access your dashboard</p>
-+    <div className="flex min-h-screen w-full items-center justify-center bg-muted/30 p-4">
-+      <Card className="w-full max-w-sm p-8 shadow-lg">
-+        <div className="flex flex-col items-center text-center mb-8">
-+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4">
-+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-+            </svg>
-+          </div>
-+          <h1 className="text-2xl font-semibold tracking-tight">SchoolSync</h1>
-+          <p className="text-sm text-muted-foreground mt-1">School Activity Logbook &middot; sign in to continue</p>
-         </div>
--        <button
--          onClick={handleSignIn}
--          className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
--        >
--          Sign In
--        </button>
--      </div>
-+        
-+        <div className="space-y-4">
-+          <div className="space-y-2">
-+            <Label htmlFor="email">Email</Label>
-+            <Input id="email" type="email" defaultValue="assistant@school.edu" readOnly />
-+          </div>
-+          <div className="space-y-2">
-+            <Label htmlFor="password">Password</Label>
-+            <Input id="password" type="password" defaultValue="••••••••" readOnly />
-+          </div>
-+          
-+          <div className="pt-2 flex flex-col gap-2">
-+            <Button size="lg" className="w-full text-base" onClick={() => handleSignIn('Admin')}>
-+              Sign in as Admin
-+            </Button>
-+            <div className="grid grid-cols-2 gap-2 mt-1">
-+              <Button variant="outline" onClick={() => handleSignIn('Staff')}>Staff</Button>
-+              <Button variant="outline" onClick={() => handleSignIn('Student')}>Student</Button>
-+            </div>
-+          </div>
-+        </div>
+-function AlertsComponent() {
++function AlertsRoute() {
++  const [activeTab, setActiveTab] = useState<'review' | 'rules'>('review')
++  const [alerts, setAlerts] = useState<AlertItem[]>([])
++  const [rules, setRules] = useState<RuleItem[]>([])
++  const [loading, setLoading] = useState(true)
 +
-+        <p className="text-center text-sm text-muted-foreground mt-6">
-+          Need help signing in? Ask your IT office.
-+        </p>
-+      </Card>
++  useEffect(() => {
++    async function loadData() {
++      setLoading(true)
++      const [alertsData, rulesData] = await Promise.all([
++        fetchAlertsData(),
++        fetchRulesData()
++      ])
++      setAlerts(alertsData)
++      setRules(rulesData)
++      setLoading(false)
++    }
++    loadData()
++  }, [])
++
++  const reviewCount = alerts.length
++
+   return (
+-    <div className="space-y-6">
+-      <div>
+-        <h2 className="text-2xl font-bold tracking-tight">System Alerts</h2>
+-        <p className="text-muted-foreground">
+-          Monitor active issues and configure your alert thresholds.
+-        </p>
++    <section className="view active" data-view="alerts" id="view-alerts">
++      <div className="tabs">
++        <button 
++          className={cn("tab", activeTab === 'review' && "active")} 
++          onClick={() => setActiveTab('review')}
++        >
++          Needs review {reviewCount > 0 && <span className="badge destructive" id="tabBadge">{reviewCount}</span>}
++        </button>
++        <button 
++          className={cn("tab", activeTab === 'rules' && "active")} 
++          onClick={() => setActiveTab('rules')}
++        >
++          What I get alerted about
++        </button>
+       </div>
+ 
+-      <div className="grid gap-6 md:grid-cols-2">
+-        <div className="space-y-4">
+-          <h3 className="text-lg font-medium">Active Alerts</h3>
+-          <Alert variant="destructive">
+-            <AlertCircle className="h-4 w-4" />
+-            <AlertTitle>High CPU Usage</AlertTitle>
+-            <AlertDescription>
+-              Server Alpha is experiencing CPU usage above 90% for the last 5 minutes.
+-            </AlertDescription>
+-          </Alert>
+-          <Alert>
+-            <Info className="h-4 w-4" />
+-            <AlertTitle>Maintenance Scheduled</AlertTitle>
+-            <AlertDescription>
+-              Database optimization scheduled for tonight at 2:00 AM UTC.
+-            </AlertDescription>
+-          </Alert>
+-          <Alert className="border-green-200 bg-green-50 text-green-900 dark:border-green-900 dark:bg-green-900/20 dark:text-green-400">
+-            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500" />
+-            <AlertTitle>System Healthy</AlertTitle>
+-            <AlertDescription>
+-              All monitoring services are reporting normal status.
+-            </AlertDescription>
+-          </Alert>
+-        </div>
+-
+-        <Card>
+-          <CardHeader>
+-            <CardTitle>Threshold Configuration</CardTitle>
+-            <CardDescription>
+-              Configure when system alerts should be triggered.
+-            </CardDescription>
+-          </CardHeader>
+-          <CardContent className="space-y-6">
+-            <div className="flex items-center justify-between space-x-2">
+-              <Label htmlFor="email-alerts" className="flex flex-col space-y-1">
+-                <span>Email Notifications</span>
+-                <span className="font-normal text-sm text-muted-foreground">Receive critical alerts via email.</span>
+-              </Label>
+-              <Switch id="email-alerts" defaultChecked />
++      {/* TAB: Needs review */}
++      <div className={cn("tabpanel", activeTab === 'review' && "active")} data-panel="review">
++        {loading ? (
++          <div className="p-4 text-muted-foreground">Loading alerts...</div>
++        ) : alerts.length > 0 ? (
++          <div className="list" id="alertList">
++            {alerts.map(alert => (
++              <AlertCard key={alert.id} alert={alert} onReview={(id) => setAlerts(alerts.filter(a => a.id !== id))} />
++            ))}
++          </div>
++        ) : (
++          <div className="empty shown" id="emptyReview">
++            <div className="icon">
++              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+             </div>
++            <div className="e-title">You’re all caught up</div>
++            <div>No alerts need your review right now. Anything new will show up here.</div>
++          </div>
++        )}
++      </div>
++
++      {/* TAB: Rules */}
++      <div className={cn("tabpanel", activeTab === 'rules' && "active")} data-panel="rules">
++        {loading ? (
++          <div className="p-4 text-muted-foreground">Loading rules...</div>
++        ) : (
++          <div className="list">
++            <div className="section-label">Tell me when…</div>
++            {rules.filter(r => r.section === 'Tell me when…').map(rule => (
++              <RuleCard key={rule.id} rule={rule} />
++            ))}
+             
+-            <div className="space-y-3">
+-              <Label htmlFor="cpu-threshold">CPU Usage Threshold (%)</Label>
+-              <Input id="cpu-threshold" type="number" defaultValue={85} />
+-            </div>
++            <div className="section-label" style={{ marginTop: '8px' }}>How I’m told</div>
++            {rules.filter(r => r.section === 'How I’m told').map(rule => (
++              <RuleCard key={rule.id} rule={rule} />
++            ))}
++          </div>
++        )}
++      </div>
++    </section>
++  )
++}
+ 
+-            <div className="space-y-3">
+-              <Label htmlFor="memory-threshold">Memory Usage Threshold (%)</Label>
+-              <Input id="memory-threshold" type="number" defaultValue={90} />
+-            </div>
++function AlertCard({ alert, onReview }: { alert: AlertItem, onReview: (id: string) => void }) {
++  const [showDetails, setShowDetails] = useState(false)
+ 
+-            <div className="flex items-center justify-between space-x-2">
+-              <Label htmlFor="auto-resolve" className="flex flex-col space-y-1">
+-                <span>Auto-resolve Alerts</span>
+-                <span className="font-normal text-sm text-muted-foreground">Automatically close alerts when metrics return to normal.</span>
+-              </Label>
+-              <Switch id="auto-resolve" defaultChecked />
+-            </div>
+-          </CardContent>
+-        </Card>
++  return (
++    <div className={cn("alert-card", alert.severity === 'high' ? 'high' : 'med')} data-alert>
++      <div className="ac-icon">
++        {alert.severity === 'high' ? (
++           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
++        ) : alert.title.toLowerCase().includes('password') ? (
++           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
++        ) : (
++           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
++        )}
++      </div>
++      <div className="ac-body">
++        <div className="ac-title">{alert.title}</div>
++        <div className="ac-desc">{alert.description}</div>
++        <div className="ac-meta">
++          <span className="chip">{alert.location}</span>
++          <span className="ac-time">{alert.time}</span>
++          <span className={cn("badge only-detailed", alert.severity === 'high' ? 'destructive' : 'warning')}>
++            {alert.severity === 'high' ? 'High' : 'Medium'}
++          </span>
++        </div>
++        <div className={cn("ac-tech", showDetails && "shown")}>
++          {alert.techDetails}
++        </div>
++      </div>
++      <div className="ac-actions">
++        <button className="btn btn-primary btn-sm" data-review onClick={() => onReview(alert.id)}>Mark as reviewed</button>
++        <button className="btn btn-outline btn-sm" data-details onClick={() => setShowDetails(!showDetails)}>
++          {showDetails ? 'Hide details' : 'See details'}
++        </button>
++      </div>
++    </div>
++  )
++}
++
++function RuleCard({ rule }: { rule: RuleItem }) {
++  const [isOn, setIsOn] = useState(rule.defaultOn)
++  const [thresholdVal, setThresholdVal] = useState(rule.thresholdValue || '')
++
++  return (
++    <div className="rule">
++      <div className="r-body">
++        <div className="r-title">{rule.title}</div>
++        <div className="r-sub">{rule.sub}</div>
++        {rule.type === 'threshold' && (
++          <div className="threshold only-detailed">
++            {rule.thresholdText} <input type="number" value={thresholdVal} onChange={e => setThresholdVal(e.target.value)} /> {rule.thresholdUnit}
++          </div>
++        )}
+       </div>
++      <div className={cn("switch", isOn && "on")} onClick={() => setIsOn(!isOn)}></div>
      </div>
    )
  }
-diff --git a/src/store/index.ts b/src/store/index.ts
-new file mode 100644
-index 0000000..f4460c7
---- /dev/null
-+++ b/src/store/index.ts
-@@ -0,0 +1,29 @@
-+import { create } from 'zustand';
-+import { persist } from 'zustand/middleware';
-+
-+export type AuthRole = 'Admin' | 'Staff' | 'Student' | null;
-+
-+interface AppState {
-+  authRole: AuthRole;
-+  theme: 'light' | 'dark' | 'system';
-+  viewMode: string;
-+  setAuthRole: (role: AuthRole) => void;
-+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
-+  setViewMode: (mode: string) => void;
-+}
-+
-+export const useStore = create<AppState>()(
-+  persist(
-+    (set) => ({
-+      authRole: null,
-+      theme: 'system',
-+      viewMode: 'default',
-+      setAuthRole: (role) => set({ authRole: role }),
-+      setTheme: (theme) => set({ theme }),
-+      setViewMode: (mode) => set({ viewMode: mode }),
-+    }),
-+    {
-+      name: 'app-storage',
-+    }
-+  )
-+);
-diff --git a/src/styles.css b/src/styles.css
-index dad8584..46f04b6 100644
---- a/src/styles.css
-+++ b/src/styles.css
-@@ -12,81 +12,123 @@
- }
- 
- :root {
--  --background: oklch(1 0 0);
--  --foreground: oklch(0.145 0 0);
--  --card: oklch(1 0 0);
--  --card-foreground: oklch(0.145 0 0);
--  --popover: oklch(1 0 0);
--  --popover-foreground: oklch(0.145 0 0);
--  --primary: oklch(0.205 0 0);
--  --primary-foreground: oklch(0.985 0 0);
--  --secondary: oklch(0.97 0 0);
--  --secondary-foreground: oklch(0.205 0 0);
--  --muted: oklch(0.97 0 0);
--  --muted-foreground: oklch(0.556 0 0);
--  --accent: oklch(0.97 0 0);
--  --accent-foreground: oklch(0.205 0 0);
--  --destructive: oklch(0.577 0.245 27.325);
--  --border: oklch(0.922 0 0);
--  --input: oklch(0.922 0 0);
--  --ring: oklch(0.708 0 0);
--  --chart-1: oklch(0.87 0 0);
--  --chart-2: oklch(0.556 0 0);
--  --chart-3: oklch(0.439 0 0);
--  --chart-4: oklch(0.371 0 0);
--  --chart-5: oklch(0.269 0 0);
--  --radius: 0.75rem;
-+  --background: oklch(0.9711 0.0034 145.5494);
-+  --foreground: oklch(0.2235 0.0049 145.4099);
-+  --card: oklch(1.0000 0 0);
-+  --card-foreground: oklch(0.2235 0.0049 145.4099);
-+  --popover: oklch(1.0000 0 0);
-+  --popover-foreground: oklch(0.2235 0.0049 145.4099);
-+  --primary: oklch(0.4731 0.0450 149.2237);
-+  --primary-foreground: oklch(0.9711 0.0034 145.5494);
-+  --secondary: oklch(0.9247 0.0103 145.4919);
-+  --secondary-foreground: oklch(0.2235 0.0049 145.4099);
-+  --muted: oklch(0.9621 0.0034 145.5491);
-+  --muted-foreground: oklch(0.4889 0.0120 145.3884);
-+  --accent: oklch(0.9621 0.0034 145.5491);
-+  --accent-foreground: oklch(0.2235 0.0049 145.4099);
-+  --destructive: oklch(0.4437 0.1613 26.8994);
-+  --border: oklch(0.8688 0.0069 145.5154);
-+  --input: oklch(0.8688 0.0069 145.5154);
-+  --ring: oklch(0.4731 0.0450 149.2237);
-+  --chart-1: oklch(0.4731 0.0450 149.2237);
-+  --chart-2: oklch(0.6147 0.0361 149.2264);
-+  --chart-3: oklch(0.7440 0.0320 148.2634);
-+  --chart-4: oklch(0.8504 0.0164 148.3765);
-+  --chart-5: oklch(0.9482 0.0058 153.7726);
-+  --radius: 0.6rem;
-   --success: 142 71% 35%;
-   --warning: 35 92% 40%;
--  --sidebar: oklch(0.985 0 0);
--  --sidebar-foreground: oklch(0.145 0 0);
--  --sidebar-primary: oklch(0.205 0 0);
--  --sidebar-primary-foreground: oklch(0.985 0 0);
--  --sidebar-accent: oklch(0.97 0 0);
--  --sidebar-accent-foreground: oklch(0.205 0 0);
--  --sidebar-border: oklch(0.922 0 0);
--  --sidebar-ring: oklch(0.708 0 0);
-+  --sidebar: oklch(0.9711 0.0034 145.5494);
-+  --sidebar-foreground: oklch(0.2235 0.0049 145.4099);
-+  --sidebar-primary: oklch(0.4731 0.0450 149.2237);
-+  --sidebar-primary-foreground: oklch(0.9711 0.0034 145.5494);
-+  --sidebar-accent: oklch(0.9247 0.0103 145.4919);
-+  --sidebar-accent-foreground: oklch(0.2235 0.0049 145.4099);
-+  --sidebar-border: oklch(0.9247 0.0103 145.4919);
-+  --sidebar-ring: oklch(0.4731 0.0450 149.2237);
-+  --destructive-foreground: oklch(0.9711 0.0034 145.5494);
-+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
-+  --font-serif: Georgia, serif;
-+  --font-mono: JetBrains Mono, monospace;
-+  --shadow-color: #000000;
-+  --shadow-opacity: 0.05;
-+  --shadow-blur: 10px;
-+  --shadow-spread: 0px;
-+  --shadow-offset-x: 0px;
-+  --shadow-offset-y: 4px;
-+  --letter-spacing: -0.01em;
-+  --spacing: 0.25rem;
-+  --shadow-2xs: 0px 4px 10px 0px hsl(0 0% 0% / 0.03);
-+  --shadow-xs: 0px 4px 10px 0px hsl(0 0% 0% / 0.03);
-+  --shadow-sm: 0px 4px 10px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
-+  --shadow: 0px 4px 10px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
-+  --shadow-md: 0px 4px 10px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.05);
-+  --shadow-lg: 0px 4px 10px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.05);
-+  --shadow-xl: 0px 4px 10px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
-+  --shadow-2xl: 0px 4px 10px 0px hsl(0 0% 0% / 0.13);
-+  --tracking-normal: -0.025em;
- }
- 
- .dark {
--  --background: oklch(0.145 0 0);
--  --foreground: oklch(0.985 0 0);
--  --card: oklch(0.205 0 0);
--  --card-foreground: oklch(0.985 0 0);
--  --popover: oklch(0.205 0 0);
--  --popover-foreground: oklch(0.985 0 0);
--  --primary: oklch(0.922 0 0);
--  --primary-foreground: oklch(0.205 0 0);
--  --secondary: oklch(0.269 0 0);
--  --secondary-foreground: oklch(0.985 0 0);
--  --muted: oklch(0.269 0 0);
--  --muted-foreground: oklch(0.708 0 0);
--  --accent: oklch(0.269 0 0);
--  --accent-foreground: oklch(0.985 0 0);
--  --destructive: oklch(0.704 0.191 22.216);
--  --border: oklch(1 0 0 / 10%);
--  --input: oklch(1 0 0 / 15%);
--  --ring: oklch(0.556 0 0);
--  --chart-1: oklch(0.87 0 0);
--  --chart-2: oklch(0.556 0 0);
--  --chart-3: oklch(0.439 0 0);
--  --chart-4: oklch(0.371 0 0);
--  --chart-5: oklch(0.269 0 0);
--  --sidebar: oklch(0.205 0 0);
--  --sidebar-foreground: oklch(0.985 0 0);
--  --sidebar-primary: oklch(0.488 0.243 264.376);
--  --sidebar-primary-foreground: oklch(0.985 0 0);
--  --sidebar-accent: oklch(0.269 0 0);
--  --sidebar-accent-foreground: oklch(0.985 0 0);
--  --sidebar-border: oklch(1 0 0 / 10%);
--  --sidebar-ring: oklch(0.556 0 0);
-+  --background: oklch(0.2002 0 0);
-+  --foreground: oklch(0.8717 0.0093 258.3382);
-+  --card: oklch(0.2350 0 0);
-+  --card-foreground: oklch(0.8717 0.0093 258.3382);
-+  --popover: oklch(0.2002 0 0);
-+  --popover-foreground: oklch(0.8717 0.0093 258.3382);
-+  --primary: oklch(0.5017 0.0487 151.7958);
-+  --primary-foreground: oklch(1.0000 0 0);
-+  --secondary: oklch(0.2686 0 0);
-+  --secondary-foreground: oklch(0.8717 0.0093 258.3382);
-+  --muted: oklch(0.2686 0 0);
-+  --muted-foreground: oklch(0.6401 0 0);
-+  --accent: oklch(0.3778 0.0197 153.7965);
-+  --accent-foreground: oklch(1.0000 0 0);
-+  --destructive: oklch(0.3958 0.1331 25.7230);
-+  --border: oklch(0.2850 0 0);
-+  --input: oklch(0.2850 0 0);
-+  --ring: oklch(0.5017 0.0487 151.7958);
-+  --chart-1: oklch(0.5017 0.0487 151.7958);
-+  --chart-2: oklch(0.4167 0.0363 150.6122);
-+  --chart-3: oklch(0.3212 0.0260 149.2516);
-+  --chart-4: oklch(0.5951 0.0461 151.2497);
-+  --chart-5: oklch(0.6869 0.0349 152.1651);
-+  --sidebar: oklch(0.1776 0 0);
-+  --sidebar-foreground: oklch(0.8717 0.0093 258.3382);
-+  --sidebar-primary: oklch(0.5017 0.0487 151.7958);
-+  --sidebar-primary-foreground: oklch(1.0000 0 0);
-+  --sidebar-accent: oklch(0.2350 0 0);
-+  --sidebar-accent-foreground: oklch(1.0000 0 0);
-+  --sidebar-border: oklch(0.2350 0 0);
-+  --sidebar-ring: oklch(0.5017 0.0487 151.7958);
-   --success: 142 71% 35%;
-   --warning: 35 92% 40%;
-+  --destructive-foreground: oklch(1.0000 0 0);
-+  --radius: 0.6rem;
-+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
-+  --font-serif: Georgia, serif;
-+  --font-mono: JetBrains Mono, monospace;
-+  --shadow-color: #000000;
-+  --shadow-opacity: 0.4;
-+  --shadow-blur: 24px;
-+  --shadow-spread: 0px;
-+  --shadow-offset-x: 0px;
-+  --shadow-offset-y: 12px;
-+  --letter-spacing: -0.025em;
-+  --spacing: 0.25rem;
-+  --shadow-2xs: 0px 12px 24px 0px hsl(0 0% 0% / 0.20);
-+  --shadow-xs: 0px 12px 24px 0px hsl(0 0% 0% / 0.20);
-+  --shadow-sm: 0px 12px 24px 0px hsl(0 0% 0% / 0.40), 0px 1px 2px -1px hsl(0 0% 0% / 0.40);
-+  --shadow: 0px 12px 24px 0px hsl(0 0% 0% / 0.40), 0px 1px 2px -1px hsl(0 0% 0% / 0.40);
-+  --shadow-md: 0px 12px 24px 0px hsl(0 0% 0% / 0.40), 0px 2px 4px -1px hsl(0 0% 0% / 0.40);
-+  --shadow-lg: 0px 12px 24px 0px hsl(0 0% 0% / 0.40), 0px 4px 6px -1px hsl(0 0% 0% / 0.40);
-+  --shadow-xl: 0px 12px 24px 0px hsl(0 0% 0% / 0.40), 0px 8px 10px -1px hsl(0 0% 0% / 0.40);
-+  --shadow-2xl: 0px 12px 24px 0px hsl(0 0% 0% / 1.00);
- }
- 
- @theme inline {
-   --font-heading: var(--font-sans);
--  --font-sans: 'Geist Variable', sans-serif;
-+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
-   --color-success: hsl(var(--success));
-   --color-warning: hsl(var(--warning));
-   --color-sidebar-ring: var(--sidebar-ring);
-@@ -127,6 +169,32 @@
-   --radius-2xl: calc(var(--radius) * 1.8);
-   --radius-3xl: calc(var(--radius) * 2.2);
-   --radius-4xl: calc(var(--radius) * 2.6);
-+  --font-mono: JetBrains Mono, monospace;
-+  --font-serif: Georgia, serif;
-+  --radius: 0.6rem;
-+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
-+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
-+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
-+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
-+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
-+  --tracking-normal: var(--tracking-normal);
-+  --shadow-2xl: var(--shadow-2xl);
-+  --shadow-xl: var(--shadow-xl);
-+  --shadow-lg: var(--shadow-lg);
-+  --shadow-md: var(--shadow-md);
-+  --shadow: var(--shadow);
-+  --shadow-sm: var(--shadow-sm);
-+  --shadow-xs: var(--shadow-xs);
-+  --shadow-2xs: var(--shadow-2xs);
-+  --spacing: var(--spacing);
-+  --letter-spacing: var(--letter-spacing);
-+  --shadow-offset-y: var(--shadow-offset-y);
-+  --shadow-offset-x: var(--shadow-offset-x);
-+  --shadow-spread: var(--shadow-spread);
-+  --shadow-blur: var(--shadow-blur);
-+  --shadow-opacity: var(--shadow-opacity);
-+  --color-shadow-color: var(--shadow-color);
-+  --color-destructive-foreground: var(--destructive-foreground);
- }
- 
- @layer base {
-@@ -135,6 +203,7 @@
-   }
-   body {
-     @apply bg-background text-foreground;
-+    letter-spacing: var(--tracking-normal);
-   }
-   html {
-     @apply font-sans;

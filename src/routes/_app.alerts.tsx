@@ -30,6 +30,9 @@ function AlertsRoute() {
 
   const reviewCount = alerts.length
 
+  const reviewRules = rules.filter(r => r.section === 'Tell me when…')
+  const toldRules = rules.filter(r => r.section === 'How I’m told')
+
   return (
     <section className="view active" data-view="alerts" id="view-alerts">
       <div className="tabs">
@@ -54,7 +57,7 @@ function AlertsRoute() {
         ) : alerts.length > 0 ? (
           <div className="list" id="alertList">
             {alerts.map(alert => (
-              <AlertCard key={alert.id} alert={alert} onReview={(id) => setAlerts(alerts.filter(a => a.id !== id))} />
+              <AlertCard key={alert.id} alert={alert} />
             ))}
           </div>
         ) : (
@@ -75,12 +78,12 @@ function AlertsRoute() {
         ) : (
           <div className="list">
             <div className="section-label">Tell me when…</div>
-            {rules.filter(r => r.section === 'Tell me when…').map(rule => (
+            {reviewRules.map(rule => (
               <RuleCard key={rule.id} rule={rule} />
             ))}
             
             <div className="section-label" style={{ marginTop: '8px' }}>How I’m told</div>
-            {rules.filter(r => r.section === 'How I’m told').map(rule => (
+            {toldRules.map(rule => (
               <RuleCard key={rule.id} rule={rule} />
             ))}
           </div>
@@ -90,19 +93,38 @@ function AlertsRoute() {
   )
 }
 
-function AlertCard({ alert, onReview }: { alert: AlertItem, onReview: (id: string) => void }) {
-  const [showDetails, setShowDetails] = useState(false)
+function AlertIcon({ type }: { type: AlertItem['iconType'] }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {type === 'printer' && (
+        <>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/>
+          <rect x="6" y="14" width="12" height="8" rx="1"/>
+        </>
+      )}
+      {type === 'password' && (
+        <>
+          <rect width="18" height="11" x="3" y="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </>
+      )}
+      {type === 'program' && (
+        <>
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/>
+          <path d="M12 9v4"/>
+          <path d="M12 17h.01"/>
+        </>
+      )}
+    </svg>
+  )
+}
 
+function AlertCard({ alert }: { alert: AlertItem }) {
   return (
     <div className={cn("alert-card", alert.severity === 'high' ? 'high' : 'med')} data-alert>
       <div className="ac-icon">
-        {alert.severity === 'high' ? (
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
-        ) : alert.title.toLowerCase().includes('password') ? (
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        ) : (
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-        )}
+        <AlertIcon type={alert.iconType} />
       </div>
       <div className="ac-body">
         <div className="ac-title">{alert.title}</div>
@@ -114,24 +136,19 @@ function AlertCard({ alert, onReview }: { alert: AlertItem, onReview: (id: strin
             {alert.severity === 'high' ? 'High' : 'Medium'}
           </span>
         </div>
-        <div className={cn("ac-tech", showDetails && "shown")}>
+        <div className="ac-tech">
           {alert.techDetails}
         </div>
       </div>
       <div className="ac-actions">
-        <button className="btn btn-primary btn-sm" data-review onClick={() => onReview(alert.id)}>Mark as reviewed</button>
-        <button className="btn btn-outline btn-sm" data-details onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? 'Hide details' : 'See details'}
-        </button>
+        <button className="btn btn-primary btn-sm" data-review>Mark as reviewed</button>
+        <button className="btn btn-outline btn-sm" data-details>See details</button>
       </div>
     </div>
   )
 }
 
 function RuleCard({ rule }: { rule: RuleItem }) {
-  const [isOn, setIsOn] = useState(rule.defaultOn)
-  const [thresholdVal, setThresholdVal] = useState(rule.thresholdValue || '')
-
   return (
     <div className="rule">
       <div className="r-body">
@@ -139,11 +156,11 @@ function RuleCard({ rule }: { rule: RuleItem }) {
         <div className="r-sub">{rule.sub}</div>
         {rule.type === 'threshold' && (
           <div className="threshold only-detailed">
-            {rule.thresholdText} <input type="number" value={thresholdVal} onChange={e => setThresholdVal(e.target.value)} /> {rule.thresholdUnit}
+            {rule.thresholdText} <input type="number" defaultValue={rule.thresholdValue} readOnly /> {rule.thresholdUnit}
           </div>
         )}
       </div>
-      <div className={cn("switch", isOn && "on")} onClick={() => setIsOn(!isOn)}></div>
+      <div className={cn("switch", rule.defaultOn && "on")}></div>
     </div>
   )
 }

@@ -312,6 +312,7 @@ export interface AlertItem {
   time: string;
   severity: 'high' | 'medium';
   techDetails: string;
+  iconType: 'printer' | 'password' | 'program';
 }
 
 export const mockAlertsData: AlertItem[] = [
@@ -323,6 +324,7 @@ export const mockAlertsData: AlertItem[] = [
     time: 'Today · 11:42 AM',
     severity: 'high',
     techDetails: 'The front-office printer stopped answering at 11:42 AM. It had been printing normally all morning, so it most likely lost power, ran out of paper, or had a cable knocked loose. No one in the office can print until it’s back. Try checking that it’s switched on and connected, then print a test page — if that doesn’t help, IT can take a closer look.',
+    iconType: 'printer',
   },
   {
     id: 'a2',
@@ -332,6 +334,7 @@ export const mockAlertsData: AlertItem[] = [
     time: 'Today · 10:15 AM',
     severity: 'medium',
     techDetails: 'At 10:15 AM someone entered the wrong password four times in a row on a computer in Lab 2. Usually this is just a student or teacher who forgot their password or left caps lock on. Once in a while it can mean someone is trying to get into an account that isn’t theirs. It’s worth asking who was using that computer mid-morning, and offering a password reset if they were simply locked out.',
+    iconType: 'password',
   },
   {
     id: 'a3',
@@ -341,6 +344,7 @@ export const mockAlertsData: AlertItem[] = [
     time: 'Today · 9:38 AM',
     severity: 'medium',
     techDetails: 'At 9:38 AM a program that students aren’t allowed to run was opened on PC 12 in Lab 1. The system blocked it right away, so nothing was harmed — but it’s a sign someone was trying to use a tool they shouldn’t. You may want to check who was signed in at that time and remind them which programs are off-limits.',
+    iconType: 'program',
   }
 ];
 
