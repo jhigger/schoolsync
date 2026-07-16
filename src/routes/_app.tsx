@@ -4,7 +4,14 @@ import Topbar from '../components/Topbar'
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: () => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('auth') !== 'true') {
+    if (typeof localStorage !== 'undefined') {
+      const storage = localStorage.getItem('app-storage');
+      if (storage) {
+        try {
+          const parsed = JSON.parse(storage);
+          if (parsed?.state?.authRole) return;
+        } catch (e) {}
+      }
       throw redirect({ to: '/signin' })
     }
   },

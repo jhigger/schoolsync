@@ -1,6 +1,6 @@
-import { useAuth } from '../lib/auth'
+import { useStore } from '../store'
 import { LogOut } from 'lucide-react'
-import { useRouterState } from '@tanstack/react-router'
+import { useRouterState, useNavigate } from '@tanstack/react-router'
 
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
@@ -12,9 +12,15 @@ const ROUTE_TITLES: Record<string, string> = {
 }
 
 export default function Topbar() {
-  const { signOut } = useAuth()
+  const setAuthRole = useStore((state) => state.setAuthRole)
+  const navigate = useNavigate()
   const router = useRouterState()
-  
+
+  const signOut = () => {
+    setAuthRole(null)
+    navigate({ to: '/signin' })
+  }
+
   const path = router.location.pathname
   const title = ROUTE_TITLES[path] || 'App'
 

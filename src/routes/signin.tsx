@@ -1,38 +1,79 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
-import { useAuth } from '../lib/auth'
+import { useStore, type AuthRole } from '../store'
+import { Button } from '../components/ui/button'
+import { Card } from '../components/ui/card'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
 
 export const Route = createFileRoute('/signin')({
   beforeLoad: () => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('auth') === 'true') {
-      throw redirect({ to: '/dashboard' })
+    if (typeof localStorage !== 'undefined') {
+      const storage = localStorage.getItem('app-storage');
+      if (storage) {
+        try {
+          const parsed = JSON.parse(storage);
+          if (parsed?.state?.authRole) {
+            throw redirect({ to: '/dashboard' })
+          }
+        } catch (e) {
+          if (e instanceof Error && e.message === 'REDIRECT') throw e;
+          // Catch redirect and re-throw, ignore JSON parse errors
+          if ((e as any)?.status === 302) throw e;
+        }
+      }
     }
   },
   component: SignInComponent,
 })
 
 function SignInComponent() {
-  const { signIn } = useAuth()
+  const setAuthRole = useStore((state) => state.setAuthRole)
   const navigate = useNavigate()
 
-  const handleSignIn = () => {
-    signIn()
+  const handleSignIn = (role: AuthRole) => {
+    setAuthRole(role)
     navigate({ to: '/dashboard' })
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-xl shadow-md border">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Sign In</h1>
-          <p className="text-muted-foreground mt-2">Sign in to access your dashboard</p>
+    <div className="flex min-h-screen w-full items-center justify-center bg-muted/30 p-4">
+      <Card className="w-full max-w-sm p-8 shadow-lg">
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight">SchoolSync</h1>
+          <p className="text-sm text-muted-foreground mt-1">School Activity Logbook &middot; sign in to continue</p>
         </div>
-        <button
-          onClick={handleSignIn}
-          className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-        >
-          Sign In
-        </button>
-      </div>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" defaultValue="assistant@school.edu" readOnly />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" defaultValue="••••••••" readOnly />
+          </div>
+          
+          <div className="pt-2 flex flex-col gap-2">
+            <Button size="lg" className="w-full text-base" onClick={() => handleSignIn('Admin')}>
+              Sign in as Admin
+            </Button>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <Button variant="outline" onClick={() => handleSignIn('Staff')}>Staff</Button>
+              <Button variant="outline" onClick={() => handleSignIn('Student')}>Student</Button>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Need help signing in? Ask your IT office.
+        </p>
+      </Card>
     </div>
   )
 }
