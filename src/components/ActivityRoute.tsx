@@ -24,16 +24,11 @@ const SEVERITY_STYLES: Record<string, string> = {
   Info: 'bg-[hsl(142,71%,95%)] text-[hsl(var(--success))] border-[hsl(142,71%,85%)] dark:bg-[hsl(142,38%,16%)] dark:text-[hsl(142,62%,70%)] dark:border-[hsl(142,32%,30%)]',
 }
 
-export function ActivityComponent() {
-  const { data = [], isLoading } = useQuery({
-    queryKey: ['activityLogData'],
-    queryFn: fetchActivityLogData,
-  })
-  const viewMode = useStore((state) => state.viewMode)
-  const isDetailed = viewMode === 'detailed'
+type FilterState = 'All' | 'fix' | 'look' | 'normal'
 
+function useActivityLog(data: ActivityLogEvent[]) {
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<string>('All') // 'All', 'fix', 'look', 'normal'
+  const [filter, setFilter] = useState<FilterState>('All')
   const [visibleDays, setVisibleDays] = useState(1)
 
   useEffect(() => {
@@ -49,6 +44,27 @@ export function ActivityComponent() {
       return matchesSearch && matchesFilter;
     })
   }, [data, search, filter])
+
+  return {
+    search,
+    setSearch,
+    filter,
+    setFilter,
+    visibleDays,
+    setVisibleDays,
+    filteredData
+  }
+}
+
+export function ActivityComponent() {
+  const { data = [], isLoading } = useQuery({
+    queryKey: ['activityLogData'],
+    queryFn: fetchActivityLogData,
+  })
+  const viewMode = useStore((state) => state.viewMode)
+  const isDetailed = viewMode === 'detailed'
+
+  const { search, setSearch, filter, setFilter, visibleDays, setVisibleDays, filteredData } = useActivityLog(data)
 
   const columns = useMemo<ColumnDef<ActivityLogEvent>[]>(
     () => [
@@ -93,6 +109,7 @@ export function ActivityComponent() {
           const val = info.getValue() as string
           return (
             <span className={`inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[13px] font-semibold leading-none border border-transparent ${SEVERITY_STYLES[val] || SEVERITY_STYLES.Info}`}>
+              {val === 'High' && <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />}
               {val}
             </span>
           )
@@ -254,7 +271,7 @@ export function ActivityComponent() {
             {visibleDays < allDays.length && (
               <div className="flex justify-center py-[20px]">
                 <button
-                  onClick={() => setVisibleDays(prev => prev + 1)}
+                  onClick={() => setVisibleDays(prev => prev + 3)}
                   className="h-[38px] px-[16px] rounded-full border border-border text-[14px] font-semibold transition-colors bg-muted text-foreground hover:bg-muted/80"
                 >
                   Load earlier days
