@@ -34,9 +34,9 @@ const ROOMS_DATA = [
 
 export function DevicesRoute() {
   return (
-    <div className="flex flex-col gap-8 p-6 bg-slate-50/50 min-h-screen">
+    <div className="flex flex-col gap-8 p-6 min-h-screen">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Rooms & Devices</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Rooms & Devices</h1>
         <p className="text-muted-foreground mt-2">Manage your smart devices across different rooms.</p>
       </div>
 
@@ -44,8 +44,8 @@ export function DevicesRoute() {
         {ROOMS_DATA.map((room) => (
           <section key={room.id} className="flex flex-col gap-4">
             <div className="flex items-center gap-2 border-b pb-2">
-              <Router className="w-5 h-5 text-slate-500" />
-              <h2 className="text-xl font-semibold text-slate-800">{room.name}</h2>
+              <Router className="w-5 h-5 text-muted-foreground" />
+              <h2 className="text-xl font-semibold text-foreground">{room.name}</h2>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
