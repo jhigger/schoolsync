@@ -244,3 +244,62 @@ export async function fetchActivityLogData(): Promise<ActivityLogEvent[]> {
     }, 1000);
   });
 }
+
+export interface Device {
+  name: string;
+  type: 'pc' | 'printer' | 'other';
+  status: 'ok' | 'warn' | 'down';
+  host?: string;
+  ip?: string;
+  model?: string;
+  seen?: string;
+  report?: string;
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  devices: Device[];
+}
+
+export const mockRoomsData: Room[] = [
+  { id:"lab1", name:"Lab 1", devices:[
+    { name:"PC 1–11", type:"pc", status:"ok" },
+    { name:"PC 12", type:"pc", status:"warn", host:"LAB1-PC12", ip:"10.2.1.12", model:"Dell OptiPlex 3090", seen:"9:41 AM", report:"Stopped responding on the network at 9:41 AM, right after the morning class signed off. Still has power but isn't answering. A restart usually brings it back." },
+    { name:"PC 13–15", type:"pc", status:"ok" },
+  ]},
+  { id:"lab2", name:"Lab 2", devices:[ { name:"PC 1–15", type:"pc", status:"ok" } ]},
+  { id:"lab3", name:"Lab 3", devices:[
+    { name:"PC 1–3", type:"pc", status:"ok" },
+    { name:"PC 4", type:"pc", status:"warn", host:"LAB3-PC04", ip:"10.2.3.4", model:"Dell OptiPlex 3090", seen:"8:55 AM", report:"Dropped off the network at 8:55 AM. The last user didn't report any error. Most likely a loose network cable — worth a quick check before restarting." },
+    { name:"PC 5–15", type:"pc", status:"ok" },
+  ]},
+  { id:"office", name:"Office", devices:[
+    { name:"PC 6–8", type:"pc", status:"ok" },
+    { name:"PC 9", type:"pc", status:"warn", host:"OFFICE-PC09", ip:"10.2.9.9", model:"HP ProDesk 400", seen:"10:02 AM", report:"Unreachable since 10:02 AM. The screen is on but the computer isn't responding. Recommend a restart; let IT know if it happens again." },
+    { name:"PC 10", type:"pc", status:"ok" },
+    { name:"Front printer", type:"printer", status:"down", host:"OFFICE-PRN1", ip:"10.2.9.50", model:"Brother HL-L2390", seen:"11:42 AM" },
+    { name:"Front-desk scanner", type:"other", status:"ok" },
+  ]},
+  { id:"library", name:"Library", devices:[
+    { name:"PC 1–10", type:"pc", status:"ok" },
+    { name:"Library printer", type:"printer", status:"ok" },
+  ]},
+  { id:"lab4", name:"Computer Lab 4", devices:[
+    { name:"PC 1–15", type:"pc", status:"ok" },
+    { name:"Projector", type:"other", status:"ok" },
+  ]},
+  { id:"staff", name:"Staff Room", devices:[
+    { name:"PC 1–4", type:"pc", status:"ok" },
+    { name:"Staff printer", type:"printer", status:"ok" },
+  ]},
+];
+
+export async function fetchRoomsData(): Promise<Room[]> {
+  // Simulate network delay
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockRoomsData);
+    }, 1000);
+  });
+}

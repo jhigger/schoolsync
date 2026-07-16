@@ -1,0 +1,657 @@
+diff --git a/.scratch/ui-1to1-match/issues/04-activity-log-ui.md b/.scratch/ui-1to1-match/issues/04-activity-log-ui.md
+index 3386728..2aad76e 100644
+--- a/.scratch/ui-1to1-match/issues/04-activity-log-ui.md
++++ b/.scratch/ui-1to1-match/issues/04-activity-log-ui.md
+@@ -6,6 +6,6 @@
+ 
+ **Status:** ready-for-agent
+ 
+-- [ ] Activity Log uses TanStack Table to render structured mock data.
+-- [ ] Table styling strictly mirrors the original HTML design.
+-- [ ] Advanced technical columns/data are correctly hidden when the Zustand store's viewMode is set to "Simple".
++- [x] Activity Log uses TanStack Table to render structured mock data.
++- [x] Table styling strictly mirrors the original HTML design.
++- [x] Advanced technical columns/data are correctly hidden when the Zustand store's viewMode is set to "Simple".
+diff --git a/package.json b/package.json
+index 379a501..88960eb 100644
+--- a/package.json
++++ b/package.json
+@@ -22,6 +22,7 @@
+     "@tanstack/react-router-devtools": "latest",
+     "@tanstack/react-router-ssr-query": "latest",
+     "@tanstack/react-start": "latest",
++    "@tanstack/react-table": "^8.21.3",
+     "@tanstack/router-plugin": "^1.132.0",
+     "class-variance-authority": "^0.7.1",
+     "clsx": "^2.1.1",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 27d9a3e..2b2b67b 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -35,6 +35,9 @@ importers:
+       '@tanstack/react-start':
+         specifier: latest
+         version: 1.168.28(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rolldown@1.1.5)(vite@8.1.4(@types/node@22.20.1)(jiti@2.7.0))
++      '@tanstack/react-table':
++        specifier: ^8.21.3
++        version: 8.21.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+       '@tanstack/router-plugin':
+         specifier: ^1.132.0
+         version: 1.168.20(@tanstack/react-router@1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(rolldown@1.1.5)(vite@8.1.4(@types/node@22.20.1)(jiti@2.7.0))
+@@ -954,6 +957,13 @@ packages:
+       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+ 
++  '@tanstack/react-table@8.21.3':
++    resolution: {integrity: sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==}
++    engines: {node: '>=12'}
++    peerDependencies:
++      react: '>=16.8'
++      react-dom: '>=16.8'
++
+   '@tanstack/router-cli@1.167.19':
+     resolution: {integrity: sha512-QdgcIJ/BBaMD94RRnkUFrwOnDe5cO3fXbt3p3DklEqUCI1PpTkt7DssRsL0Hf01y0gJU7Jm1KHE4/Am72BcOZQ==}
+     engines: {node: '>=20.19'}
+@@ -1040,6 +1050,10 @@ packages:
+   '@tanstack/store@0.9.3':
+     resolution: {integrity: sha512-8reSzl/qGWGGVKhBoxXPMWzATSbZLZFWhwBAFO9NAyp0TxzfBP0mIrGb8CP8KrQTmvzXlR/vFPPUrHTLBGyFyw==}
+ 
++  '@tanstack/table-core@8.21.3':
++    resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
++    engines: {node: '>=12'}
++
+   '@tanstack/virtual-file-routes@1.162.0':
+     resolution: {integrity: sha512-uhOeFyxLcU41HzvrxsGpiWdcMbScY1EDgbZ5K7DVRMYInbLYWAC0EA/kx9wXAoSM8q82bUG2hRl8+EAjE6XAbA==}
+     engines: {node: '>=20.19'}
+@@ -3693,6 +3707,12 @@ snapshots:
+       react-dom: 19.2.7(react@19.2.7)
+       use-sync-external-store: 1.6.0(react@19.2.7)
+ 
++  '@tanstack/react-table@8.21.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
++    dependencies:
++      '@tanstack/table-core': 8.21.3
++      react: 19.2.7
++      react-dom: 19.2.7(react@19.2.7)
++
+   '@tanstack/router-cli@1.167.19':
+     dependencies:
+       '@tanstack/router-generator': 1.167.19
+@@ -3836,6 +3856,8 @@ snapshots:
+ 
+   '@tanstack/store@0.9.3': {}
+ 
++  '@tanstack/table-core@8.21.3': {}
++
+   '@tanstack/virtual-file-routes@1.162.0': {}
+ 
+   '@testing-library/dom@10.4.1':
+diff --git a/src/__tests__/_app.activity.test.tsx b/src/__tests__/_app.activity.test.tsx
+index 2684988..16d8791 100644
+--- a/src/__tests__/_app.activity.test.tsx
++++ b/src/__tests__/_app.activity.test.tsx
+@@ -1,26 +1,35 @@
+-import { render, screen, fireEvent } from '@testing-library/react'
+-import { describe, it, expect } from 'vitest'
++import { render, screen, fireEvent, waitFor } from '@testing-library/react'
++import { describe, it, expect, vi } from 'vitest'
+ import { ActivityComponent } from '../components/ActivityRoute'
++import * as mockData from '../lib/mockData'
++
++// Mock the fetchActivityLogData function
++vi.spyOn(mockData, 'fetchActivityLogData').mockResolvedValue(mockData.mockActivityLogData)
+ 
+ describe('ActivityRoute', () => {
+-  it('renders the activity log header', () => {
++  it('renders the search input', async () => {
+     render(<ActivityComponent />)
+-    expect(screen.getByText('Activity Log')).toBeInTheDocument()
++    const searchInput = screen.getByPlaceholderText('Type to search… (example: Lab 1, printer, Maria)')
++    expect(searchInput).toBeInTheDocument()
+   })
+ 
+-  it('filters the log based on search input', () => {
++  it('filters the log based on search input', async () => {
+     render(<ActivityComponent />)
+-    const searchInput = screen.getByPlaceholderText('Search events...')
++    const searchInput = screen.getByPlaceholderText('Type to search… (example: Lab 1, printer, Maria)')
+     
+-    // Check if initial items are present
+-    expect(screen.getByText('System rebooted')).toBeInTheDocument()
+-    expect(screen.getByText('User logged in')).toBeInTheDocument()
++    // Check if initial items are loaded
++    await waitFor(() => {
++      expect(screen.getByText('The Office printer stopped working.')).toBeInTheDocument()
++      expect(screen.getByText('A computer in Lab 3 was slow to respond.')).toBeInTheDocument()
++    })
+     
+     // Type in search
+-    fireEvent.change(searchInput, { target: { value: 'reboot' } })
++    fireEvent.change(searchInput, { target: { value: 'printer' } })
+     
+     // Check filtered results
+-    expect(screen.getByText('System rebooted')).toBeInTheDocument()
+-    expect(screen.queryByText('User logged in')).not.toBeInTheDocument()
++    await waitFor(() => {
++      expect(screen.getByText('The Office printer stopped working.')).toBeInTheDocument()
++      expect(screen.queryByText('A computer in Lab 3 was slow to respond.')).not.toBeInTheDocument()
++    })
+   })
+ })
+diff --git a/src/components/ActivityRoute.tsx b/src/components/ActivityRoute.tsx
+index dab0fab..aa0fd30 100644
+--- a/src/components/ActivityRoute.tsx
++++ b/src/components/ActivityRoute.tsx
+@@ -1,110 +1,243 @@
+-import { useState } from 'react'
+-import { Search } from 'lucide-react'
+-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+-import { Input } from '@/components/ui/input'
+-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+-import { Badge } from '@/components/ui/badge'
+-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+-
+-const MOCK_EVENTS = [
+-  { id: 1, action: 'System rebooted', timestamp: '2026-07-17 00:00:00', user: 'System', status: 'info' },
+-  { id: 2, action: 'User logged in', timestamp: '2026-07-17 00:05:00', user: 'admin', status: 'success' },
+-  { id: 3, action: 'Threshold changed', timestamp: '2026-07-17 00:10:00', user: 'manager', status: 'warning' },
+-  { id: 4, action: 'Device offline', timestamp: '2026-07-17 00:15:00', user: 'System', status: 'error' },
+-]
++import { useState, useMemo, useEffect } from 'react'
++import {
++  useReactTable,
++  getCoreRowModel,
++  getFilteredRowModel,
++  type ColumnDef,
++} from '@tanstack/react-table'
++import { Search, Download } from 'lucide-react'
++import { fetchActivityLogData, type ActivityLogEvent } from '@/lib/mockData'
++import { useStore } from '@/store'
+ 
+ export function ActivityComponent() {
+-  const [search, setSearch] = useState('')
+-  const [filter, setFilter] = useState('all')
++  const [data, setData] = useState<ActivityLogEvent[]>([])
++  const [globalFilter, setGlobalFilter] = useState('')
++  const [categoryFilter, setCategoryFilter] = useState('all')
++  const viewMode = useStore((state) => state.viewMode)
++  const isDetailed = viewMode === 'detailed'
++
++  useEffect(() => {
++    fetchActivityLogData().then(setData)
++  }, [])
++
++  const columns = useMemo<ColumnDef<ActivityLogEvent>[]>(
++    () => [
++      {
++        accessorKey: 'category',
++        header: 'Category',
++      },
++      {
++        accessorKey: 'text',
++        header: 'Text',
++      },
++      {
++        accessorKey: 'locationChip',
++        header: 'Location',
++      },
++      {
++        accessorKey: 'time',
++        header: 'Time',
++      },
++      {
++        accessorKey: 'severity',
++        header: 'Severity',
++      },
++      {
++        accessorKey: 'techDetails',
++        header: 'Tech Details',
++      },
++      {
++        accessorKey: 'dayGroup',
++        header: 'Day',
++      },
++    ],
++    []
++  )
++
++  const table = useReactTable({
++    data,
++    columns,
++    state: {
++      globalFilter,
++    },
++    onGlobalFilterChange: setGlobalFilter,
++    globalFilterFn: (row, _columnId, filterValue) => {
++      const text = row.getValue<string>('text')?.toLowerCase() || ''
++      const location = row.getValue<string>('locationChip')?.toLowerCase() || ''
++      const search = filterValue.toLowerCase()
++      return text.includes(search) || location.includes(search)
++    },
++    getCoreRowModel: getCoreRowModel(),
++    getFilteredRowModel: getFilteredRowModel(),
++  })
++
++  // Apply category filter separately
++  const filteredRows = table.getRowModel().rows.filter(row => {
++    if (categoryFilter === 'all') return true
++    return row.original.category === categoryFilter
++  })
+ 
+-  const filteredEvents = MOCK_EVENTS.filter(event => {
+-    const matchesSearch = event.action.toLowerCase().includes(search.toLowerCase()) || 
+-                          event.user.toLowerCase().includes(search.toLowerCase())
+-    const matchesFilter = filter === 'all' || event.status === filter
+-    return matchesSearch && matchesFilter
++  // Group rows by dayGroup for rendering
++  const groupedRows: Record<string, typeof filteredRows> = {}
++  filteredRows.forEach(row => {
++    const day = row.original.dayGroup
++    if (!groupedRows[day]) groupedRows[day] = []
++    groupedRows[day].push(row)
+   })
+ 
+   return (
+-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+-        <div>
+-          <h1 className="text-3xl font-bold tracking-tight">Activity Log</h1>
+-          <p className="text-muted-foreground mt-1">Monitor system events and user actions.</p>
++    <div className="flex flex-col gap-[12px] h-full w-full">
++      {/* Controls */}
++      <div className="flex flex-wrap gap-[10px] items-center shrink-0">
++        <div className="flex-1 flex items-center gap-[8px] h-[44px] bg-white dark:bg-card border border-border rounded-[10px] px-[12px] min-w-[200px]">
++          <Search className="w-[18px] h-[18px] text-muted-foreground" />
++          <input
++            type="text"
++            placeholder="Type to search… (example: Lab 1, printer, Maria)"
++            className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
++            value={globalFilter}
++            onChange={(e) => setGlobalFilter(e.target.value)}
++          />
+         </div>
++        {isDetailed && (
++          <>
++            <select className="h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
++              <option value="">All rooms</option>
++              <option>Lab 1</option>
++              <option>Lab 2</option>
++              <option>Lab 3</option>
++              <option>Office</option>
++              <option>Library</option>
++            </select>
++            <select className="h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
++              <option>All types</option>
++              <option>Device</option>
++              <option>Login</option>
++              <option>Program</option>
++              <option>USB</option>
++            </select>
++            <button className="inline-flex items-center justify-center gap-[8px] rounded-[calc(var(--radius)-2px)] text-[15px] font-semibold cursor-pointer transition-opacity hover:opacity-88 bg-background text-foreground border border-border shadow-[0_1px_2px_rgba(0,0,0,.04)] dark:bg-card h-[46px] px-[18px]">
++              <Download className="w-[16px] h-[16px]" />
++              Export CSV
++            </button>
++          </>
++        )}
+       </div>
+ 
+-      <Card>
+-        <CardHeader className="pb-3">
+-          <div className="flex flex-col sm:flex-row justify-between gap-4">
+-            <div className="relative w-full max-w-sm">
+-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+-              <Input
+-                placeholder="Search events..."
+-                className="pl-8"
+-                value={search}
+-                onChange={(e) => setSearch(e.target.value)}
+-              />
+-            </div>
+-            <div className="w-full sm:w-[180px]">
+-              <Select value={filter} onValueChange={(val) => setFilter(val || 'all')}>
+-                <SelectTrigger>
+-                  <SelectValue placeholder="Filter by status" />
+-                </SelectTrigger>
+-                <SelectContent>
+-                  <SelectItem value="all">All Statuses</SelectItem>
+-                  <SelectItem value="info">Info</SelectItem>
+-                  <SelectItem value="success">Success</SelectItem>
+-                  <SelectItem value="warning">Warning</SelectItem>
+-                  <SelectItem value="error">Error</SelectItem>
+-                </SelectContent>
+-              </Select>
+-            </div>
+-          </div>
+-        </CardHeader>
+-        <CardContent>
+-          <div className="rounded-md border overflow-x-auto">
+-            <Table>
+-              <TableHeader>
+-                <TableRow>
+-                  <TableHead className="w-[100px]">ID</TableHead>
+-                  <TableHead>Action</TableHead>
+-                  <TableHead className="hidden md:table-cell">Timestamp</TableHead>
+-                  <TableHead className="hidden sm:table-cell">User/System</TableHead>
+-                  <TableHead>Status</TableHead>
+-                </TableRow>
+-              </TableHeader>
+-              <TableBody>
+-                {filteredEvents.length === 0 ? (
+-                  <TableRow>
+-                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+-                      No events found.
+-                    </TableCell>
+-                  </TableRow>
+-                ) : (
+-                  filteredEvents.map((event) => (
+-                    <TableRow key={event.id}>
+-                      <TableCell className="font-medium">#{event.id}</TableCell>
+-                      <TableCell>{event.action}</TableCell>
+-                      <TableCell className="hidden md:table-cell text-muted-foreground">
+-                        {event.timestamp}
+-                      </TableCell>
+-                      <TableCell className="hidden sm:table-cell">{event.user}</TableCell>
+-                      <TableCell>
+-                        <Badge 
+-                          variant={event.status === 'error' ? 'destructive' : 'secondary'}
+-                          className={event.status === 'success' ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''}
+-                        >
+-                          {event.status}
+-                        </Badge>
+-                      </TableCell>
+-                    </TableRow>
+-                  ))
+-                )}
+-              </TableBody>
+-            </Table>
++      {/* Pills */}
++      <div className="flex gap-[8px] shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
++        <button
++          onClick={() => setCategoryFilter('all')}
++          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
++            categoryFilter === 'all'
++              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
++              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
++          }`}
++        >
++          All
++        </button>
++        <button
++          onClick={() => setCategoryFilter('fix')}
++          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
++            categoryFilter === 'fix'
++              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
++              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
++          }`}
++        >
++          <span className="w-[9px] h-[9px] rounded-full bg-[hsl(var(--destructive))]"></span> Needs fixing
++        </button>
++        <button
++          onClick={() => setCategoryFilter('look')}
++          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
++            categoryFilter === 'look'
++              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
++              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
++          }`}
++        >
++          <span className="w-[9px] h-[9px] rounded-full bg-[hsl(35,92%,50%)]"></span> Worth a look
++        </button>
++        <button
++          onClick={() => setCategoryFilter('normal')}
++          className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
++            categoryFilter === 'normal'
++              ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
++              : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
++          }`}
++        >
++          <span className="w-[9px] h-[9px] rounded-full bg-[hsl(var(--success))]"></span> Normal
++        </button>
++      </div>
++
++      {/* Log */}
++      <div className="flex-1 overflow-y-auto bg-white dark:bg-card border border-border rounded-[var(--radius)] px-[16px] pb-[16px]">
++        {Object.entries(groupedRows).length === 0 ? (
++          <div className="flex flex-col items-center justify-center gap-[8px] py-[60px] px-[20px] text-muted-foreground text-center">
++            <Search className="w-[34px] h-[34px] stroke-[1.6px]" />
++            <div className="text-[16px] font-bold text-foreground">Nothing matches your search</div>
++            <div>Try a different word, or tap “All” to see everything.</div>
+           </div>
+-        </CardContent>
+-      </Card>
++        ) : (
++          Object.entries(groupedRows).map(([day, rows]) => (
++            <div key={day} className="day-group">
++              <div className="sticky top-0 bg-white dark:bg-card px-[2px] pt-[12px] pb-[8px] text-[13px] font-bold text-muted-foreground tracking-[.02em] uppercase z-10 border-b border-border">
++                {day}
++              </div>
++              {rows.map((row, index) => {
++                const event = row.original
++                return (
++                  <div key={event.id}>
++                    <div className="flex gap-[12px] py-[12px] px-[2px] items-start">
++                      <div
++                        className={`w-[11px] h-[11px] rounded-full mt-[5px] shrink-0 ${
++                          event.category === 'fix'
++                            ? 'bg-[hsl(var(--destructive))]'
++                            : event.category === 'look'
++                            ? 'bg-[hsl(35,92%,50%)]'
++                            : 'bg-[hsl(var(--success))]'
++                        }`}
++                      ></div>
++                      <div className="flex-1 min-w-0">
++                        <div className="text-[14.5px] leading-[1.45] text-foreground">
++                          {event.text}
++                        </div>
++                        <div className="flex gap-[8px] items-center mt-[5px] flex-wrap">
++                          <span className="inline-flex items-center gap-[5px] text-[12.5px] font-semibold text-foreground bg-muted border border-border rounded-[7px] px-[8px] py-[3px]">
++                            {event.locationChip}
++                          </span>
++                          <span className="text-[12.5px] text-muted-foreground">
++                            {event.time}
++                          </span>
++                          {isDetailed && (
++                            <span
++                              className={`inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[13px] font-semibold leading-none border border-transparent ${
++                                event.severity === 'High'
++                                  ? 'bg-[hsl(0,72%,96%)] text-[hsl(var(--destructive))] border-[hsl(0,72%,88%)] dark:bg-[hsl(0,46%,18%)] dark:text-[hsl(0,85%,78%)] dark:border-[hsl(0,42%,32%)]'
++                                  : event.severity === 'Medium'
++                                  ? 'bg-[hsl(35,92%,95%)] text-[hsl(var(--warning))] border-[hsl(35,92%,82%)] dark:bg-[hsl(35,46%,16%)] dark:text-[hsl(35,88%,70%)] dark:border-[hsl(35,42%,30%)]'
++                                  : 'bg-[hsl(142,71%,95%)] text-[hsl(var(--success))] border-[hsl(142,71%,85%)] dark:bg-[hsl(142,38%,16%)] dark:text-[hsl(142,62%,70%)] dark:border-[hsl(142,32%,30%)]'
++                              }`}
++                            >
++                              {event.severity}
++                            </span>
++                          )}
++                        </div>
++                        {isDetailed && event.techDetails && (
++                          <div className="text-[12px] text-muted-foreground font-mono mt-[4px]">
++                            {event.techDetails}
++                          </div>
++                        )}
++                      </div>
++                    </div>
++                    {index < rows.length - 1 && (
++                      <div className="h-[1px] bg-border w-full"></div>
++                    )}
++                  </div>
++                )
++              })}
++            </div>
++          ))
++        )}
++      </div>
+     </div>
+   )
+ }
+diff --git a/src/lib/mockData.ts b/src/lib/mockData.ts
+index 0ead6ac..79faa8c 100644
+--- a/src/lib/mockData.ts
++++ b/src/lib/mockData.ts
+@@ -23,6 +23,17 @@ export interface DashboardFeedItem {
+   techDetails?: string;
+ }
+ 
++export interface ActivityLogEvent {
++  id: string;
++  category: 'fix' | 'look' | 'normal'; // r, a, g
++  text: string;
++  locationChip: string;
++  time: string;
++  severity: 'High' | 'Medium' | 'Info';
++  techDetails?: string;
++  dayGroup: string; // 'Today · Wednesday, June 10', 'Yesterday · Tuesday, June 9', etc.
++}
++
+ export interface DashboardData {
+   stats: DashboardStats;
+   tasks: DashboardTask[];
+@@ -86,3 +97,150 @@ export async function fetchDashboardData(): Promise<DashboardData> {
+     }, 1500); // 1.5 second delay
+   });
+ }
++
++export const mockActivityLogData: ActivityLogEvent[] = [
++  // Today
++  {
++    id: 'al-1',
++    category: 'fix',
++    text: 'The Office printer stopped working.',
++    locationChip: 'Office',
++    time: '11:42 AM',
++    severity: 'High',
++    techDetails: 'printer.spooler · code 0x709 · host=OFFICE-PRN1',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-2',
++    category: 'look',
++    text: 'A computer in Lab 3 was slow to respond.',
++    locationChip: 'Lab 3 · PC 4',
++    time: '11:20 AM',
++    severity: 'Medium',
++    techDetails: 'perf.slow · cpu=98% · host=LAB3-PC04',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-3',
++    category: 'normal',
++    text: '5 new student accounts were added.',
++    locationChip: 'Office',
++    time: '10:55 AM',
++    severity: 'Info',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-4',
++    category: 'look',
++    text: 'Someone typed a wrong password 4 times in Lab 2.',
++    locationChip: 'Lab 2',
++    time: '10:15 AM',
++    severity: 'Medium',
++    techDetails: 'auth.fail · attempts=4 · host=LAB2-PC07',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-5',
++    category: 'look',
++    text: 'A student opened a program they’re not allowed to use.',
++    locationChip: 'Lab 1',
++    time: '9:38 AM',
++    severity: 'Medium',
++    techDetails: 'policy.block · app=cmd.exe · host=LAB1-PC12',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-6',
++    category: 'normal',
++    text: 'All morning records were saved successfully.',
++    locationChip: 'System',
++    time: '9:00 AM',
++    severity: 'Info',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-7',
++    category: 'normal',
++    text: 'A USB drive was plugged in at the front desk.',
++    locationChip: 'Office',
++    time: '8:05 AM',
++    severity: 'Info',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  {
++    id: 'al-8',
++    category: 'normal',
++    text: 'All computers started normally this morning.',
++    locationChip: 'All rooms',
++    time: '7:30 AM',
++    severity: 'Info',
++    dayGroup: 'Today · Wednesday, June 10',
++  },
++  // Yesterday
++  {
++    id: 'al-9',
++    category: 'normal',
++    text: 'Yesterday’s records were backed up successfully.',
++    locationChip: 'System',
++    time: '6:00 PM',
++    severity: 'Info',
++    dayGroup: 'Yesterday · Tuesday, June 9',
++  },
++  {
++    id: 'al-10',
++    category: 'fix',
++    text: 'A Library computer overheated and shut down.',
++    locationChip: 'Library',
++    time: '2:12 PM',
++    severity: 'High',
++    techDetails: 'hw.thermal · temp=92C · host=LIB-PC03',
++    dayGroup: 'Yesterday · Tuesday, June 9',
++  },
++  {
++    id: 'al-11',
++    category: 'normal',
++    text: 'A software update was installed on all computers.',
++    locationChip: 'All rooms',
++    time: '7:00 AM',
++    severity: 'Info',
++    dayGroup: 'Yesterday · Tuesday, June 9',
++  },
++  // Monday
++  {
++    id: 'al-12',
++    category: 'look',
++    text: 'Someone typed a wrong password 3 times in the Office.',
++    locationChip: 'Office',
++    time: '3:24 PM',
++    severity: 'Medium',
++    techDetails: 'auth.fail · attempts=3 · host=OFFICE-PC10',
++    dayGroup: 'Monday · June 8',
++  },
++  {
++    id: 'al-13',
++    category: 'normal',
++    text: 'The Office printer was refilled with paper.',
++    locationChip: 'Office',
++    time: '1:10 PM',
++    severity: 'Info',
++    dayGroup: 'Monday · June 8',
++  },
++  {
++    id: 'al-14',
++    category: 'normal',
++    text: 'All computers started normally this morning.',
++    locationChip: 'All rooms',
++    time: '7:30 AM',
++    severity: 'Info',
++    dayGroup: 'Monday · June 8',
++  },
++];
++
++export async function fetchActivityLogData(): Promise<ActivityLogEvent[]> {
++  // Simulate network delay
++  return new Promise((resolve) => {
++    setTimeout(() => {
++      resolve(mockActivityLogData);
++    }, 1000);
++  });
++}
