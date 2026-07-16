@@ -20,11 +20,11 @@ function SignInComponent() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-md">
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-xl shadow-md border">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Sign In</h1>
-          <p className="text-gray-500 mt-2">Sign in to access your dashboard</p>
+          <p className="text-muted-foreground mt-2">Sign in to access your dashboard</p>
         </div>
         <button
           onClick={handleSignIn}

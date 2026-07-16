@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_app')({
 function AppLayout() {
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 flex-col md:flex-row overflow-hidden">
+    <div className="flex h-screen w-full bg-background flex-col md:flex-row overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Topbar />
