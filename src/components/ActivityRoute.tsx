@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,13 +13,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const CATEGORY_STYLES: Record<string, string> = {
-  fix: 'bg-[hsl(var(--destructive))]',
+  fix: 'bg-destructive',
   look: 'bg-[hsl(35,92%,50%)]',
   normal: 'bg-[hsl(var(--success))]',
 }
 
 const SEVERITY_STYLES: Record<string, string> = {
-  High: 'bg-[hsl(0,72%,96%)] text-[hsl(var(--destructive))] border-[hsl(0,72%,88%)] dark:bg-[hsl(0,46%,18%)] dark:text-[hsl(0,85%,78%)] dark:border-[hsl(0,42%,32%)]',
+  High: 'bg-[hsl(0,72%,96%)] text-destructive border-[hsl(0,72%,88%)] dark:bg-[hsl(0,46%,18%)] dark:text-destructive dark:border-[hsl(0,42%,32%)]',
   Medium: 'bg-[hsl(35,92%,95%)] text-[hsl(var(--warning))] border-[hsl(35,92%,82%)] dark:bg-[hsl(35,46%,16%)] dark:text-[hsl(35,88%,70%)] dark:border-[hsl(35,42%,30%)]',
   Info: 'bg-[hsl(142,71%,95%)] text-[hsl(var(--success))] border-[hsl(142,71%,85%)] dark:bg-[hsl(142,38%,16%)] dark:text-[hsl(142,62%,70%)] dark:border-[hsl(142,32%,30%)]',
 }
@@ -31,6 +31,24 @@ export function ActivityComponent() {
   })
   const viewMode = useStore((state) => state.viewMode)
   const isDetailed = viewMode === 'detailed'
+
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<string>('All') // 'All', 'fix', 'look', 'normal'
+  const [visibleDays, setVisibleDays] = useState(1)
+
+  useEffect(() => {
+    setVisibleDays(1)
+  }, [search, filter])
+
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      const matchesSearch = search === '' || 
+        item.text.toLowerCase().includes(search.toLowerCase()) || 
+        item.locationChip.toLowerCase().includes(search.toLowerCase());
+      const matchesFilter = filter === 'All' || item.category === filter;
+      return matchesSearch && matchesFilter;
+    })
+  }, [data, search, filter])
 
   const columns = useMemo<ColumnDef<ActivityLogEvent>[]>(
     () => [
@@ -98,7 +116,7 @@ export function ActivityComponent() {
   )
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       columnVisibility: {
@@ -117,9 +135,19 @@ export function ActivityComponent() {
     groupedRows[day].push(row)
   })
 
+  const allDays = Object.keys(groupedRows)
+  const visibleDayKeys = allDays.slice(0, visibleDays)
+
   // Helper for filter pills
-  const FilterButton = ({ label, iconClass }: { label: string; iconClass?: string }) => (
-    <button className="h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88">
+  const FilterButton = ({ label, iconClass, active, onClick }: { label: string; iconClass?: string; active?: boolean; onClick?: () => void }) => (
+    <button
+      onClick={onClick}
+      className={`h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors ${
+        active
+          ? 'bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]'
+          : 'bg-white text-[hsl(240,5%,30%)] border-border dark:bg-card dark:text-foreground hover:opacity-88'
+      }`}
+    >
       {iconClass && <span className={`w-[9px] h-[9px] rounded-full ${iconClass}`}></span>}
       {label}
     </button>
@@ -135,6 +163,8 @@ export function ActivityComponent() {
             type="text"
             placeholder="Type to search… (example: Lab 1, printer, Maria)"
             className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         {isDetailed && (
@@ -164,12 +194,10 @@ export function ActivityComponent() {
 
       {/* Pills */}
       <div className="flex gap-[8px] shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
-        <button className="h-[38px] px-[16px] rounded-full border text-[14px] font-semibold inline-flex items-center gap-[7px] whitespace-nowrap transition-colors bg-primary text-primary-foreground border-primary dark:bg-[#39393e] dark:text-[#f5f5f5] dark:border-[#525257]">
-          All
-        </button>
-        <FilterButton label="Needs fixing" iconClass="bg-[hsl(var(--destructive))]" />
-        <FilterButton label="Worth a look" iconClass="bg-[hsl(35,92%,50%)]" />
-        <FilterButton label="Normal" iconClass="bg-[hsl(var(--success))]" />
+        <FilterButton label="All" active={filter === 'All'} onClick={() => setFilter('All')} />
+        <FilterButton label="Needs fixing" iconClass="bg-destructive" active={filter === 'fix'} onClick={() => setFilter('fix')} />
+        <FilterButton label="Worth a look" iconClass="bg-[hsl(35,92%,50%)]" active={filter === 'look'} onClick={() => setFilter('look')} />
+        <FilterButton label="Normal" iconClass="bg-[hsl(var(--success))]" active={filter === 'normal'} onClick={() => setFilter('normal')} />
       </div>
 
       {/* Log */}
@@ -186,39 +214,54 @@ export function ActivityComponent() {
             <div className="text-[16px] font-bold text-foreground">Nothing to display</div>
           </div>
         ) : (
-          Object.entries(groupedRows).map(([day, rows]) => (
-            <div key={day} className="day-group">
-              <div className="sticky top-0 bg-white dark:bg-card px-[2px] pt-[12px] pb-[8px] text-[13px] font-bold text-muted-foreground tracking-[.02em] uppercase z-10 border-b border-border">
-                {day}
-              </div>
-              {rows.map((row, index) => {
-                const getCellNode = (id: string) => {
-                  const cell = row.getVisibleCells().find(c => c.column.id === id)
-                  return cell ? flexRender(cell.column.columnDef.cell, cell.getContext()) : null
-                }
-
-                return (
-                  <div key={row.original.id}>
-                    <div className="flex gap-[12px] py-[12px] px-[2px] items-start">
-                      {getCellNode('category')}
-                      <div className="flex-1 min-w-0">
-                        {getCellNode('text')}
-                        <div className="flex gap-[8px] items-center mt-[5px] flex-wrap">
-                          {getCellNode('locationChip')}
-                          {getCellNode('time')}
-                          {getCellNode('severity')}
-                        </div>
-                        {getCellNode('techDetails')}
-                      </div>
-                    </div>
-                    {index < rows.length - 1 && (
-                      <div className="h-[1px] bg-border w-full"></div>
-                    )}
+          <>
+            {visibleDayKeys.map((day) => {
+              const rows = groupedRows[day]
+              return (
+                <div key={day} className="day-group">
+                  <div className="sticky top-0 bg-white dark:bg-card px-[2px] pt-[12px] pb-[8px] text-[13px] font-bold text-muted-foreground tracking-[.02em] uppercase z-10 border-b border-border">
+                    {day}
                   </div>
-                )
-              })}
-            </div>
-          ))
+                  {rows.map((row, index) => {
+                    const getCellNode = (id: string) => {
+                      const cell = row.getVisibleCells().find(c => c.column.id === id)
+                      return cell ? flexRender(cell.column.columnDef.cell, cell.getContext()) : null
+                    }
+
+                    return (
+                      <div key={row.original.id}>
+                        <div className="flex gap-[12px] py-[12px] px-[2px] items-start">
+                          {getCellNode('category')}
+                          <div className="flex-1 min-w-0">
+                            {getCellNode('text')}
+                            <div className="flex gap-[8px] items-center mt-[5px] flex-wrap">
+                              {getCellNode('locationChip')}
+                              {getCellNode('time')}
+                              {getCellNode('severity')}
+                            </div>
+                            {getCellNode('techDetails')}
+                          </div>
+                        </div>
+                        {index < rows.length - 1 && (
+                          <div className="h-[1px] bg-border w-full"></div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })}
+            {visibleDays < allDays.length && (
+              <div className="flex justify-center py-[20px]">
+                <button
+                  onClick={() => setVisibleDays(prev => prev + 1)}
+                  className="h-[38px] px-[16px] rounded-full border border-border text-[14px] font-semibold transition-colors bg-muted text-foreground hover:bg-muted/80"
+                >
+                  Load earlier days
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
