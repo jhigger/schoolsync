@@ -6,6 +6,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Activity Log uses TanStack Table to render structured mock data.
-- [ ] Table styling strictly mirrors the original HTML design.
-- [ ] Advanced technical columns/data are correctly hidden when the Zustand store's viewMode is set to "Simple".
+- [x] Activity Log uses TanStack Table to render structured mock data.
+- [x] Table styling strictly mirrors the original HTML design.
+- [x] Advanced technical columns/data are correctly hidden when the Zustand store's viewMode is set to "Simple".
