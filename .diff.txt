@@ -1,365 +1,86 @@
-diff --git a/package.json b/package.json
-index c47cc3a..379a501 100644
---- a/package.json
-+++ b/package.json
-@@ -17,6 +17,7 @@
-     "@fontsource-variable/geist": "^5.2.9",
-     "@tailwindcss/vite": "^4.1.18",
-     "@tanstack/react-devtools": "latest",
-+    "@tanstack/react-query": "^5.101.2",
-     "@tanstack/react-router": "latest",
-     "@tanstack/react-router-devtools": "latest",
-     "@tanstack/react-router-ssr-query": "latest",
-diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
-index 08e8d44..27d9a3e 100644
---- a/pnpm-lock.yaml
-+++ b/pnpm-lock.yaml
-@@ -20,6 +20,9 @@ importers:
-       '@tanstack/react-devtools':
-         specifier: latest
-         version: 0.10.8(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(csstype@3.2.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(solid-js@1.9.14)
-+      '@tanstack/react-query':
-+        specifier: ^5.101.2
-+        version: 5.101.2(react@19.2.7)
-       '@tanstack/react-router':
-         specifier: latest
-         version: 1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-diff --git a/src/components/dashboard/HeroTaskList.tsx b/src/components/dashboard/HeroTaskList.tsx
-index dd0433e..442c0c5 100644
---- a/src/components/dashboard/HeroTaskList.tsx
-+++ b/src/components/dashboard/HeroTaskList.tsx
-@@ -1,50 +1,58 @@
--
- import { CheckSquare } from 'lucide-react'
- import { Button } from '../ui/button'
- import { Card } from '../ui/card'
- import { Badge } from '../ui/badge'
-+import { Skeleton } from '../ui/skeleton'
-+import type { DashboardTask } from '../../lib/mockData'
+diff --git a/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md b/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md
+index 83e4f35..7d795d2 100644
+--- a/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md
++++ b/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md
+@@ -1,7 +1,7 @@
+ # 10 — App Shell Header Help Button
  
- type TaskItemProps = {
--  title: string
--  badges: string[]
--  description?: string
--  accentColor: string
--  actionLabel: string
--  actionVariant?: 'default' | 'outline'
-+  task: DashboardTask
- }
+ **What to build:** Add the missing global help button to the application header.
+-**Status:** ready-for-agent
++**Status:** ready-for-human
  
--function TaskItem({
--  title,
--  badges,
--  description,
--  accentColor,
--  actionLabel,
--  actionVariant = 'default',
--}: TaskItemProps) {
-+function TaskItem({ task }: TaskItemProps) {
-   return (
-     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
--      <div className={`hidden sm:block w-1 self-stretch rounded-full shrink-0 ${accentColor}`}></div>
-+      <div className={`hidden sm:block w-1 self-stretch rounded-full shrink-0 ${task.severity === 'high' ? 'bg-destructive' : 'bg-amber-500'}`}></div>
-       
-       <div className="flex-1 flex flex-col gap-1">
--        <div className="font-semibold text-foreground">{title}</div>
-+        <div className="font-semibold text-foreground">{task.title}</div>
-         <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
--          {badges.map((badge, idx) => (
-+          {task.badges.map((badge, idx) => (
-             <Badge key={idx} variant="secondary" className="px-2 py-0.5 text-xs font-semibold rounded-md">
-               {badge}
-             </Badge>
-           ))}
--          {description && <span>{description}</span>}
-+          {task.description && <span>{task.description}</span>}
+-- [ ] Locate the main header in the App Shell.
+-- [ ] Add the global help button to match the original HTML spec.
++- [x] Locate the main header in the App Shell.
++- [x] Add the global help button to match the original HTML spec.
+diff --git a/src/components/Topbar.tsx b/src/components/Topbar.tsx
+index b577492..6fe9ea0 100644
+--- a/src/components/Topbar.tsx
++++ b/src/components/Topbar.tsx
+@@ -1,9 +1,10 @@
+ import { useStore } from '../store'
+-import { LogOut, Sun, Moon } from 'lucide-react'
++import { LogOut, Sun, Moon, CircleHelp } from 'lucide-react'
+ import { useRouterState, useNavigate } from '@tanstack/react-router'
+ import { SidebarTrigger } from './ui/sidebar'
+ import { Switch } from './ui/switch'
+ import { Label } from './ui/label'
++import { Button } from './ui/button'
+ import { useThemeSync } from '../hooks/use-theme-sync'
+ 
+ const ROUTE_TITLES: Record<string, string> = {
+@@ -21,6 +22,8 @@ export default function Topbar() {
+   const setTheme = useStore((state) => state.setTheme)
+   const viewMode = useStore((state) => state.viewMode)
+   const setViewMode = useStore((state) => state.setViewMode)
++  const helpOpen = useStore((state) => state.helpOpen)
++  const setHelpOpen = useStore((state) => state.setHelpOpen)
+   const navigate = useNavigate()
+   const router = useRouterState()
+ 
+@@ -66,6 +69,17 @@ export default function Topbar() {
+           </Label>
          </div>
-       </div>
-       
--      <Button variant={actionVariant} className="w-full sm:w-auto">
--        {actionLabel}
-+      <Button variant={task.severity === 'high' ? 'default' : 'outline'} className="w-full sm:w-auto">
-+        {task.actionLabel}
-       </Button>
-     </div>
-   )
+ 
++        <Button 
++          variant={helpOpen ? 'default' : 'outline'} 
++          size="sm" 
++          className="hidden md:flex gap-2"
++          onClick={() => setHelpOpen(!helpOpen)}
++          aria-label="Help"
++        >
++          <CircleHelp className="w-4 h-4" />
++          Help
++        </Button>
++
+         <button
+           onClick={toggleTheme}
+           className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-accent-foreground"
+diff --git a/src/store/index.ts b/src/store/index.ts
+index a6069c2..70453d4 100644
+--- a/src/store/index.ts
++++ b/src/store/index.ts
+@@ -7,9 +7,11 @@ interface AppState {
+   authRole: AuthRole;
+   theme: 'light' | 'dark' | 'system';
+   viewMode: string;
++  helpOpen: boolean;
+   setAuthRole: (role: AuthRole) => void;
+   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+   setViewMode: (mode: string) => void;
++  setHelpOpen: (open: boolean) => void;
  }
  
--export function HeroTaskList() {
-+export function HeroTaskList({ tasks, isLoading }: { tasks?: DashboardTask[], isLoading?: boolean }) {
-+  if (isLoading || !tasks) {
-+    return (
-+      <Card className="p-5 sm:p-6 flex flex-col gap-4 sm:gap-5">
-+        <h2 className="text-lg font-semibold flex items-center gap-2">
-+          <CheckSquare className="w-5 h-5" /> What to do now
-+        </h2>
-+        
-+        <div className="flex flex-col gap-3">
-+          <Skeleton className="h-[88px] w-full rounded-md" />
-+          <Skeleton className="h-[88px] w-full rounded-md" />
-+        </div>
-+        
-+        <div className="text-sm text-muted-foreground mt-1">
-+          <Skeleton className="h-4 w-32" />
-+        </div>
-+      </Card>
-+    )
-+  }
-+
-   return (
-     <Card className="p-5 sm:p-6 flex flex-col gap-4 sm:gap-5">
-       <h2 className="text-lg font-semibold flex items-center gap-2">
-@@ -52,24 +60,11 @@ export function HeroTaskList() {
-       </h2>
-       
-       <div className="flex flex-col gap-3">
--        <TaskItem
--          title="Fix the Office printer"
--          badges={['Office']}
--          description="stopped working at 11:42 AM"
--          accentColor="bg-destructive"
--          actionLabel="Ask IT for help"
--        />
--        <TaskItem
--          title="Check 3 computers"
--          badges={['Lab 1 • PC 12', 'Lab 3 • PC 4', 'Office • PC 9']}
--          accentColor="bg-amber-500"
--          actionLabel="Check now"
--          actionVariant="outline"
--        />
-+        {tasks.map(task => <TaskItem key={task.id} task={task} />)}
-       </div>
-       
-       <div className="text-sm text-muted-foreground mt-1">
--        0 of 2 handled today
-+        0 of {tasks.length} handled today
-       </div>
-     </Card>
-   )
-diff --git a/src/components/dashboard/StatusAlert.tsx b/src/components/dashboard/StatusAlert.tsx
-index ac762df..44a9eeb 100644
---- a/src/components/dashboard/StatusAlert.tsx
-+++ b/src/components/dashboard/StatusAlert.tsx
-@@ -1,6 +1,31 @@
--import { AlertTriangle } from 'lucide-react'
-+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
-+import { Skeleton } from '../ui/skeleton'
-+
-+type StatusAlertProps = {
-+  count?: number
-+  isLoading?: boolean
-+}
-+
-+export function StatusAlert({ count = 0, isLoading }: StatusAlertProps) {
-+  if (isLoading) {
-+    return <Skeleton className="h-[48px] w-full rounded-lg" />
-+  }
-+
-+  if (count === 0) {
-+    return (
-+      <div
-+        className="flex items-center gap-3 rounded-lg px-4 py-3 shrink-0 bg-green-50 border border-green-200 dark:bg-green-950 dark:border-green-800"
-+        role="status"
-+        aria-live="polite"
-+      >
-+        <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
-+        <div className="text-green-900 dark:text-green-300 font-medium">
-+          You're all caught up
-+        </div>
-+      </div>
-+    )
-+  }
- 
--export function StatusAlert() {
-   return (
-     <div
-       className="flex items-center gap-3 rounded-lg px-4 py-3 shrink-0 bg-orange-50 border border-orange-200 dark:bg-orange-950 dark:border-orange-800"
-@@ -9,7 +34,7 @@ export function StatusAlert() {
-     >
-       <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0" />
-       <div className="text-orange-900 dark:text-orange-300 font-medium">
--        2 things need your attention
-+        {count} {count === 1 ? 'thing needs' : 'things need'} your attention
-       </div>
-     </div>
-   )
-diff --git a/src/components/dashboard/SummaryStrip.tsx b/src/components/dashboard/SummaryStrip.tsx
-index e55cf1e..814d6b7 100644
---- a/src/components/dashboard/SummaryStrip.tsx
-+++ b/src/components/dashboard/SummaryStrip.tsx
-@@ -1,19 +1,31 @@
--export function SummaryStrip() {
-+import { Skeleton } from '../ui/skeleton'
-+import type { DashboardStats } from '../../lib/mockData'
-+
-+type SummaryStripProps = {
-+  stats?: DashboardStats
-+  isLoading?: boolean
-+}
-+
-+export function SummaryStrip({ stats, isLoading }: SummaryStripProps) {
-+  if (isLoading || !stats) {
-+    return <Skeleton className="h-[46px] w-full rounded-lg" />
-+  }
-+
-   return (
-     <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 flex-wrap text-sm text-muted-foreground bg-card border border-border rounded-lg px-4 py-3 shrink-0 shadow-sm">
-       <span>
-         <span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1.5 bg-green-500"></span>
--        <b>61 of 64</b> computers are working fine
-+        <b>{stats.computersWorking} of {stats.computersTotal}</b> computers are working fine
-       </span>
-       <span className="hidden sm:inline text-border">•</span>
-       <span>
-         <span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1.5 bg-destructive"></span>
--        <b>1</b> printer needs fixing
-+        <b>{stats.printersFix}</b> {stats.printersFix === 1 ? 'printer needs' : 'printers need'} fixing
-       </span>
-       <span className="hidden sm:inline text-border">•</span>
-       <span>
-         <span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1.5 bg-amber-500"></span>
--        <b>3</b> worth a look
-+        <b>{stats.worthALook}</b> worth a look
-       </span>
-     </div>
-   )
-diff --git a/src/lib/mockData.ts b/src/lib/mockData.ts
-new file mode 100644
-index 0000000..edc34e9
---- /dev/null
-+++ b/src/lib/mockData.ts
-@@ -0,0 +1,57 @@
-+export interface DashboardStats {
-+  attentionCount: number;
-+  computersWorking: number;
-+  computersTotal: number;
-+  printersFix: number;
-+  worthALook: number;
-+}
-+
-+export interface DashboardTask {
-+  id: string;
-+  title: string;
-+  badges: string[];
-+  description?: string;
-+  severity: 'high' | 'medium';
-+  actionLabel: string;
-+}
-+
-+export interface DashboardData {
-+  stats: DashboardStats;
-+  tasks: DashboardTask[];
-+}
-+
-+const mockDashboardData: DashboardData = {
-+  stats: {
-+    attentionCount: 2,
-+    computersWorking: 61,
-+    computersTotal: 64,
-+    printersFix: 1,
-+    worthALook: 3,
-+  },
-+  tasks: [
-+    {
-+      id: 'task-1',
-+      title: 'Fix the Office printer',
-+      badges: ['Office'],
-+      description: 'stopped working at 11:42 AM',
-+      severity: 'high',
-+      actionLabel: 'Ask IT for help',
-+    },
-+    {
-+      id: 'task-2',
-+      title: 'Check 3 computers',
-+      badges: ['Lab 1 • PC 12', 'Lab 3 • PC 4', 'Office • PC 9'],
-+      severity: 'medium',
-+      actionLabel: 'Check now',
-+    },
-+  ],
-+};
-+
-+export async function fetchDashboardData(): Promise<DashboardData> {
-+  // Simulate network delay
-+  return new Promise((resolve) => {
-+    setTimeout(() => {
-+      resolve(mockDashboardData);
-+    }, 1500); // 1.5 second delay
-+  });
-+}
-diff --git a/src/routes/__root.tsx b/src/routes/__root.tsx
-index 61e55ba..e8a76c5 100644
---- a/src/routes/__root.tsx
-+++ b/src/routes/__root.tsx
-@@ -1,6 +1,7 @@
- import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
- import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
- import { TanStackDevtools } from '@tanstack/react-devtools'
-+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
- import { PreferencesProvider } from '../lib/preferences'
- import { TooltipProvider } from '../components/ui/tooltip'
- 
-@@ -8,6 +9,8 @@ import appCss from '../styles.css?url'
- 
- const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
- 
-+const queryClient = new QueryClient()
-+
- export const Route = createRootRoute({
-   head: () => ({
-     meta: [
-@@ -40,11 +43,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
-         <HeadContent />
-       </head>
-       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
--        <TooltipProvider>
--          <PreferencesProvider>
--            {children}
--          </PreferencesProvider>
--        </TooltipProvider>
-+        <QueryClientProvider client={queryClient}>
-+          <TooltipProvider>
-+            <PreferencesProvider>
-+              {children}
-+            </PreferencesProvider>
-+          </TooltipProvider>
-+        </QueryClientProvider>
-         <TanStackDevtools
-           config={{
-             position: 'bottom-right',
-diff --git a/src/routes/_app.dashboard.tsx b/src/routes/_app.dashboard.tsx
-index 8bafe05..6ee1ad6 100644
---- a/src/routes/_app.dashboard.tsx
-+++ b/src/routes/_app.dashboard.tsx
-@@ -1,22 +1,29 @@
- import { createFileRoute, Link } from '@tanstack/react-router'
- import { Printer } from 'lucide-react'
-+import { useQuery } from '@tanstack/react-query'
- import { StatusAlert } from '../components/dashboard/StatusAlert'
- import { SummaryStrip } from '../components/dashboard/SummaryStrip'
- import { HeroTaskList } from '../components/dashboard/HeroTaskList'
- import { Button } from '../components/ui/button'
-+import { fetchDashboardData } from '../lib/mockData'
- 
- export const Route = createFileRoute('/_app/dashboard')({
-   component: DashboardComponent,
- })
- 
- function DashboardComponent() {
-+  const { data, isLoading } = useQuery({
-+    queryKey: ['dashboardData'],
-+    queryFn: fetchDashboardData,
-+  })
-+
-   return (
-     <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full pb-8">
--      <StatusAlert />
-+      <StatusAlert count={data?.stats.attentionCount} isLoading={isLoading} />
-       
--      <SummaryStrip />
-+      <SummaryStrip stats={data?.stats} isLoading={isLoading} />
- 
--      <HeroTaskList />
-+      <HeroTaskList tasks={data?.tasks} isLoading={isLoading} />
- 
-       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
-         <Button size="lg" className="gap-2 w-full sm:w-auto">
+ export const useStore = create<AppState>()(
+@@ -18,9 +20,11 @@ export const useStore = create<AppState>()(
+       authRole: null,
+       theme: 'system',
+       viewMode: 'simple',
++      helpOpen: false,
+       setAuthRole: (role) => set({ authRole: role }),
+       setTheme: (theme) => set({ theme }),
+       setViewMode: (mode) => set({ viewMode: mode }),
++      setHelpOpen: (open) => set({ helpOpen: open }),
+     }),
+     {
+       name: 'app-storage',
