@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { PageContainer } from '../components/PageContainer'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Switch } from '../components/ui/switch'
@@ -61,7 +62,7 @@ function SettingsComponent() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full">
+    <PageContainer className="overflow-y-auto">
       {/* Account */}
       <SettingsCard title="Your account">
         <div className="flex items-center gap-3.5 py-4 border-t border-border first:border-t-0">
@@ -173,6 +174,6 @@ function SettingsComponent() {
 
         <SettingRow title="About" description="SchoolSync for tablets · Version 1.0" />
       </SettingsCard>
-    </div>
+    </PageContainer>
   )
 }

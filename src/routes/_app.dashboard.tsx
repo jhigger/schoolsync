@@ -7,6 +7,7 @@ import { HeroTaskList } from '../components/dashboard/HeroTaskList'
 import { ActivityFeed } from '../components/dashboard/ActivityFeed'
 import { Button, buttonVariants } from '../components/ui/button'
 import { Skeleton } from '../components/ui/skeleton'
+import { PageContainer } from '../components/PageContainer'
 import { fetchDashboardData } from '../lib/mockData'
 
 export const Route = createFileRoute('/_app/dashboard')({
@@ -21,7 +22,7 @@ function DashboardComponent() {
 
   if (isLoading || !data) {
     return (
-      <div className="flex-1 flex flex-col gap-6 p-4 sm:p-[18px_22px] max-w-full w-full">
+      <PageContainer className="gap-6">
         <Skeleton className="h-[48px] w-full rounded-lg" />
         <Skeleton className="h-[46px] w-full rounded-lg" />
         <div className="flex flex-col sm:flex-row gap-4 h-[350px]">
@@ -32,12 +33,12 @@ function DashboardComponent() {
           <Skeleton className="h-11 w-full sm:w-[200px] rounded-md" />
           <Skeleton className="h-11 w-full sm:w-[200px] rounded-md" />
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="flex-1 flex flex-col gap-6 p-4 sm:p-[18px_22px] max-w-full w-full">
+    <PageContainer className="gap-6 pb-8">
       <StatusAlert count={data.stats.attentionCount} />
       
       <SummaryStrip stats={data.stats} />
@@ -61,6 +62,6 @@ function DashboardComponent() {
           Printing makes a plain one-page summary of today.
         </span>
       </div>
-    </div>
+    </PageContainer>
   )
 }

@@ -11,6 +11,7 @@ import { fetchActivityLogData, type ActivityLogEvent } from '@/lib/mockData'
 import { useStore } from '@/store'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PageContainer } from '@/components/PageContainer'
 
 const CATEGORY_STYLES: Record<string, string> = {
   fix: 'bg-destructive',
@@ -171,7 +172,7 @@ export function ActivityComponent() {
   )
 
   return (
-    <div className="flex-1 flex flex-col gap-[12px] p-4 sm:p-[18px_22px] max-w-full w-full">
+    <PageContainer>
       {/* Controls */}
       <div className="flex flex-wrap gap-[10px] items-center shrink-0">
         <div className="flex-1 flex items-center gap-[8px] h-[44px] bg-white dark:bg-card border border-border rounded-[10px] px-[12px] min-w-[200px]">
@@ -281,6 +282,6 @@ export function ActivityComponent() {
           </>
         )}
       </div>
-    </div>
+    </PageContainer>
   )
 }

@@ -4,6 +4,7 @@ import { fetchAlertsData, fetchRulesData } from '@/lib/mockData'
 import type { AlertItem, RuleItem } from '@/lib/mockData'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PageContainer } from '@/components/PageContainer'
 
 export const Route = createFileRoute('/_app/alerts')({
   component: AlertsRoute,
@@ -35,7 +36,7 @@ function AlertsRoute() {
   const toldRules = rules.filter(r => r.section === 'How I’m told')
 
   return (
-    <section className="flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full" data-view="alerts" id="view-alerts">
+    <PageContainer as="section" className="view active" data-view="alerts" id="view-alerts">
       <div className="tabs">
         <button 
           className={cn("tab", activeTab === 'review' && "active")} 
@@ -101,7 +102,7 @@ function AlertsRoute() {
           </div>
         )}
       </div>
-    </section>
+    </PageContainer>
   )
 }
 

@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PageContainer } from '@/components/PageContainer'
 
 const ICON_PC = (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -101,7 +102,7 @@ export function DevicesRoute() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col gap-3 p-4 sm:p-[18px_22px] max-w-full w-full animate-pulse">
+      <PageContainer className="animate-pulse">
         <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
@@ -116,12 +117,12 @@ export function DevicesRoute() {
           <Skeleton className="w-[288px] bg-muted border border-border rounded-lg overflow-y-auto shrink-0 p-2 max-[900px]:w-full max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:border-b max-[900px]:gap-2 max-[900px]:scrollbar-none" />
           <Skeleton className="flex-1 bg-muted border border-border rounded-lg flex flex-col min-w-0 overflow-hidden" />
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="flex-1 flex flex-col gap-3 p-4 sm:p-[18px_22px] max-w-full w-full">
+    <PageContainer>
       <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
         <div className="flex items-center gap-[9px] bg-card border border-border rounded-[10px] py-[10px] px-[14px]">
           <span className="text-[20px] font-extrabold tracking-tight">{totalDevices}</span>
@@ -270,6 +271,6 @@ export function DevicesRoute() {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   )
 }

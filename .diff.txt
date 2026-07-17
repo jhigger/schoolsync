@@ -1,86 +1,96 @@
-diff --git a/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md b/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md
-index 83e4f35..7d795d2 100644
---- a/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md
-+++ b/.scratch/ui-1to1-match/issues/10-app-shell-header-help.md
-@@ -1,7 +1,7 @@
- # 10 — App Shell Header Help Button
+diff --git a/src/components/ActivityRoute.tsx b/src/components/ActivityRoute.tsx
+index 7f21d71..cf469b6 100644
+--- a/src/components/ActivityRoute.tsx
++++ b/src/components/ActivityRoute.tsx
+@@ -171,7 +171,7 @@ export function ActivityComponent() {
+   )
  
- **What to build:** Add the missing global help button to the application header.
--**Status:** ready-for-agent
-+**Status:** ready-for-human
+   return (
+-    <div className="flex flex-col gap-[12px] h-full w-full">
++    <div className="flex-1 flex flex-col gap-[12px] p-4 sm:p-[18px_22px] max-w-full w-full">
+       {/* Controls */}
+       <div className="flex flex-wrap gap-[10px] items-center shrink-0">
+         <div className="flex-1 flex items-center gap-[8px] h-[44px] bg-white dark:bg-card border border-border rounded-[10px] px-[12px] min-w-[200px]">
+diff --git a/src/components/DevicesRoute.tsx b/src/components/DevicesRoute.tsx
+index 39ac153..28060c5 100644
+--- a/src/components/DevicesRoute.tsx
++++ b/src/components/DevicesRoute.tsx
+@@ -101,7 +101,7 @@ export function DevicesRoute() {
  
--- [ ] Locate the main header in the App Shell.
--- [ ] Add the global help button to match the original HTML spec.
-+- [x] Locate the main header in the App Shell.
-+- [x] Add the global help button to match the original HTML spec.
-diff --git a/src/components/Topbar.tsx b/src/components/Topbar.tsx
-index b577492..6fe9ea0 100644
---- a/src/components/Topbar.tsx
-+++ b/src/components/Topbar.tsx
-@@ -1,9 +1,10 @@
- import { useStore } from '../store'
--import { LogOut, Sun, Moon } from 'lucide-react'
-+import { LogOut, Sun, Moon, CircleHelp } from 'lucide-react'
- import { useRouterState, useNavigate } from '@tanstack/react-router'
- import { SidebarTrigger } from './ui/sidebar'
- import { Switch } from './ui/switch'
- import { Label } from './ui/label'
-+import { Button } from './ui/button'
- import { useThemeSync } from '../hooks/use-theme-sync'
+   if (isLoading) {
+     return (
+-      <div className="flex flex-col gap-3 h-full p-4 md:p-6 lg:p-8 animate-pulse">
++      <div className="flex-1 flex flex-col gap-3 p-4 sm:p-[18px_22px] max-w-full w-full animate-pulse">
+         <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
+           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
+           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
+@@ -121,7 +121,7 @@ export function DevicesRoute() {
+   }
  
- const ROUTE_TITLES: Record<string, string> = {
-@@ -21,6 +22,8 @@ export default function Topbar() {
-   const setTheme = useStore((state) => state.setTheme)
-   const viewMode = useStore((state) => state.viewMode)
-   const setViewMode = useStore((state) => state.setViewMode)
-+  const helpOpen = useStore((state) => state.helpOpen)
-+  const setHelpOpen = useStore((state) => state.setHelpOpen)
+   return (
+-    <div className="flex flex-col gap-3 h-full p-4 md:p-6 lg:p-8">
++    <div className="flex-1 flex flex-col gap-3 p-4 sm:p-[18px_22px] max-w-full w-full">
+       <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
+         <div className="flex items-center gap-[9px] bg-card border border-border rounded-[10px] py-[10px] px-[14px]">
+           <span className="text-[20px] font-extrabold tracking-tight">{totalDevices}</span>
+diff --git a/src/routes/_app.alerts.tsx b/src/routes/_app.alerts.tsx
+index 5ff1a7a..bebbec6 100644
+--- a/src/routes/_app.alerts.tsx
++++ b/src/routes/_app.alerts.tsx
+@@ -35,7 +35,7 @@ function AlertsRoute() {
+   const toldRules = rules.filter(r => r.section === 'How I’m told')
+ 
+   return (
+-    <section className="view active" data-view="alerts" id="view-alerts">
++    <section className="flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full" data-view="alerts" id="view-alerts">
+       <div className="tabs">
+         <button 
+           className={cn("tab", activeTab === 'review' && "active")} 
+diff --git a/src/routes/_app.dashboard.tsx b/src/routes/_app.dashboard.tsx
+index b330a84..ff20a2a 100644
+--- a/src/routes/_app.dashboard.tsx
++++ b/src/routes/_app.dashboard.tsx
+@@ -21,7 +21,7 @@ function DashboardComponent() {
+ 
+   if (isLoading || !data) {
+     return (
+-      <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-8">
++      <div className="flex-1 flex flex-col gap-6 p-4 sm:p-[18px_22px] max-w-full w-full">
+         <Skeleton className="h-[48px] w-full rounded-lg" />
+         <Skeleton className="h-[46px] w-full rounded-lg" />
+         <div className="flex flex-col sm:flex-row gap-4 h-[350px]">
+@@ -37,7 +37,7 @@ function DashboardComponent() {
+   }
+ 
+   return (
+-    <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-8">
++    <div className="flex-1 flex flex-col gap-6 p-4 sm:p-[18px_22px] max-w-full w-full">
+       <StatusAlert count={data.stats.attentionCount} />
+       
+       <SummaryStrip stats={data.stats} />
+diff --git a/src/routes/_app.settings.tsx b/src/routes/_app.settings.tsx
+index b308bc4..05ebf35 100644
+--- a/src/routes/_app.settings.tsx
++++ b/src/routes/_app.settings.tsx
+@@ -61,7 +61,7 @@ function SettingsComponent() {
    const navigate = useNavigate()
-   const router = useRouterState()
  
-@@ -66,6 +69,17 @@ export default function Topbar() {
-           </Label>
-         </div>
- 
-+        <Button 
-+          variant={helpOpen ? 'default' : 'outline'} 
-+          size="sm" 
-+          className="hidden md:flex gap-2"
-+          onClick={() => setHelpOpen(!helpOpen)}
-+          aria-label="Help"
-+        >
-+          <CircleHelp className="w-4 h-4" />
-+          Help
-+        </Button>
-+
-         <button
-           onClick={toggleTheme}
-           className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-accent-foreground"
-diff --git a/src/store/index.ts b/src/store/index.ts
-index a6069c2..70453d4 100644
---- a/src/store/index.ts
-+++ b/src/store/index.ts
-@@ -7,9 +7,11 @@ interface AppState {
-   authRole: AuthRole;
-   theme: 'light' | 'dark' | 'system';
-   viewMode: string;
-+  helpOpen: boolean;
-   setAuthRole: (role: AuthRole) => void;
-   setTheme: (theme: 'light' | 'dark' | 'system') => void;
-   setViewMode: (mode: string) => void;
-+  setHelpOpen: (open: boolean) => void;
- }
- 
- export const useStore = create<AppState>()(
-@@ -18,9 +20,11 @@ export const useStore = create<AppState>()(
-       authRole: null,
-       theme: 'system',
-       viewMode: 'simple',
-+      helpOpen: false,
-       setAuthRole: (role) => set({ authRole: role }),
-       setTheme: (theme) => set({ theme }),
-       setViewMode: (mode) => set({ viewMode: mode }),
-+      setHelpOpen: (open) => set({ helpOpen: open }),
-     }),
-     {
-       name: 'app-storage',
+   return (
+-    <div className="flex flex-col overflow-y-auto p-4 sm:p-[18px_22px] gap-4">
++    <div className="flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full">
+       {/* Account */}
+       <SettingsCard title="Your account">
+         <div className="flex items-center gap-3.5 py-4 border-t border-border first:border-t-0">
+diff --git a/src/routes/_app.tsx b/src/routes/_app.tsx
+index c313847..c2eeb35 100644
+--- a/src/routes/_app.tsx
++++ b/src/routes/_app.tsx
+@@ -20,7 +20,7 @@ function AppLayout() {
+         <Sidebar />
+         <SidebarInset className="flex-1 flex flex-col min-w-0 overflow-hidden">
+           <Topbar />
+-          <main className="flex-1 overflow-y-auto p-4 md:p-6">
++          <main className="flex-1 overflow-y-auto flex flex-col">
+             <Outlet />
+           </main>
+         </SidebarInset>
