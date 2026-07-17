@@ -62,14 +62,14 @@ export default function Sidebar() {
                   render={
                     <Link
                       to={item.to}
-                      className="[&.active]:bg-primary [&.active]:text-primary-foreground flex justify-between w-full"
+                      className="group [&.active]:bg-primary [&.active]:text-primary-foreground flex justify-between w-full"
                     >
                       <div className="flex items-center gap-2">
                         <Icon />
                         <span>{item.label}</span>
                       </div>
                       {item.to === '/alerts' && alertsCount !== null && alertsCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px]">
+                        <Badge variant="destructive" className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] group-[.active]:bg-red-400 group-[.active]:text-white dark:group-[.active]:bg-red-500">
                           {alertsCount}
                         </Badge>
                       )}
