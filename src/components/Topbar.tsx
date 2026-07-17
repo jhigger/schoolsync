@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useStore } from '../store'
 import { LogOut, Sun, Moon, CircleHelp } from 'lucide-react'
 import { useRouterState, useNavigate } from '@tanstack/react-router'
@@ -22,8 +23,7 @@ export default function Topbar() {
   const setTheme = useStore((state) => state.setTheme)
   const viewMode = useStore((state) => state.viewMode)
   const setViewMode = useStore((state) => state.setViewMode)
-  const helpOpen = useStore((state) => state.helpOpen)
-  const setHelpOpen = useStore((state) => state.setHelpOpen)
+  const [helpOpen, setHelpOpen] = useState(false)
   const navigate = useNavigate()
   const router = useRouterState()
 

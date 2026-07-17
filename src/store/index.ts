@@ -7,11 +7,9 @@ interface AppState {
   authRole: AuthRole;
   theme: 'light' | 'dark' | 'system';
   viewMode: string;
-  helpOpen: boolean;
   setAuthRole: (role: AuthRole) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setViewMode: (mode: string) => void;
-  setHelpOpen: (open: boolean) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -20,11 +18,9 @@ export const useStore = create<AppState>()(
       authRole: null,
       theme: 'system',
       viewMode: 'simple',
-      helpOpen: false,
       setAuthRole: (role) => set({ authRole: role }),
       setTheme: (theme) => set({ theme }),
       setViewMode: (mode) => set({ viewMode: mode }),
-      setHelpOpen: (open) => set({ helpOpen: open }),
     }),
     {
       name: 'app-storage',
