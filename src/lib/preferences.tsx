@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useEffect } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 
 export type Theme = 'light' | 'dark' | 'auto'
@@ -52,6 +52,14 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     }
     root.style.colorScheme = resolved
   }
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.remove('text-sm', 'text-base', 'text-lg')
+    if (textSize === 'Small') root.classList.add('text-sm')
+    if (textSize === 'Medium') root.classList.add('text-base')
+    if (textSize === 'Large') root.classList.add('text-lg')
+  }, [textSize])
 
   return (
     <PreferencesContext.Provider value={{ 

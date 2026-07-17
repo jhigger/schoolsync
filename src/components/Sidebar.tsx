@@ -22,23 +22,26 @@ const navItems = [
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
-const ROLE_PROFILES: Record<string, { name: string, title: string, initial: string }> = {
-  Admin: { name: 'Maria Reyes', title: 'Admin assistant', initial: 'M' },
-  Staff: { name: 'David Smith', title: 'Teacher', initial: 'D' },
-  Student: { name: 'Alex Johnson', title: 'Student', initial: 'A' },
+export const ROLE_PROFILES: Record<string, { name: string, title: string, email: string, initial: string }> = {
+  Admin: { name: 'Maria Reyes', title: 'Admin assistant', email: 'maria.reyes@school.edu', initial: 'M' },
+  Staff: { name: 'David Smith', title: 'Teacher', email: 'david.smith@school.edu', initial: 'D' },
+  Student: { name: 'Alex Johnson', title: 'Student', email: 'alex.johnson@school.edu', initial: 'A' },
 }
 
 export default function Sidebar() {
   const authRole = useStore((state) => state.authRole)
   const profile = authRole && ROLE_PROFILES[authRole] 
     ? ROLE_PROFILES[authRole] 
-    : { name: 'User', title: 'Guest', initial: 'U' }
+    : { name: 'User', title: 'Guest', email: '', initial: 'U' }
 
-  const [alertsCount, setAlertsCount] = useState<number | null>(null)
+  const alertsCount = useStore((state) => state.alertsCount)
+  const setAlertsCount = useStore((state) => state.setAlertsCount)
 
   useEffect(() => {
-    fetchAlertsData().then(data => setAlertsCount(data.length))
-  }, [])
+    if (alertsCount === null) {
+      fetchAlertsData().then(data => setAlertsCount(data.length))
+    }
+  }, [alertsCount, setAlertsCount])
 
   return (
     <ShadcnSidebar>
@@ -69,7 +72,7 @@ export default function Sidebar() {
                         <span>{item.label}</span>
                       </div>
                       {item.to === '/alerts' && alertsCount !== null && alertsCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] group-[.active]:bg-red-400 group-[.active]:text-white dark:group-[.active]:bg-red-500">
+                        <Badge variant="default" className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] bg-destructive/20 text-destructive dark:bg-destructive dark:text-white group-[.active]:bg-white group-[.active]:text-red-500 dark:group-[.active]:bg-white dark:group-[.active]:text-red-500">
                           {alertsCount}
                         </Badge>
                       )}

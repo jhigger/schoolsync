@@ -5,14 +5,18 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   useEffect(() => {
     const item = localStorage.getItem(key)
-    if (item) {
-      setStoredValue(item as unknown as T)
+    if (item !== null) {
+      try {
+        setStoredValue(JSON.parse(item))
+      } catch (e) {
+        setStoredValue(item as unknown as T)
+      }
     }
   }, [key])
 
   const setValue = (value: T) => {
     setStoredValue(value)
-    localStorage.setItem(key, String(value))
+    localStorage.setItem(key, JSON.stringify(value))
   }
 
   return [storedValue, setValue] as const

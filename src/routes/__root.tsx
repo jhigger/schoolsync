@@ -1,4 +1,4 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute, Link } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -31,6 +31,17 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  notFoundComponent: () => {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center space-y-4">
+        <h1 className="text-4xl font-bold">404 - Page Not Found</h1>
+        <p className="text-muted-foreground">The page you are looking for does not exist or has been moved.</p>
+        <Link to="/" className="text-primary hover:underline font-medium">
+          Go back home
+        </Link>
+      </div>
+    )
+  },
   shellComponent: RootDocument,
 })
 

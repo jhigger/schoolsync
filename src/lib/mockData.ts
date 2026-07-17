@@ -98,6 +98,15 @@ export async function fetchDashboardData(): Promise<DashboardData> {
   });
 }
 
+const today = new Date();
+const todayGroup = `Today · ${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`;
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+const yesterdayGroup = `Yesterday · ${yesterday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`;
+const twoDaysAgo = new Date();
+twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+const twoDaysAgoGroup = `${twoDaysAgo.toLocaleDateString('en-US', { weekday: 'long' })} · ${twoDaysAgo.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+
 export const mockActivityLogData: ActivityLogEvent[] = [
   // Today
   {
@@ -108,7 +117,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     time: '11:42 AM',
     severity: 'High',
     techDetails: 'printer.spooler · code 0x709 · host=OFFICE-PRN1',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-2',
@@ -118,7 +127,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     time: '11:20 AM',
     severity: 'Medium',
     techDetails: 'perf.slow · cpu=98% · host=LAB3-PC04',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-3',
@@ -127,7 +136,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'Office',
     time: '10:55 AM',
     severity: 'Info',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-4',
@@ -137,7 +146,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     time: '10:15 AM',
     severity: 'Medium',
     techDetails: 'auth.fail · attempts=4 · host=LAB2-PC07',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-5',
@@ -147,7 +156,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     time: '9:38 AM',
     severity: 'Medium',
     techDetails: 'policy.block · app=cmd.exe · host=LAB1-PC12',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-6',
@@ -156,7 +165,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'System',
     time: '9:00 AM',
     severity: 'Info',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-7',
@@ -165,7 +174,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'Office',
     time: '8:05 AM',
     severity: 'Info',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   {
     id: 'al-8',
@@ -174,7 +183,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'All rooms',
     time: '7:30 AM',
     severity: 'Info',
-    dayGroup: 'Today · Wednesday, June 10',
+    dayGroup: todayGroup,
   },
   // Yesterday
   {
@@ -184,7 +193,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'System',
     time: '6:00 PM',
     severity: 'Info',
-    dayGroup: 'Yesterday · Tuesday, June 9',
+    dayGroup: yesterdayGroup,
   },
   {
     id: 'al-10',
@@ -194,7 +203,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     time: '2:12 PM',
     severity: 'High',
     techDetails: 'hw.thermal · temp=92C · host=LIB-PC03',
-    dayGroup: 'Yesterday · Tuesday, June 9',
+    dayGroup: yesterdayGroup,
   },
   {
     id: 'al-11',
@@ -203,7 +212,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'All rooms',
     time: '7:00 AM',
     severity: 'Info',
-    dayGroup: 'Yesterday · Tuesday, June 9',
+    dayGroup: yesterdayGroup,
   },
   // Monday
   {
@@ -214,7 +223,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     time: '3:24 PM',
     severity: 'Medium',
     techDetails: 'auth.fail · attempts=3 · host=OFFICE-PC10',
-    dayGroup: 'Monday · June 8',
+    dayGroup: twoDaysAgoGroup,
   },
   {
     id: 'al-13',
@@ -223,7 +232,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'Office',
     time: '1:10 PM',
     severity: 'Info',
-    dayGroup: 'Monday · June 8',
+    dayGroup: twoDaysAgoGroup,
   },
   {
     id: 'al-14',
@@ -232,7 +241,7 @@ export const mockActivityLogData: ActivityLogEvent[] = [
     locationChip: 'All rooms',
     time: '7:30 AM',
     severity: 'Info',
-    dayGroup: 'Monday · June 8',
+    dayGroup: twoDaysAgoGroup,
   },
 ];
 
@@ -242,6 +251,14 @@ export async function fetchActivityLogData(): Promise<ActivityLogEvent[]> {
     setTimeout(() => {
       resolve(mockActivityLogData);
     }, 1000);
+  });
+}
+
+export function addActivityLogEvent(event: Omit<ActivityLogEvent, 'id' | 'dayGroup'>) {
+  mockActivityLogData.unshift({
+    ...event,
+    id: `al-new-${Date.now()}`,
+    dayGroup: `Today · ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`
   });
 }
 

@@ -44,7 +44,7 @@ export default function Topbar() {
   const title = ROUTE_TITLES[path] || 'App'
 
   return (
-    <header className="h-14 md:h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-30">
+    <header className="h-14 md:h-16 bg-card dark:bg-sidebar border-b border-border flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-30">
       <div className="flex items-center gap-4">
         <SidebarTrigger className="-ml-2" />
         <h1 className="text-lg md:text-xl font-bold">{title}</h1>
@@ -62,7 +62,7 @@ export default function Topbar() {
             checked={viewMode === 'detailed'}
             onCheckedChange={(checked) => setViewMode(checked ? 'detailed' : 'simple')}
           />
-          <Label htmlFor="view-mode" className="text-sm font-medium cursor-pointer">
+          <Label htmlFor="view-mode" className="text-sm font-medium cursor-pointer w-[60px] inline-block text-center">
             {viewMode === 'detailed' ? 'Detailed' : 'Simple'}
           </Label>
         </div>
@@ -72,6 +72,7 @@ export default function Topbar() {
           variant="outline" 
           size="lg" 
           aria-label="Help"
+          onClick={() => alert("Opening help guide...")}
         >
           <CircleHelp className="w-4 h-4" />
         </Button>

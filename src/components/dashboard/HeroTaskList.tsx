@@ -1,8 +1,10 @@
-import { CheckSquare } from 'lucide-react'
+import { CheckSquare, Check } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 import { Badge } from '../ui/badge'
-import type { DashboardTask } from '../../lib/mockData'
+import { type DashboardTask } from '../../lib/mockData'
+import { useStore } from '../../store'
 
 type TaskItemProps = {
   task: DashboardTask
@@ -19,8 +21,27 @@ const severityConfig = {
   },
 }
 
+import { useNavigate } from '@tanstack/react-router'
+
+import { useITNotification } from '../../lib/useITNotification'
+
 function TaskItem({ task }: TaskItemProps) {
   const config = severityConfig[task.severity]
+  const navigate = useNavigate()
+  const handledTasks = useStore(state => state.sessionActivity.handledTasks)
+  const { notifyIT, undoNotifyIT } = useITNotification()
+
+  const notified = handledTasks.includes(task.id)
+
+  const handleAction = () => {
+    if (task.actionLabel === 'Check now') {
+      navigate({ to: '/devices', search: { filter: 'problems' } })
+    } else if (task.actionLabel === 'Ask IT for help') {
+      notifyIT(null, task.id, `IT was notified about: ${task.title}`, 'Dashboard')
+    } else {
+      alert(`${task.actionLabel} clicked`)
+    }
+  }
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-border rounded-md p-3 sm:p-4 bg-background transition-colors hover:bg-muted/50">
@@ -38,9 +59,20 @@ function TaskItem({ task }: TaskItemProps) {
         </div>
       </div>
       
-      <Button variant={config.buttonVariant} className="w-full sm:w-auto">
-        {task.actionLabel}
-      </Button>
+      {task.actionLabel === 'Ask IT for help' && notified ? (
+        <div className="flex items-center gap-3 w-full sm:w-auto h-[36px]">
+          <div className="flex items-center text-[13.5px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <Check className="w-4 h-4 mr-1" /> IT notified
+          </div>
+          <button onClick={() => {
+            undoNotifyIT(null, task.id)
+          }} className="text-[13.5px] font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2">Undo</button>
+        </div>
+      ) : (
+        <Button variant={config.buttonVariant} className="w-full sm:w-auto" onClick={handleAction}>
+          {task.actionLabel}
+        </Button>
+      )}
     </div>
   )
 }

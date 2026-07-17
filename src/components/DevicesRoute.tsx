@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PageContainer } from '@/components/PageContainer'
+import { useStore } from '@/store'
+
+import { useQueryClient } from '@tanstack/react-query'
 
 const ICON_PC = (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -42,16 +45,25 @@ function getBadgeForStatus(status: string, issueCount: number = 0) {
   return <Badge variant="success">✓ OK</Badge>
 }
 
+import { getRouteApi } from '@tanstack/react-router'
+import { useITNotification } from '../lib/useITNotification'
+
+const routeApi = getRouteApi('/_app/devices')
+
 export function DevicesRoute() {
+  const queryClient = useQueryClient()
   const { data: rooms = [], isLoading } = useQuery({
     queryKey: ['rooms'],
     queryFn: fetchRoomsData
   })
 
-  const [activeFilter, setActiveFilter] = useState<'all' | 'problems'>('all')
+  const searchParams = routeApi.useSearch()
+  const [activeFilter, setActiveFilter] = useState<'all' | 'problems'>(searchParams.filter as 'all' | 'problems' || 'all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [shownReports, setShownReports] = useState<Record<string, boolean>>({})
+  const notifiedDevices = useStore(state => state.sessionActivity.notifiedDevices)
+  const { notifyIT, undoNotifyIT } = useITNotification()
 
   useEffect(() => {
     if (rooms.length > 0 && selectedId === null) {
@@ -247,7 +259,21 @@ export function DevicesRoute() {
                         {device.status === 'down' ? <Badge variant="destructive">✗ Broken</Badge> : device.status === 'warn' ? <Badge variant="warning">! Not responding</Badge> : <Badge variant="success">✓ Working</Badge>}
                         
                         {device.status === 'down' ? (
-                          <Button size="sm" className="h-[38px] px-[14px]">Ask IT for help</Button>
+                          notifiedDevices.includes(device.name) ? (
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center text-[13.5px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 
+                                IT notified
+                              </div>
+                              <button onClick={() => {
+                                undoNotifyIT(device.name, null);
+                              }} className="text-[13.5px] font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2">Undo</button>
+                            </div>
+                          ) : (
+                            <Button size="sm" className="h-[38px] px-[14px]" onClick={() => {
+                              notifyIT(device.name, null, `IT was notified about issue on ${device.name}`, selectedRoom.name)
+                            }}>Ask IT for help</Button>
+                          )
                         ) : device.status === 'warn' ? (
                           <Button size="sm" variant="outline" className="h-[38px] px-[14px]" onClick={() => setShownReports(prev => ({ ...prev, [device.name]: !prev[device.name] }))}>
                             {shownReports[device.name] ? 'Hide report' : 'Show report'}
