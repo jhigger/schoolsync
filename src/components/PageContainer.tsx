@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { ReactNode, HTMLAttributes } from 'react'
+import type { ReactNode, HTMLAttributes } from 'react'
 
 interface PageContainerProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode

@@ -1,6 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { LayoutDashboard, Activity, MonitorSmartphone, Bell, Settings } from 'lucide-react'
 import { useStore } from '../store'
+import { useEffect, useState } from 'react'
+import { fetchAlertsData } from '../lib/mockData'
+import { Badge } from './ui/badge'
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -31,6 +34,12 @@ export default function Sidebar() {
     ? ROLE_PROFILES[authRole] 
     : { name: 'User', title: 'Guest', initial: 'U' }
 
+  const [alertsCount, setAlertsCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetchAlertsData().then(data => setAlertsCount(data.length))
+  }, [])
+
   return (
     <ShadcnSidebar>
       <SidebarHeader className="border-b border-border px-4 py-3 h-14 md:h-16 flex items-center justify-center md:justify-start">
@@ -53,10 +62,17 @@ export default function Sidebar() {
                   render={
                     <Link
                       to={item.to}
-                      className="[&.active]:bg-primary [&.active]:text-primary-foreground"
+                      className="[&.active]:bg-primary [&.active]:text-primary-foreground flex justify-between w-full"
                     >
-                      <Icon />
-                      <span>{item.label}</span>
+                      <div className="flex items-center gap-2">
+                        <Icon />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.to === '/alerts' && alertsCount !== null && alertsCount > 0 && (
+                        <Badge variant="destructive" className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px]">
+                          {alertsCount}
+                        </Badge>
+                      )}
                     </Link>
                   }
                 />
