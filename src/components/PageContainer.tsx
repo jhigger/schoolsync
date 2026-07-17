@@ -8,7 +8,7 @@ interface PageContainerProps extends HTMLAttributes<HTMLElement> {
 
 export function PageContainer({ children, className, as: Component = "div", ...props }: PageContainerProps) {
   return (
-    <Component className={cn("flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full", className)} {...props}>
+    <Component className={cn("flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full h-full min-h-full", className)} {...props}>
       {children}
     </Component>
   )
