@@ -2,3 +2,9 @@ node_modules/
 dist/
 .env
 .DS_Store
+.tanstack/
+.scratch_diff.txt
+log.txt
+*.log
+wip-diff.txt
+.scratch/wip-diff.txt
