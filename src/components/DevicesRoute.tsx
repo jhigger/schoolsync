@@ -101,7 +101,7 @@ export function DevicesRoute() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-3 h-full p-4 md:p-6 lg:p-8 animate-pulse">
+      <div className="flex-1 flex flex-col gap-3 p-4 sm:p-[18px_22px] max-w-full w-full animate-pulse">
         <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
           <Skeleton className="h-[74px] w-[140px] rounded-[10px]" />
@@ -121,7 +121,7 @@ export function DevicesRoute() {
   }
 
   return (
-    <div className="flex flex-col gap-3 h-full p-4 md:p-6 lg:p-8">
+    <div className="flex-1 flex flex-col gap-3 p-4 sm:p-[18px_22px] max-w-full w-full">
       <div className="flex gap-[10px] shrink-0 max-[900px]:flex-col">
         <div className="flex items-center gap-[9px] bg-card border border-border rounded-[10px] py-[10px] px-[14px]">
           <span className="text-[20px] font-extrabold tracking-tight">{totalDevices}</span>

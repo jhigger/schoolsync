@@ -21,7 +21,7 @@ function DashboardComponent() {
 
   if (isLoading || !data) {
     return (
-      <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-8">
+      <div className="flex-1 flex flex-col gap-6 p-4 sm:p-[18px_22px] max-w-full w-full">
         <Skeleton className="h-[48px] w-full rounded-lg" />
         <Skeleton className="h-[46px] w-full rounded-lg" />
         <div className="flex flex-col sm:flex-row gap-4 h-[350px]">
@@ -37,7 +37,7 @@ function DashboardComponent() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-8">
+    <div className="flex-1 flex flex-col gap-6 p-4 sm:p-[18px_22px] max-w-full w-full">
       <StatusAlert count={data.stats.attentionCount} />
       
       <SummaryStrip stats={data.stats} />

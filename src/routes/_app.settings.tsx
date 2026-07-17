@@ -61,7 +61,7 @@ function SettingsComponent() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col overflow-y-auto p-4 sm:p-[18px_22px] gap-4">
+    <div className="flex-1 flex flex-col gap-4 p-4 sm:p-[18px_22px] max-w-full w-full">
       {/* Account */}
       <SettingsCard title="Your account">
         <div className="flex items-center gap-3.5 py-4 border-t border-border first:border-t-0">
