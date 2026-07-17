@@ -70,13 +70,14 @@ export default function Topbar() {
         </div>
 
         <Button 
+          id="helpBtn"
           variant={helpOpen ? 'default' : 'outline'} 
-          size="sm" 
-          className="hidden md:flex gap-2"
+          size="lg" 
+          className="flex gap-2"
           onClick={() => setHelpOpen(!helpOpen)}
           aria-label="Help"
         >
-          <CircleHelp className="w-4 h-4" />
+          <CircleHelp className="w-[17px] h-[17px]" />
           Help
         </Button>
 
