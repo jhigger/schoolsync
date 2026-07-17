@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { PageContainer } from '@/components/PageContainer'
 import { useStore } from '@/store'
 
-import { useQueryClient } from '@tanstack/react-query'
 
 const ICON_PC = (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -45,13 +44,15 @@ function getBadgeForStatus(status: string, issueCount: number = 0) {
   return <Badge variant="success">✓ OK</Badge>
 }
 
+const getFilterBtnClass = (isActive: boolean) => 
+  `flex-1 h-[42px] px-2 sm:px-4 rounded-full border border-border text-[14px] font-semibold whitespace-nowrap transition-colors duration-200 cursor-pointer ${isActive ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`
+
 import { getRouteApi } from '@tanstack/react-router'
 import { useITNotification } from '../lib/useITNotification'
 
 const routeApi = getRouteApi('/_app/devices')
 
 export function DevicesRoute() {
-  const queryClient = useQueryClient()
   const { data: rooms = [], isLoading } = useQuery({
     queryKey: ['rooms'],
     queryFn: fetchRoomsData
@@ -155,26 +156,26 @@ export function DevicesRoute() {
         </Button>
       </div>
 
-      <div className="flex gap-[10px] items-center shrink-0">
+      <div className="flex flex-col sm:flex-row gap-[10px] items-stretch sm:items-center shrink-0">
         <div className="flex-1 flex items-center gap-2 h-[42px] bg-card border border-border rounded-[10px] px-3">
           <svg className="text-muted-foreground" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input 
             type="text" 
             className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
-            placeholder="Search a room or device… (example: Lab 1, printer, PC 12)"
+            placeholder="Search a room or device…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
         <div className="flex gap-2">
           <button 
-            className={`h-[42px] px-4 rounded-full border border-border text-[14px] font-semibold transition-colors duration-200 cursor-pointer ${activeFilter === 'all' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
+            className={getFilterBtnClass(activeFilter === 'all')} 
             onClick={() => setActiveFilter('all')}
           >
             All rooms
           </button>
           <button 
-            className={`h-[42px] px-4 rounded-full border border-border text-[14px] font-semibold transition-colors duration-200 cursor-pointer ${activeFilter === 'problems' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
+            className={getFilterBtnClass(activeFilter === 'problems')} 
             onClick={() => setActiveFilter('problems')}
           >
             Has problems

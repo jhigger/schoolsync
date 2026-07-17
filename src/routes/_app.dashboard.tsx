@@ -24,7 +24,7 @@ function DashboardComponent() {
       <PageContainer className="gap-6">
         <Skeleton className="h-[48px] w-full rounded-lg" />
         <Skeleton className="h-[46px] w-full rounded-lg" />
-        <div className="flex flex-col sm:flex-row gap-4 flex-1 min-h-[500px]">
+        <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-[500px]">
           <Skeleton className="flex-1 h-full rounded-lg" />
           <Skeleton className="flex-1 h-full rounded-lg" />
         </div>
@@ -38,7 +38,7 @@ function DashboardComponent() {
       
       <SummaryStrip stats={data.stats} />
 
-      <div className="flex flex-col sm:flex-row gap-4 items-stretch flex-1 min-h-[500px]">
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch flex-1 min-h-[500px]">
         <HeroTaskList tasks={data.tasks} className="flex-1 h-full" />
         <div className="flex-1 h-full">
           <ActivityFeed feed={data.feed} />

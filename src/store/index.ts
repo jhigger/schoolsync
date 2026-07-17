@@ -14,11 +14,14 @@ interface AppState {
     handledTasks: string[];
     notifiedDevices: string[];
   };
+  isHelpOpen: boolean;
   setAuthRole: (role: AuthRole) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setViewMode: (mode: string) => void;
-  setAlertsCount: (count: number) => void;
+  setAlertsCount: (count: number | null) => void;
   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
+  toggleHelp: () => void;
+  setHelpOpen: (isOpen: boolean) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -34,6 +37,7 @@ export const useStore = create<AppState>()(
         handledTasks: [],
         notifiedDevices: [],
       },
+      isHelpOpen: false,
       setAuthRole: (role) => set({ authRole: role }),
       setTheme: (theme) => set({ theme }),
       setViewMode: (mode) => set({ viewMode: mode }),
@@ -44,6 +48,8 @@ export const useStore = create<AppState>()(
           [key]: typeof updater === 'function' ? updater(state.sessionActivity[key]) : updater
         }
       })),
+      toggleHelp: () => set((state) => ({ isHelpOpen: !state.isHelpOpen })),
+      setHelpOpen: (isOpen) => set({ isHelpOpen: isOpen }),
     }),
     {
       name: 'app-storage',
@@ -51,7 +57,7 @@ export const useStore = create<AppState>()(
         authRole: state.authRole,
         theme: state.theme,
         viewMode: state.viewMode,
-        alertsCount: state.alertsCount
+        isHelpOpen: state.isHelpOpen
       }),
     }
   )

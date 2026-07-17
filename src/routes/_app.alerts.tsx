@@ -66,6 +66,7 @@ function AlertsRoute() {
   }, [reviewCount, loading, setAlertsCount])
 
   const displayCount = loading ? globalAlertsCount : reviewCount
+  const needsReviewAlerts = alerts.filter(a => !dismissedAlertIds.includes(a.id) && (!reviewedAlertIds.includes(a.id) || sessionReviewed.current.has(a.id)))
 
   return (
     <PageContainer as="section" className="flex flex-col flex-1 overflow-hidden p-4 md:p-6 gap-4">
@@ -115,16 +116,14 @@ function AlertsRoute() {
                 <Skeleton key={i} className="h-[140px] w-full rounded-xl" />
               ))}
             </div>
-          ) : alerts.length > 0 ? (
+          ) : needsReviewAlerts.length > 0 ? (
             <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 overflow-x-hidden">
-              {alerts.filter(a => !dismissedAlertIds.includes(a.id) && (!reviewedAlertIds.includes(a.id) || sessionReviewed.current.has(a.id))).map(alert => {
-                const isReviewed = reviewedAlertIds.includes(alert.id)
+              {needsReviewAlerts.map(alert => {
                 return (
                   <AlertCard 
                     key={alert.id} 
                     alert={alert} 
                     isDetailed={isDetailed} 
-                    isReviewed={isReviewed}
                     tab="review"
                     onReview={handleReview}
                     onUndo={handleUndo}
@@ -159,7 +158,6 @@ function AlertsRoute() {
                   key={alert.id} 
                   alert={alert} 
                   isDetailed={isDetailed} 
-                  isReviewed={true}
                   tab="reviewed"
                   onReview={handleReview}
                   onUndo={handleUndo}
@@ -249,7 +247,7 @@ type AlertCardProps = {
 
 
 
-function AlertCard({ alert, isDetailed, isReviewed, tab, onReview, onUndo, onDismiss }: AlertCardProps) {
+function AlertCard({ alert, isDetailed, tab, onReview, onUndo, onDismiss }: Omit<AlertCardProps, 'isReviewed'>) {
   const isHigh = alert.severity === 'high'
   const [isSlidingOut, setIsSlidingOut] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
@@ -392,7 +390,11 @@ function AlertCard({ alert, isDetailed, isReviewed, tab, onReview, onUndo, onDis
           </div>
           <button 
             onClick={handleUndoLocal}
-            className="relative flex items-center justify-center w-[34px] h-[34px] rounded-full bg-background border border-border shadow-sm hover:bg-muted-foreground/10 transition-colors group"
+            disabled={fullyDismissed}
+            className={cn(
+              "relative flex items-center justify-center w-[34px] h-[34px] rounded-full bg-background border border-border shadow-sm transition-colors group",
+              fullyDismissed ? "opacity-50 cursor-not-allowed" : "hover:bg-muted-foreground/10"
+            )}
             title="Undo"
           >
             <svg className="absolute inset-0 w-full h-full -rotate-90 text-foreground" viewBox="0 0 32 32">

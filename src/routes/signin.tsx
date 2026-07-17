@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
 import { useStore, getStoredAuthRole, type AuthRole } from '../store'
+import { APP_TITLE } from '@/lib/constants'
 import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
 import { Input } from '../components/ui/input'
@@ -33,7 +34,7 @@ function SignInComponent() {
               <path d="M6 12v5c3 3 9 3 12 0v-5"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">SchoolSync</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{APP_TITLE}</h1>
           <p className="text-sm text-muted-foreground mt-1">School Activity Logbook &middot; sign in to continue</p>
         </div>
         

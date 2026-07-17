@@ -6,12 +6,12 @@ The user has a monolithic, 94kb `index.html` prototype of "SchoolSync" which con
 
 ## Solution
 
-We will execute a 1:1 UI/UX match by translating the original custom CSS and HTML structure into idiomatic Tailwind CSS utility classes and Shadcn components. To support the interactive elements of the UI without a real backend, we will extract hardcoded data into strictly typed TypeScript mock data files and use TanStack Query with simulated async delays to fetch it. Global states—such as the active Mock Auth Role, Dark/Light Theme, and Simple/Detailed Mode—will be managed via a typesafe Zustand store. Tabular data will be rendered using TanStack Table, and the app shell will leverage Shadcn's new Sidebar component for robust, accessible navigation.
+We will execute a 1:1 UI/UX match by translating the original custom CSS and HTML structure into idiomatic Tailwind CSS utility classes and Shadcn components. To support the interactive elements of the UI without a real backend, we will extract hardcoded data into strictly typed TypeScript mock data files and use TanStack Query with simulated async delays to fetch it. Global states—such as the active Mock Auth Role, Dark/Light Theme, and Simple/Detailed Mode—will be managed via a typesafe Zustand store. Tabular data will be rendered using TanStack Table, and the app shell will leverage a custom `<aside>` sidebar to perfectly replicate the original navigation.
 
 ## User Stories
 
 1. As a user, I want the Sign-In page to display three buttons (Admin, Staff, Student) so that I can mock-authenticate into different roles.
-2. As a user, I want the App Shell to use a robust Sidebar for navigation so that I can easily move between the Dashboard, Activity Log, Rooms & Devices, Alerts, and Settings.
+2. As a user, I want the App Shell to use a custom Tailwind <aside> Sidebar for navigation that perfectly replicates the 1:1 look and feel of the original HTML, so that I can easily move between the Dashboard, Activity Log, Rooms & Devices, Alerts, and Settings.
 3. As a user, I want the App Shell sidebar to gracefully handle mobile layouts so that the app remains usable on smaller screens.
 4. As a user, I want to toggle a "Simple/Detailed" mode from the settings or header so that advanced technical data is hidden when I don't need it, exactly matching the original HTML behavior.
 5. As a user, I want to toggle between light and dark themes so that the app matches my system preference or environment.
@@ -29,7 +29,7 @@ We will execute a 1:1 UI/UX match by translating the original custom CSS and HTM
 - **Mock Data Layer**: Hardcoded HTML data will be extracted into a `lib/mockData.ts` (or similar) file. We will write mock API functions that return this data wrapped in a `setTimeout` to simulate network latency.
 - **Data Fetching**: We will use TanStack Query to call the mock API functions. This enforces proper loading/error state handling via Shadcn skeletons.
 - **Tables**: We will use TanStack Table for complex lists/tables (like the Activity Log).
-- **Layout**: We will use Shadcn's `Sidebar` component for the primary app shell navigation.
+- **Layout**: We will use a custom Tailwind `<aside>` layout for the primary app shell navigation to ensure a perfect 1:1 match with the original prototype (pivoting away from Shadcn's `Sidebar` component).
 
 ## Testing Decisions
 

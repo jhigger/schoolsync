@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { usePreferences, type Theme, type TextSize, type Language } from '../lib/preferences'
 import { useStore } from '../store'
+import { APP_TITLE } from '../lib/constants'
 import { ROLE_PROFILES } from '../components/Sidebar'
 export const Route = createFileRoute('/_app/settings')({
   component: SettingsComponent,
@@ -179,7 +180,7 @@ function SettingsComponent() {
           <Button variant="outline" size="sm" className="h-8">Contact</Button>
         </SettingRow>
 
-        <SettingRow title="About" description="SchoolSync for tablets · Version 1.0" />
+        <SettingRow title="About" description={`${APP_TITLE} for tablets · Version 1.0`} />
       </SettingsCard>
     </PageContainer>
   )

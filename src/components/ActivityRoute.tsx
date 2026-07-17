@@ -57,6 +57,8 @@ function useActivityLog(data: ActivityLogEvent[]) {
   }
 }
 
+const SELECT_CLASS = "flex-1 min-w-0 h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground"
+
 export function ActivityComponent() {
   const { data = [], isLoading } = useQuery({
     queryKey: ['activityLogData'],
@@ -179,7 +181,7 @@ export function ActivityComponent() {
           <Search className="w-[18px] h-[18px] text-muted-foreground" />
           <input
             type="text"
-            placeholder="Type to search… (example: Lab 1, printer, Maria)"
+            placeholder="Type to search…"
             className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -187,7 +189,7 @@ export function ActivityComponent() {
         </div>
         {isDetailed && (
           <>
-            <select className="h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
+            <select className={SELECT_CLASS}>
               <option value="">All rooms</option>
               <option>Lab 1</option>
               <option>Lab 2</option>
@@ -195,14 +197,14 @@ export function ActivityComponent() {
               <option>Office</option>
               <option>Library</option>
             </select>
-            <select className="h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
+            <select className={SELECT_CLASS}>
               <option>All types</option>
               <option>Device</option>
               <option>Login</option>
               <option>Program</option>
               <option>USB</option>
             </select>
-            <button className="inline-flex items-center justify-center gap-[8px] rounded-[calc(var(--radius)-2px)] text-[15px] font-semibold cursor-pointer transition-opacity hover:opacity-88 bg-background text-foreground border border-border shadow-[0_1px_2px_rgba(0,0,0,.04)] dark:bg-card h-[46px] px-[18px]">
+            <button className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-[8px] rounded-[calc(var(--radius)-2px)] text-[15px] font-semibold whitespace-nowrap cursor-pointer transition-opacity hover:opacity-88 bg-background text-foreground border border-border shadow-[0_1px_2px_rgba(0,0,0,.04)] dark:bg-card h-[46px] px-[18px]">
               <Download className="w-[16px] h-[16px]" />
               Export CSV
             </button>

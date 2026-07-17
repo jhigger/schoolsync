@@ -1,0 +1,548 @@
+diff --git a/index.html b/index.html
+index 8e1e5f0..74840c9 100644
+--- a/index.html
++++ b/index.html
+@@ -1,5 +1,5 @@
+ <!--
+-  SchoolSync — v1.0 (single-file app)
++  SchoolSync App — v1.0 (single-file app)
+   Audience: mostly non-IT school staff · 12.5" tablet, landscape.
+   One combined page: Sign-in + app shell with sidebar nav + Simple/Detailed
+   toggle, and five FULL screens wired to the nav:
+@@ -11,7 +11,7 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>SchoolSync</title>
++<title>SchoolSync App</title>
+ <style>
+   /* ============================================================
+      SHARED DESIGN SYSTEM (shadcn/ui zinc tokens) — used by all screens
+@@ -488,7 +488,7 @@
+     <div class="signin">
+       <div class="card signin-card">
+         <div class="logo-lg"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+-        <h1>SchoolSync</h1>
++        <h1>SchoolSync App</h1>
+         <p>School Activity Logbook · sign in to continue</p>
+         <div class="field"><label>Email</label><input type="email" value="assistant@school.edu"></div>
+         <div class="field"><label>Password</label><input type="password" value="••••••••"></div>
+@@ -504,7 +504,7 @@
+       <aside class="sidebar">
+         <div class="brand-row">
+           <div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+-          <div class="brand-name">SchoolSync</div>
++          <div class="brand-name">SchoolSync App</div>
+         </div>
+         <div class="nav-item active" data-nav="dashboard"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</div>
+         <div class="nav-item" data-nav="activity"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> Activity Log</div>
+@@ -922,7 +922,7 @@
+               <button class="btn btn-outline btn-sm">Contact</button>
+             </div>
+             <div class="row">
+-              <div class="r-body"><div class="r-title">About</div><div class="r-sub">SchoolSync for tablets · Version 1.0</div></div>
++              <div class="r-body"><div class="r-title">About</div><div class="r-sub">SchoolSync App for tablets · Version 1.0</div></div>
+             </div>
+           </div>
+         </section>
+@@ -954,7 +954,7 @@
+       activity: { title:"Help \u00b7 Activity Log", text:"A running list of everything that happened, newest first. Use the search box to find a room, person, or event, and the filter pills to show only what you care about. 'Load earlier' reveals older days." },
+       devices: { title:"Help \u00b7 Rooms & Devices", text:"Every room and its computers, printers, and other devices. Pick a room on the left to see its devices. 'Has problems' shows only rooms that need attention. On a flagged device, tap 'Show report' to read what happened, or 'Ask IT for help' if it's broken." },
+       alerts: { title:"Help \u00b7 Alerts", text:"Things worth knowing about \u2014 like repeated wrong passwords or a device going offline. Read each one and tap 'Mark as reviewed' once you've handled it. The 'What I get alerted about' tab lets you turn alert types on or off." },
+-      settings: { title:"Help \u00b7 Settings", text:"Manage your account and choose what SchoolSync alerts you about. Switch between Simple and Detailed anytime with the toggle in the corner. Use 'Change password' to update your sign-in, or 'Sign out' when you're done." }
++      settings: { title:"Help \u00b7 Settings", text:"Manage your account and choose what SchoolSync App alerts you about. Switch between Simple and Detailed anytime with the toggle in the corner. Use 'Change password' to update your sign-in, or 'Sign out' when you're done." }
+     };
+     const bar = document.getElementById('helpBar');
+     const titleEl = document.getElementById('helpTitle');
+diff --git a/src/components/ActivityRoute.tsx b/src/components/ActivityRoute.tsx
+index ad2787f..6e0ba74 100644
+--- a/src/components/ActivityRoute.tsx
++++ b/src/components/ActivityRoute.tsx
+@@ -179,7 +179,7 @@ export function ActivityComponent() {
+           <Search className="w-[18px] h-[18px] text-muted-foreground" />
+           <input
+             type="text"
+-            placeholder="Type to search… (example: Lab 1, printer, Maria)"
++            placeholder="Type to search…"
+             className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
+             value={search}
+             onChange={(e) => setSearch(e.target.value)}
+@@ -187,7 +187,7 @@ export function ActivityComponent() {
+         </div>
+         {isDetailed && (
+           <>
+-            <select className="h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
++            <select className="flex-1 min-w-0 h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
+               <option value="">All rooms</option>
+               <option>Lab 1</option>
+               <option>Lab 2</option>
+@@ -195,14 +195,14 @@ export function ActivityComponent() {
+               <option>Office</option>
+               <option>Library</option>
+             </select>
+-            <select className="h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
++            <select className="flex-1 min-w-0 h-[44px] border border-border rounded-[10px] px-[12px] text-[14px] bg-white dark:bg-card text-foreground">
+               <option>All types</option>
+               <option>Device</option>
+               <option>Login</option>
+               <option>Program</option>
+               <option>USB</option>
+             </select>
+-            <button className="inline-flex items-center justify-center gap-[8px] rounded-[calc(var(--radius)-2px)] text-[15px] font-semibold cursor-pointer transition-opacity hover:opacity-88 bg-background text-foreground border border-border shadow-[0_1px_2px_rgba(0,0,0,.04)] dark:bg-card h-[46px] px-[18px]">
++            <button className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-[8px] rounded-[calc(var(--radius)-2px)] text-[15px] font-semibold whitespace-nowrap cursor-pointer transition-opacity hover:opacity-88 bg-background text-foreground border border-border shadow-[0_1px_2px_rgba(0,0,0,.04)] dark:bg-card h-[46px] px-[18px]">
+               <Download className="w-[16px] h-[16px]" />
+               Export CSV
+             </button>
+diff --git a/src/components/DevicesRoute.tsx b/src/components/DevicesRoute.tsx
+index b8de37f..cdf95db 100644
+--- a/src/components/DevicesRoute.tsx
++++ b/src/components/DevicesRoute.tsx
+@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton'
+ import { PageContainer } from '@/components/PageContainer'
+ import { useStore } from '@/store'
+ 
+-import { useQueryClient } from '@tanstack/react-query'
+ 
+ const ICON_PC = (
+   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+@@ -51,7 +50,6 @@ import { useITNotification } from '../lib/useITNotification'
+ const routeApi = getRouteApi('/_app/devices')
+ 
+ export function DevicesRoute() {
+-  const queryClient = useQueryClient()
+   const { data: rooms = [], isLoading } = useQuery({
+     queryKey: ['rooms'],
+     queryFn: fetchRoomsData
+@@ -155,26 +153,26 @@ export function DevicesRoute() {
+         </Button>
+       </div>
+ 
+-      <div className="flex gap-[10px] items-center shrink-0">
++      <div className="flex flex-col sm:flex-row gap-[10px] items-stretch sm:items-center shrink-0">
+         <div className="flex-1 flex items-center gap-2 h-[42px] bg-card border border-border rounded-[10px] px-3">
+           <svg className="text-muted-foreground" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+           <input 
+             type="text" 
+             className="border-none outline-none flex-1 text-[15px] bg-transparent text-foreground placeholder:text-muted-foreground"
+-            placeholder="Search a room or device… (example: Lab 1, printer, PC 12)"
++            placeholder="Search a room or device…"
+             value={query}
+             onChange={(e) => setQuery(e.target.value)}
+           />
+         </div>
+         <div className="flex gap-2">
+           <button 
+-            className={`h-[42px] px-4 rounded-full border border-border text-[14px] font-semibold transition-colors duration-200 cursor-pointer ${activeFilter === 'all' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
++            className={`flex-1 h-[42px] px-2 sm:px-4 rounded-full border border-border text-[14px] font-semibold whitespace-nowrap transition-colors duration-200 cursor-pointer ${activeFilter === 'all' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
+             onClick={() => setActiveFilter('all')}
+           >
+             All rooms
+           </button>
+           <button 
+-            className={`h-[42px] px-4 rounded-full border border-border text-[14px] font-semibold transition-colors duration-200 cursor-pointer ${activeFilter === 'problems' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
++            className={`flex-1 h-[42px] px-2 sm:px-4 rounded-full border border-border text-[14px] font-semibold whitespace-nowrap transition-colors duration-200 cursor-pointer ${activeFilter === 'problems' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary' : 'bg-card text-muted-foreground hover:bg-muted'}`} 
+             onClick={() => setActiveFilter('problems')}
+           >
+             Has problems
+diff --git a/src/components/Sidebar.tsx b/src/components/Sidebar.tsx
+index 9b3680f..aa4fc9a 100644
+--- a/src/components/Sidebar.tsx
++++ b/src/components/Sidebar.tsx
+@@ -1,18 +1,8 @@
+ import { Link } from '@tanstack/react-router'
+ import { LayoutDashboard, Activity, MonitorSmartphone, Bell, Settings } from 'lucide-react'
+ import { useStore } from '../store'
+-import { useEffect, useState } from 'react'
++import { useEffect } from 'react'
+ import { fetchAlertsData } from '../lib/mockData'
+-import { Badge } from './ui/badge'
+-import {
+-  Sidebar as ShadcnSidebar,
+-  SidebarContent,
+-  SidebarFooter,
+-  SidebarHeader,
+-  SidebarMenu,
+-  SidebarMenuButton,
+-  SidebarMenuItem,
+-} from './ui/sidebar'
+ 
+ const navItems = [
+   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+@@ -44,58 +34,46 @@ export default function Sidebar() {
+   }, [alertsCount, setAlertsCount])
+ 
+   return (
+-    <ShadcnSidebar>
+-      <SidebarHeader className="border-b border-border px-4 py-3 h-14 md:h-16 flex items-center justify-center md:justify-start">
+-        <div className="flex items-center gap-2">
+-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
+-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+-          </div>
+-          <span className="font-bold text-lg truncate group-data-[collapsible=icon]:hidden">SchoolSync</span>
++    <aside className="w-full h-auto border-t md:border-t-0 md:border-r border-border flex flex-row md:flex-col p-1 md:p-4 pb-[max(8px,env(safe-area-inset-bottom))] md:pb-4 justify-around md:justify-start order-2 md:order-1 z-40 bg-white dark:bg-card md:bg-background md:dark:bg-background md:w-[212px] shrink-0">
++      <div className="hidden md:flex items-center gap-2 px-2 pb-4">
++        <div className="w-[34px] h-[34px] rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
++          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+         </div>
+-      </SidebarHeader>
++        <span className="font-bold text-base truncate">SchoolSync App</span>
++      </div>
++
++      <nav className="flex flex-row md:flex-col gap-1 w-full flex-1 md:flex-none justify-around md:justify-start">
++        {navItems.map((item) => {
++          const Icon = item.icon
++          return (
++            <Link
++              key={item.to}
++              to={item.to}
++              className="group flex flex-col md:flex-row items-center gap-1 md:gap-3 py-2 md:py-2.5 px-0 md:px-3 rounded-lg text-[11px] md:text-[14.5px] font-semibold text-muted-foreground hover:bg-muted [&.active]:text-primary-foreground [&.active]:bg-primary flex-1 md:flex-none justify-center md:justify-start relative text-center leading-tight"
++            >
++              <Icon className="w-5 h-5 mx-auto md:mx-0 shrink-0" />
++              <span>{item.label}</span>
++              {item.to === '/alerts' && alertsCount !== null && alertsCount > 0 && (
++                <span className="absolute top-1 md:top-auto md:relative right-[calc(50%-24px)] md:right-auto md:ml-auto flex items-center justify-center rounded-full bg-destructive/20 md:bg-destructive text-destructive md:text-white px-1.5 py-0.5 text-[10px] md:text-[11px] font-bold group-[.active]:bg-white group-[.active]:text-destructive">
++                  {alertsCount}
++                </span>
++              )}
++            </Link>
++          )
++        })}
++      </nav>
+ 
+-      <SidebarContent className="px-2 py-4">
+-        <SidebarMenu>
+-          {navItems.map((item) => {
+-            const Icon = item.icon
+-            return (
+-              <SidebarMenuItem key={item.to}>
+-                <SidebarMenuButton 
+-                  tooltip={item.label}
+-                  render={
+-                    <Link
+-                      to={item.to}
+-                      className="group [&.active]:bg-primary [&.active]:text-primary-foreground flex justify-between w-full"
+-                    >
+-                      <div className="flex items-center gap-2">
+-                        <Icon />
+-                        <span>{item.label}</span>
+-                      </div>
+-                      {item.to === '/alerts' && alertsCount !== null && alertsCount > 0 && (
+-                        <Badge variant="default" className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] bg-destructive/20 text-destructive dark:bg-destructive dark:text-white group-[.active]:bg-white group-[.active]:text-red-500 dark:group-[.active]:bg-white dark:group-[.active]:text-red-500">
+-                          {alertsCount}
+-                        </Badge>
+-                      )}
+-                    </Link>
+-                  }
+-                />
+-              </SidebarMenuItem>
+-            )
+-          })}
+-        </SidebarMenu>
+-      </SidebarContent>
+-      
+-      <SidebarFooter className="p-4 border-t border-border">
+-        <div className="flex items-center gap-3">
+-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-bold shrink-0">
++      <div className="hidden md:flex mt-auto pt-4">
++        <div className="flex items-center gap-3 p-2.5 border border-border rounded-[10px] w-full">
++          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
+             {profile.initial}
+           </div>
+-          <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
+-            <span className="text-sm font-semibold truncate">{profile.name}</span>
++          <div className="flex flex-col truncate">
++            <span className="text-[13.5px] font-semibold truncate">{profile.name}</span>
+             <span className="text-xs text-muted-foreground truncate">{profile.title}</span>
+           </div>
+         </div>
+-      </SidebarFooter>
+-    </ShadcnSidebar>
++      </div>
++    </aside>
+   )
+ }
+diff --git a/src/components/Topbar.tsx b/src/components/Topbar.tsx
+index b3c9fbb..c42ab57 100644
+--- a/src/components/Topbar.tsx
++++ b/src/components/Topbar.tsx
+@@ -1,7 +1,6 @@
+ import { useStore } from '../store'
+ import { LogOut, Sun, Moon, CircleHelp } from 'lucide-react'
+ import { useRouterState, useNavigate } from '@tanstack/react-router'
+-import { SidebarTrigger } from './ui/sidebar'
+ import { Switch } from './ui/switch'
+ import { Label } from './ui/label'
+ import { Button } from './ui/button'
+@@ -22,6 +21,8 @@ export default function Topbar() {
+   const setTheme = useStore((state) => state.setTheme)
+   const viewMode = useStore((state) => state.viewMode)
+   const setViewMode = useStore((state) => state.setViewMode)
++  const isHelpOpen = useStore((state) => state.isHelpOpen)
++  const toggleHelp = useStore((state) => state.toggleHelp)
+   const navigate = useNavigate()
+   const router = useRouterState()
+ 
+@@ -45,12 +46,11 @@ export default function Topbar() {
+ 
+   return (
+     <header className="h-14 md:h-16 bg-card dark:bg-sidebar border-b border-border flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-30">
+-      <div className="flex items-center gap-4">
+-        <SidebarTrigger className="-ml-2" />
+-        <h1 className="text-lg md:text-xl font-bold">{title}</h1>
++      <div className="flex items-center gap-4 min-w-0">
++        <h1 className="text-lg md:text-xl font-bold truncate">{title}</h1>
+       </div>
+       
+-      <div className="flex items-center gap-4">
++      <div className="flex items-center gap-2 md:gap-4 shrink-0">
+         <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground border border-border px-3 py-1.5 rounded-full mr-2">
+           <span className="w-2 h-2 rounded-full bg-green-500"></span>
+           Updated 2 min ago
+@@ -69,17 +69,19 @@ export default function Topbar() {
+ 
+         <Button 
+           id="helpBtn"
+-          variant="outline" 
++          variant={isHelpOpen ? 'default' : 'outline'}
+           size="lg" 
+           aria-label="Help"
+-          onClick={() => alert("Opening help guide...")}
++          onClick={toggleHelp}
++          className="gap-2"
+         >
+           <CircleHelp className="w-4 h-4" />
++          <span className="hidden sm:inline">Help</span>
+         </Button>
+ 
+         <button
+           onClick={toggleTheme}
+-          className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-accent-foreground"
++          className="hidden sm:flex p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-accent-foreground"
+           aria-label="Toggle theme"
+         >
+           <Moon className="w-5 h-5 hidden dark:block" />
+@@ -88,7 +90,7 @@ export default function Topbar() {
+         
+         <button 
+           onClick={signOut}
+-          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent"
++          className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent"
+         >
+           <LogOut className="w-4 h-4" />
+           <span className="hidden md:inline">Sign Out</span>
+diff --git a/src/components/dashboard/HeroTaskList.tsx b/src/components/dashboard/HeroTaskList.tsx
+index 8217b3d..89b0aea 100644
+--- a/src/components/dashboard/HeroTaskList.tsx
++++ b/src/components/dashboard/HeroTaskList.tsx
+@@ -1,5 +1,4 @@
+ import { CheckSquare, Check } from 'lucide-react'
+-import { useState } from 'react'
+ import { Button } from '../ui/button'
+ import { Card } from '../ui/card'
+ import { Badge } from '../ui/badge'
+diff --git a/src/routes/_app.alerts.tsx b/src/routes/_app.alerts.tsx
+index 4dd7c8c..3cb87d9 100644
+--- a/src/routes/_app.alerts.tsx
++++ b/src/routes/_app.alerts.tsx
+@@ -66,6 +66,7 @@ function AlertsRoute() {
+   }, [reviewCount, loading, setAlertsCount])
+ 
+   const displayCount = loading ? globalAlertsCount : reviewCount
++  const needsReviewAlerts = alerts.filter(a => !dismissedAlertIds.includes(a.id) && (!reviewedAlertIds.includes(a.id) || sessionReviewed.current.has(a.id)))
+ 
+   return (
+     <PageContainer as="section" className="flex flex-col flex-1 overflow-hidden p-4 md:p-6 gap-4">
+@@ -115,16 +116,14 @@ function AlertsRoute() {
+                 <Skeleton key={i} className="h-[140px] w-full rounded-xl" />
+               ))}
+             </div>
+-          ) : alerts.length > 0 ? (
++          ) : needsReviewAlerts.length > 0 ? (
+             <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 overflow-x-hidden">
+-              {alerts.filter(a => !dismissedAlertIds.includes(a.id) && (!reviewedAlertIds.includes(a.id) || sessionReviewed.current.has(a.id))).map(alert => {
+-                const isReviewed = reviewedAlertIds.includes(alert.id)
++              {needsReviewAlerts.map(alert => {
+                 return (
+                   <AlertCard 
+                     key={alert.id} 
+                     alert={alert} 
+                     isDetailed={isDetailed} 
+-                    isReviewed={isReviewed}
+                     tab="review"
+                     onReview={handleReview}
+                     onUndo={handleUndo}
+@@ -159,7 +158,6 @@ function AlertsRoute() {
+                   key={alert.id} 
+                   alert={alert} 
+                   isDetailed={isDetailed} 
+-                  isReviewed={true}
+                   tab="reviewed"
+                   onReview={handleReview}
+                   onUndo={handleUndo}
+@@ -249,7 +247,7 @@ type AlertCardProps = {
+ 
+ 
+ 
+-function AlertCard({ alert, isDetailed, isReviewed, tab, onReview, onUndo, onDismiss }: AlertCardProps) {
++function AlertCard({ alert, isDetailed, tab, onReview, onUndo, onDismiss }: Omit<AlertCardProps, 'isReviewed'>) {
+   const isHigh = alert.severity === 'high'
+   const [isSlidingOut, setIsSlidingOut] = useState(false)
+   const [showDetails, setShowDetails] = useState(false)
+@@ -392,7 +390,11 @@ function AlertCard({ alert, isDetailed, isReviewed, tab, onReview, onUndo, onDis
+           </div>
+           <button 
+             onClick={handleUndoLocal}
+-            className="relative flex items-center justify-center w-[34px] h-[34px] rounded-full bg-background border border-border shadow-sm hover:bg-muted-foreground/10 transition-colors group"
++            disabled={fullyDismissed}
++            className={cn(
++              "relative flex items-center justify-center w-[34px] h-[34px] rounded-full bg-background border border-border shadow-sm transition-colors group",
++              fullyDismissed ? "opacity-50 cursor-not-allowed" : "hover:bg-muted-foreground/10"
++            )}
+             title="Undo"
+           >
+             <svg className="absolute inset-0 w-full h-full -rotate-90 text-foreground" viewBox="0 0 32 32">
+diff --git a/src/routes/_app.dashboard.tsx b/src/routes/_app.dashboard.tsx
+index 06a13f7..3a4af7e 100644
+--- a/src/routes/_app.dashboard.tsx
++++ b/src/routes/_app.dashboard.tsx
+@@ -24,7 +24,7 @@ function DashboardComponent() {
+       <PageContainer className="gap-6">
+         <Skeleton className="h-[48px] w-full rounded-lg" />
+         <Skeleton className="h-[46px] w-full rounded-lg" />
+-        <div className="flex flex-col sm:flex-row gap-4 flex-1 min-h-[500px]">
++        <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-[500px]">
+           <Skeleton className="flex-1 h-full rounded-lg" />
+           <Skeleton className="flex-1 h-full rounded-lg" />
+         </div>
+@@ -38,7 +38,7 @@ function DashboardComponent() {
+       
+       <SummaryStrip stats={data.stats} />
+ 
+-      <div className="flex flex-col sm:flex-row gap-4 items-stretch flex-1 min-h-[500px]">
++      <div className="flex flex-col lg:flex-row gap-4 items-stretch flex-1 min-h-[500px]">
+         <HeroTaskList tasks={data.tasks} className="flex-1 h-full" />
+         <div className="flex-1 h-full">
+           <ActivityFeed feed={data.feed} />
+diff --git a/src/routes/_app.settings.tsx b/src/routes/_app.settings.tsx
+index 042f512..b45fcb5 100644
+--- a/src/routes/_app.settings.tsx
++++ b/src/routes/_app.settings.tsx
+@@ -179,7 +179,7 @@ function SettingsComponent() {
+           <Button variant="outline" size="sm" className="h-8">Contact</Button>
+         </SettingRow>
+ 
+-        <SettingRow title="About" description="SchoolSync for tablets · Version 1.0" />
++        <SettingRow title="About" description="SchoolSync App for tablets · Version 1.0" />
+       </SettingsCard>
+     </PageContainer>
+   )
+diff --git a/src/routes/_app.tsx b/src/routes/_app.tsx
+index c313847..c080739 100644
+--- a/src/routes/_app.tsx
++++ b/src/routes/_app.tsx
+@@ -1,7 +1,7 @@
+ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+-import { SidebarProvider, SidebarInset } from '../components/ui/sidebar'
+ import Sidebar from '../components/Sidebar'
+ import Topbar from '../components/Topbar'
++import HelpBar from '../components/HelpBar'
+ import { getStoredAuthRole } from '../store'
+ 
+ export const Route = createFileRoute('/_app')({
+@@ -15,16 +15,15 @@ export const Route = createFileRoute('/_app')({
+ 
+ function AppLayout() {
+   return (
+-    <SidebarProvider>
+-      <div className="flex h-screen w-full bg-background overflow-hidden">
+-        <Sidebar />
+-        <SidebarInset className="flex-1 flex flex-col min-w-0 overflow-hidden">
+-          <Topbar />
+-          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+-            <Outlet />
+-          </main>
+-        </SidebarInset>
++    <div className="flex h-screen w-full bg-background overflow-hidden flex-col md:flex-row">
++      <Sidebar />
++      <div className="flex-1 flex flex-col min-w-0 overflow-hidden order-1 md:order-2">
++        <Topbar />
++        <main className="flex-1 overflow-y-auto flex flex-col">
++          <HelpBar />
++          <Outlet />
++        </main>
+       </div>
+-    </SidebarProvider>
++    </div>
+   )
+ }
+diff --git a/src/routes/signin.tsx b/src/routes/signin.tsx
+index b28ad28..fa25e81 100644
+--- a/src/routes/signin.tsx
++++ b/src/routes/signin.tsx
+@@ -33,7 +33,7 @@ function SignInComponent() {
+               <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+             </svg>
+           </div>
+-          <h1 className="text-2xl font-semibold tracking-tight">SchoolSync</h1>
++          <h1 className="text-2xl font-semibold tracking-tight">SchoolSync App</h1>
+           <p className="text-sm text-muted-foreground mt-1">School Activity Logbook &middot; sign in to continue</p>
+         </div>
+         
+diff --git a/src/store/index.ts b/src/store/index.ts
+index 0ea6e7d..bd77f81 100644
+--- a/src/store/index.ts
++++ b/src/store/index.ts
+@@ -14,11 +14,14 @@ interface AppState {
+     handledTasks: string[];
+     notifiedDevices: string[];
+   };
++  isHelpOpen: boolean;
+   setAuthRole: (role: AuthRole) => void;
+   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+   setViewMode: (mode: string) => void;
+-  setAlertsCount: (count: number) => void;
++  setAlertsCount: (count: number | null) => void;
+   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
++  toggleHelp: () => void;
++  setHelpOpen: (isOpen: boolean) => void;
+ }
+ 
+ export const useStore = create<AppState>()(
+@@ -34,6 +37,7 @@ export const useStore = create<AppState>()(
+         handledTasks: [],
+         notifiedDevices: [],
+       },
++      isHelpOpen: false,
+       setAuthRole: (role) => set({ authRole: role }),
+       setTheme: (theme) => set({ theme }),
+       setViewMode: (mode) => set({ viewMode: mode }),
+@@ -44,6 +48,8 @@ export const useStore = create<AppState>()(
+           [key]: typeof updater === 'function' ? updater(state.sessionActivity[key]) : updater
+         }
+       })),
++      toggleHelp: () => set((state) => ({ isHelpOpen: !state.isHelpOpen })),
++      setHelpOpen: (isOpen) => set({ isHelpOpen: isOpen }),
+     }),
+     {
+       name: 'app-storage',
+@@ -51,7 +57,7 @@ export const useStore = create<AppState>()(
+         authRole: state.authRole,
+         theme: state.theme,
+         viewMode: state.viewMode,
+-        alertsCount: state.alertsCount
++        isHelpOpen: state.isHelpOpen
+       }),
+     }
+   )
+diff --git a/src/styles.css b/src/styles.css
+index 416938e..bce41b0 100644
+--- a/src/styles.css
++++ b/src/styles.css
+@@ -9,6 +9,7 @@
+ 
+ @theme {
+   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
++  --breakpoint-md: 769px;
+ }
+ 
+ :root {

@@ -1,5 +1,4 @@
 import { CheckSquare, Check } from 'lucide-react'
-import { useState } from 'react'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 import { Badge } from '../ui/badge'
