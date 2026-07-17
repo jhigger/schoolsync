@@ -50,7 +50,7 @@ function AlertsRoute() {
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all",
             activeTab === 'review' 
-              ? "bg-background text-foreground shadow-sm" 
+              ? "bg-white text-foreground shadow-sm dark:bg-background" 
               : "text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10"
           )} 
           onClick={() => setActiveTab('review')}
@@ -61,7 +61,7 @@ function AlertsRoute() {
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all",
             activeTab === 'rules' 
-              ? "bg-background text-foreground shadow-sm" 
+              ? "bg-white text-foreground shadow-sm dark:bg-background" 
               : "text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10"
           )} 
           onClick={() => setActiveTab('rules')}
