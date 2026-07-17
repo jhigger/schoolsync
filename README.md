@@ -1,24 +1,24 @@
 # SchoolSync
 
-# UI Mockup and Enhancements
+School Activity Logbook & Device Management UI.
 
-This project is a React-based application that simulates UI/UX for different user types, providing a seamless visual experience.
+This project is a React-based application that simulates a robust UI/UX for school staff, teachers, and admins to manage devices and activity logs.
 
-## Recent Updates
-- Improved Settings page to correctly sync user accounts with the Sidebar.
-- Fixed global text size change functionality across the app.
-- Enhanced skeleton loader contrast for better visibility in light mode.
-- Ensured sidebar and settings background colors are distinctly white in light mode.
-- Wired up interactive buttons across the app (Help, Check now, Print report, etc.).
-- Improved the Topbar "Simple/Detailed" switch label to avoid width shifting.
-- Cleaned up unused files and fixed Vite build warnings.
+## Architecture
+
+We recently migrated from a monolithic 94kb `index.html` prototype to a modern, typesafe stack:
+- **Framework**: React with [TanStack Start](https://tanstack.com/router/latest) for robust routing.
+- **Styling**: Tailwind CSS combined with [shadcn/ui](https://ui.shadcn.com/) components to ensure a pixel-perfect 1:1 match with the original custom CSS design system.
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand) for global preferences like Dark/Light Mode, Simple/Detailed Views, and mock Auth Roles.
+- **Data Layer**: Mock API fetching via [TanStack Query](https://tanstack.com/query/latest) against strongly typed dummy data in `src/lib/mockData.ts`.
+- **Tables**: [TanStack Table](https://tanstack.com/table/latest) for complex, sortable lists like the Activity Log.
 
 ## Features
-- **Dashboard**: Quick overview of tasks and system health.
-- **Activity Log**: Detailed feed of all school events and alerts.
-- **Rooms & Devices**: Manage and monitor devices across different rooms.
-- **Alerts**: Real-time notifications and rules.
-- **Settings**: Customizable user preferences.
+- **Dashboard**: Quick overview of tasks, issues, and system health.
+- **Activity Log**: Detailed feed of all school events and alerts, filterable by room or event type.
+- **Rooms & Devices**: Manage and monitor devices across different rooms with success/warning/destructive status badges.
+- **Alerts**: Real-time mock notifications with acknowledgment tracking.
+- **Settings**: Customizable user preferences including text scaling and UI density.
 
 ## Development
 
@@ -26,7 +26,7 @@ This project uses [Vite](https://vitejs.dev/) for lightning-fast hot module repl
 
 ### Prerequisites
 - Node.js
-- pnpm (as specified in project rules)
+- pnpm
 
 ### Getting Started
 
