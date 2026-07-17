@@ -1,1 +1,1 @@
-export const APP_TITLE = "SchoolSync App"
+export const APP_TITLE = "SchoolSync"

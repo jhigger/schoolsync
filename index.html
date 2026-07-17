@@ -1,5 +1,5 @@
 <!--
-  SchoolSync App — v1.0 (single-file app)
+  SchoolSync — v1.0 (single-file app)
   Audience: mostly non-IT school staff · 12.5" tablet, landscape.
   One combined page: Sign-in + app shell with sidebar nav + Simple/Detailed
   toggle, and five FULL screens wired to the nav:
@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SchoolSync App</title>
+<title>SchoolSync</title>
 <style>
   /* ============================================================
      SHARED DESIGN SYSTEM (shadcn/ui zinc tokens) — used by all screens
@@ -488,7 +488,7 @@
     <div class="signin">
       <div class="card signin-card">
         <div class="logo-lg"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
-        <h1>SchoolSync App</h1>
+        <h1>SchoolSync</h1>
         <p>School Activity Logbook · sign in to continue</p>
         <div class="field"><label>Email</label><input type="email" value="assistant@school.edu"></div>
         <div class="field"><label>Password</label><input type="password" value="••••••••"></div>
@@ -504,7 +504,7 @@
       <aside class="sidebar">
         <div class="brand-row">
           <div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
-          <div class="brand-name">SchoolSync App</div>
+          <div class="brand-name">SchoolSync</div>
         </div>
         <div class="nav-item active" data-nav="dashboard"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</div>
         <div class="nav-item" data-nav="activity"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> Activity Log</div>
@@ -922,7 +922,7 @@
               <button class="btn btn-outline btn-sm">Contact</button>
             </div>
             <div class="row">
-              <div class="r-body"><div class="r-title">About</div><div class="r-sub">SchoolSync App for tablets · Version 1.0</div></div>
+              <div class="r-body"><div class="r-title">About</div><div class="r-sub">SchoolSync for tablets · Version 1.0</div></div>
             </div>
           </div>
         </section>
@@ -954,7 +954,7 @@
       activity: { title:"Help \u00b7 Activity Log", text:"A running list of everything that happened, newest first. Use the search box to find a room, person, or event, and the filter pills to show only what you care about. 'Load earlier' reveals older days." },
       devices: { title:"Help \u00b7 Rooms & Devices", text:"Every room and its computers, printers, and other devices. Pick a room on the left to see its devices. 'Has problems' shows only rooms that need attention. On a flagged device, tap 'Show report' to read what happened, or 'Ask IT for help' if it's broken." },
       alerts: { title:"Help \u00b7 Alerts", text:"Things worth knowing about \u2014 like repeated wrong passwords or a device going offline. Read each one and tap 'Mark as reviewed' once you've handled it. The 'What I get alerted about' tab lets you turn alert types on or off." },
-      settings: { title:"Help \u00b7 Settings", text:"Manage your account and choose what SchoolSync App alerts you about. Switch between Simple and Detailed anytime with the toggle in the corner. Use 'Change password' to update your sign-in, or 'Sign out' when you're done." }
+      settings: { title:"Help \u00b7 Settings", text:"Manage your account and choose what SchoolSync alerts you about. Switch between Simple and Detailed anytime with the toggle in the corner. Use 'Change password' to update your sign-in, or 'Sign out' when you're done." }
     };
     const bar = document.getElementById('helpBar');
     const titleEl = document.getElementById('helpTitle');
