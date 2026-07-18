@@ -1,2 +1,0 @@
-f42d5e2 chore: mark issue 10 as ready-for-human
-29a0e9e feat: add global help button to topbar to match HTML spec

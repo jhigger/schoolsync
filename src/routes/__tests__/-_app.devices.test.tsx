@@ -2,6 +2,17 @@ import { render, screen, act, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { DevicesRoute } from '../../components/DevicesRoute'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { vi } from 'vitest'
+
+vi.mock('@tanstack/react-router', async () => {
+  const actual = await vi.importActual('@tanstack/react-router')
+  return {
+    ...actual as any,
+    getRouteApi: () => ({
+      useSearch: () => ({ filter: 'all' })
+    })
+  }
+})
 
 const queryClient = new QueryClient({
   defaultOptions: {

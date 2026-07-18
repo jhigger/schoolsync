@@ -7,11 +7,15 @@ import { APP_TITLE } from '../lib/constants'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/activity', label: 'Activity Log', icon: Activity },
-  { to: '/devices', label: 'Rooms & Devices', icon: MonitorSmartphone },
+  { to: '/activity', label: 'Activity Log', icon: Activity, roles: ['Admin', 'Staff'] },
+  { to: '/devices', label: 'Rooms & Devices', icon: MonitorSmartphone, roles: ['Admin', 'Staff'] },
   { to: '/alerts', label: 'Alerts', icon: Bell },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/settings', label: 'Settings', icon: Settings, roles: ['Admin'] },
 ]
+
+const getNavItems = (role: string | null) => {
+  return navItems.filter(item => !item.roles || item.roles.includes(role || ''))
+}
 
 export const ROLE_PROFILES: Record<string, { name: string, title: string, email: string, initial: string }> = {
   Admin: { name: 'Maria Reyes', title: 'Admin assistant', email: 'maria.reyes@school.edu', initial: 'M' },
@@ -44,7 +48,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex flex-row md:flex-col gap-1 w-full flex-1 md:flex-none justify-around md:justify-start">
-        {navItems.map((item) => {
+        {getNavItems(authRole).map((item) => {
           const Icon = item.icon
           return (
             <Link

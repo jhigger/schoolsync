@@ -1,3 +1,0 @@
-f078c73 style: improve contrast of alerts badge when active
-4cff4f8 style: set active tab background to white
-ebd20c6 feat: implement alerts tab ui and badge

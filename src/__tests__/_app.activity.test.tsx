@@ -17,7 +17,7 @@ describe('ActivityRoute', () => {
 
   it('renders the search input', async () => {
     render(<ActivityComponent />, { wrapper })
-    const searchInput = await screen.findByPlaceholderText('Type to search… (example: Lab 1, printer, Maria)')
+    const searchInput = await screen.findByPlaceholderText('Type to search…')
     expect(searchInput).toBeInTheDocument()
   })
 
