@@ -8,3 +8,5 @@ log.txt
 *.log
 wip-diff.txt
 .scratch/wip-diff.txt
+.output/
+index.backup.html

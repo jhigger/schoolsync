@@ -35,7 +35,7 @@ export default function Sidebar() {
   }, [alertsCount, setAlertsCount])
 
   return (
-    <aside className="w-full h-auto border-t md:border-t-0 md:border-r border-border flex flex-row md:flex-col p-1 md:p-4 pb-[max(8px,env(safe-area-inset-bottom))] md:pb-4 justify-around md:justify-start order-2 md:order-1 z-40 bg-white dark:bg-card md:bg-background md:dark:bg-background md:w-[212px] shrink-0">
+    <aside className="w-full h-auto border-t md:border-t-0 md:border-r border-border flex flex-row md:flex-col p-1 md:p-4 pb-[max(8px,env(safe-area-inset-bottom))] md:pb-4 justify-around md:justify-start order-2 md:order-1 z-40 bg-card dark:bg-sidebar md:w-[212px] shrink-0">
       <div className="hidden md:flex items-center gap-2 px-2 pb-4">
         <div className="w-[34px] h-[34px] rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
