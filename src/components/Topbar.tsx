@@ -1,4 +1,4 @@
-import { useStore } from '../store'
+import { useStore, type AuthRole } from '../store'
 import { LogOut, Sun, Moon, CircleHelp } from 'lucide-react'
 import { useRouterState, useNavigate } from '@tanstack/react-router'
 import { Switch } from './ui/switch'
@@ -16,6 +16,7 @@ const ROUTE_TITLES: Record<string, string> = {
 }
 
 export default function Topbar() {
+  const authRole = useStore((state) => state.authRole)
   const setAuthRole = useStore((state) => state.setAuthRole)
   const theme = useStore((state) => state.theme)
   const setTheme = useStore((state) => state.setTheme)
@@ -57,6 +58,16 @@ export default function Topbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <select 
+             value={authRole || ''}
+             onChange={(e) => setAuthRole(e.target.value as AuthRole)}
+             className="text-sm bg-muted rounded px-2 py-1.5 border border-border mr-2"
+          >
+             <option value="Admin">Admin</option>
+             <option value="Staff">Staff</option>
+             <option value="Student">Student</option>
+          </select>
+
           <Switch 
             id="view-mode" 
             checked={viewMode === 'detailed'}
