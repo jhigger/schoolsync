@@ -1,16 +1,12 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { fetchDepartmentAnnouncements } from '../lib/mockData'
 import { PageContainer } from '../components/PageContainer'
 import { Skeleton } from '../components/ui/skeleton'
-import { getStoredAuthRole } from '../store'
+import { enforceRoleAccess } from '../lib/auth'
 
 export const Route = createFileRoute('/_app/student-dashboard')({
-  beforeLoad: () => {
-    if (getStoredAuthRole() !== 'Student') {
-      throw redirect({ to: '/' })
-    }
-  },
+  beforeLoad: () => enforceRoleAccess(['Student']),
   component: StudentDashboardComponent,
 })
 
@@ -50,13 +46,6 @@ function StudentDashboardComponent() {
                 <span className="text-xs text-muted-foreground whitespace-nowrap ml-4">{announcement.date}</span>
               </div>
               <p className="text-sm mt-2 text-foreground/90">{announcement.content}</p>
-              {announcement.isImportant && (
-                <div className="mt-3">
-                  <span className="inline-flex items-center rounded-full border border-destructive/20 px-2.5 py-0.5 text-xs font-semibold bg-destructive/10 text-destructive">
-                    Important
-                  </span>
-                </div>
-              )}
             </div>
           ))
         )}

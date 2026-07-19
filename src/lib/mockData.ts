@@ -410,8 +410,9 @@ export interface DepartmentAnnouncement {
   title: string;
   content: string;
   date: string;
-  isImportant?: boolean;
 }
+
+export const mockSubscribedDepartments = ['Computer Science', 'General'];
 
 export const mockAnnouncements: DepartmentAnnouncement[] = [
   {
@@ -420,7 +421,6 @@ export const mockAnnouncements: DepartmentAnnouncement[] = [
     title: 'Lab 3 closed for maintenance',
     content: 'Lab 3 will be closed for hardware upgrades this afternoon.',
     date: 'Today',
-    isImportant: true,
   },
   {
     id: 'ann-2',
@@ -441,7 +441,7 @@ export const mockAnnouncements: DepartmentAnnouncement[] = [
 export async function fetchDepartmentAnnouncements(): Promise<DepartmentAnnouncement[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(mockAnnouncements);
+      resolve(mockAnnouncements.filter(a => mockSubscribedDepartments.includes(a.department)));
     }, 1000);
   });
 }

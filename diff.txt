@@ -1,0 +1,285 @@
+diff --git a/src/components/Sidebar.tsx b/src/components/Sidebar.tsx
+index 372f0fa..d9ba445 100644
+--- a/src/components/Sidebar.tsx
++++ b/src/components/Sidebar.tsx
+@@ -6,10 +6,11 @@ import { fetchAlertsData } from '../lib/mockData'
+ import { APP_TITLE } from '../lib/constants'
+ 
+ const navItems = [
+-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
++  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Admin', 'Staff'] },
++  { to: '/student-dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Student'] },
+   { to: '/activity', label: 'Activity Log', icon: Activity, roles: ['Admin', 'Staff'] },
+   { to: '/devices', label: 'Rooms & Devices', icon: MonitorSmartphone, roles: ['Admin', 'Staff'] },
+-  { to: '/alerts', label: 'Alerts', icon: Bell },
++  { to: '/alerts', label: 'Alerts', icon: Bell, roles: ['Admin', 'Staff'] },
+   { to: '/settings', label: 'Settings', icon: Settings, roles: ['Admin'] },
+ ]
+ 
+diff --git a/src/lib/mockData.ts b/src/lib/mockData.ts
+index 6186aca..3153719 100644
+--- a/src/lib/mockData.ts
++++ b/src/lib/mockData.ts
+@@ -403,3 +403,45 @@ export async function fetchRulesData(): Promise<RuleItem[]> {
+     }, 1000);
+   });
+ }
++
++export interface DepartmentAnnouncement {
++  id: string;
++  department: string;
++  title: string;
++  content: string;
++  date: string;
++  isImportant?: boolean;
++}
++
++export const mockAnnouncements: DepartmentAnnouncement[] = [
++  {
++    id: 'ann-1',
++    department: 'Computer Science',
++    title: 'Lab 3 closed for maintenance',
++    content: 'Lab 3 will be closed for hardware upgrades this afternoon.',
++    date: 'Today',
++    isImportant: true,
++  },
++  {
++    id: 'ann-2',
++    department: 'Mathematics',
++    title: 'Study group registration open',
++    content: 'Sign up for the upcoming calculus study groups in the math department office.',
++    date: 'Yesterday',
++  },
++  {
++    id: 'ann-3',
++    department: 'General',
++    title: 'Welcome to the new semester',
++    content: 'Please ensure your schedules are finalized by the end of the week.',
++    date: 'Monday',
++  }
++];
++
++export async function fetchDepartmentAnnouncements(): Promise<DepartmentAnnouncement[]> {
++  return new Promise((resolve) => {
++    setTimeout(() => {
++      resolve(mockAnnouncements);
++    }, 1000);
++  });
++}
+diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
+index 49e1104..69e4b42 100644
+--- a/src/routeTree.gen.ts
++++ b/src/routeTree.gen.ts
+@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
+ import { Route as AboutRouteImport } from './routes/about'
+ import { Route as AppRouteImport } from './routes/_app'
+ import { Route as IndexRouteImport } from './routes/index'
++import { Route as AppStudentDashboardRouteImport } from './routes/_app.student-dashboard'
+ import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+ import { Route as AppDevicesRouteImport } from './routes/_app.devices'
+ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
+   path: '/',
+   getParentRoute: () => rootRouteImport,
+ } as any)
++const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
++  id: '/student-dashboard',
++  path: '/student-dashboard',
++  getParentRoute: () => AppRoute,
++} as any)
+ const AppSettingsRoute = AppSettingsRouteImport.update({
+   id: '/settings',
+   path: '/settings',
+@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
+   '/dashboard': typeof AppDashboardRoute
+   '/devices': typeof AppDevicesRoute
+   '/settings': typeof AppSettingsRoute
++  '/student-dashboard': typeof AppStudentDashboardRoute
+ }
+ export interface FileRoutesByTo {
+   '/': typeof IndexRoute
+@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
+   '/dashboard': typeof AppDashboardRoute
+   '/devices': typeof AppDevicesRoute
+   '/settings': typeof AppSettingsRoute
++  '/student-dashboard': typeof AppStudentDashboardRoute
+ }
+ export interface FileRoutesById {
+   __root__: typeof rootRouteImport
+@@ -95,6 +103,7 @@ export interface FileRoutesById {
+   '/_app/dashboard': typeof AppDashboardRoute
+   '/_app/devices': typeof AppDevicesRoute
+   '/_app/settings': typeof AppSettingsRoute
++  '/_app/student-dashboard': typeof AppStudentDashboardRoute
+ }
+ export interface FileRouteTypes {
+   fileRoutesByFullPath: FileRoutesByFullPath
+@@ -107,6 +116,7 @@ export interface FileRouteTypes {
+     | '/dashboard'
+     | '/devices'
+     | '/settings'
++    | '/student-dashboard'
+   fileRoutesByTo: FileRoutesByTo
+   to:
+     | '/'
+@@ -117,6 +127,7 @@ export interface FileRouteTypes {
+     | '/dashboard'
+     | '/devices'
+     | '/settings'
++    | '/student-dashboard'
+   id:
+     | '__root__'
+     | '/'
+@@ -128,6 +139,7 @@ export interface FileRouteTypes {
+     | '/_app/dashboard'
+     | '/_app/devices'
+     | '/_app/settings'
++    | '/_app/student-dashboard'
+   fileRoutesById: FileRoutesById
+ }
+ export interface RootRouteChildren {
+@@ -167,6 +179,13 @@ declare module '@tanstack/react-router' {
+       preLoaderRoute: typeof IndexRouteImport
+       parentRoute: typeof rootRouteImport
+     }
++    '/_app/student-dashboard': {
++      id: '/_app/student-dashboard'
++      path: '/student-dashboard'
++      fullPath: '/student-dashboard'
++      preLoaderRoute: typeof AppStudentDashboardRouteImport
++      parentRoute: typeof AppRoute
++    }
+     '/_app/settings': {
+       id: '/_app/settings'
+       path: '/settings'
+@@ -211,6 +230,7 @@ interface AppRouteChildren {
+   AppDashboardRoute: typeof AppDashboardRoute
+   AppDevicesRoute: typeof AppDevicesRoute
+   AppSettingsRoute: typeof AppSettingsRoute
++  AppStudentDashboardRoute: typeof AppStudentDashboardRoute
+ }
+ 
+ const AppRouteChildren: AppRouteChildren = {
+@@ -219,6 +239,7 @@ const AppRouteChildren: AppRouteChildren = {
+   AppDashboardRoute: AppDashboardRoute,
+   AppDevicesRoute: AppDevicesRoute,
+   AppSettingsRoute: AppSettingsRoute,
++  AppStudentDashboardRoute: AppStudentDashboardRoute,
+ }
+ 
+ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+diff --git a/src/routes/_app.dashboard.tsx b/src/routes/_app.dashboard.tsx
+index 3a4af7e..f773aec 100644
+--- a/src/routes/_app.dashboard.tsx
++++ b/src/routes/_app.dashboard.tsx
+@@ -1,4 +1,4 @@
+-import { createFileRoute } from '@tanstack/react-router'
++import { createFileRoute, redirect } from '@tanstack/react-router'
+ import { useQuery } from '@tanstack/react-query'
+ import { StatusAlert } from '../components/dashboard/StatusAlert'
+ import { SummaryStrip } from '../components/dashboard/SummaryStrip'
+@@ -8,8 +8,15 @@ import { ActivityFeed } from '../components/dashboard/ActivityFeed'
+ import { Skeleton } from '../components/ui/skeleton'
+ import { PageContainer } from '../components/PageContainer'
+ import { fetchDashboardData } from '../lib/mockData'
++import { getStoredAuthRole } from '../store'
+ 
+ export const Route = createFileRoute('/_app/dashboard')({
++  beforeLoad: () => {
++    const role = getStoredAuthRole()
++    if (role === 'Student') {
++      throw redirect({ to: '/student-dashboard' })
++    }
++  },
+   component: DashboardComponent,
+ })
+ 
+diff --git a/src/routes/_app.student-dashboard.tsx b/src/routes/_app.student-dashboard.tsx
+new file mode 100644
+index 0000000..a64ebde
+--- /dev/null
++++ b/src/routes/_app.student-dashboard.tsx
+@@ -0,0 +1,66 @@
++import { createFileRoute, redirect } from '@tanstack/react-router'
++import { useQuery } from '@tanstack/react-query'
++import { fetchDepartmentAnnouncements } from '../lib/mockData'
++import { PageContainer } from '../components/PageContainer'
++import { Skeleton } from '../components/ui/skeleton'
++import { getStoredAuthRole } from '../store'
++
++export const Route = createFileRoute('/_app/student-dashboard')({
++  beforeLoad: () => {
++    if (getStoredAuthRole() !== 'Student') {
++      throw redirect({ to: '/' })
++    }
++  },
++  component: StudentDashboardComponent,
++})
++
++function StudentDashboardComponent() {
++  const { data: announcements, isLoading } = useQuery({
++    queryKey: ['departmentAnnouncements'],
++    queryFn: fetchDepartmentAnnouncements,
++  })
++
++  if (isLoading || !announcements) {
++    return (
++      <PageContainer className="gap-6">
++        <h1 className="text-2xl font-bold">Student Dashboard</h1>
++        <div className="flex flex-col gap-4">
++          <Skeleton className="h-24 w-full rounded-lg" />
++          <Skeleton className="h-24 w-full rounded-lg" />
++          <Skeleton className="h-24 w-full rounded-lg" />
++        </div>
++      </PageContainer>
++    )
++  }
++
++  return (
++    <PageContainer className="gap-6 pb-8">
++      <h1 className="text-2xl font-bold">Student Dashboard</h1>
++      <div className="flex flex-col gap-4">
++        {announcements.length === 0 ? (
++          <p className="text-muted-foreground">No announcements at this time.</p>
++        ) : (
++          announcements.map((announcement) => (
++            <div key={announcement.id} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col">
++              <div className="flex justify-between items-start mb-1">
++                <div>
++                  <h3 className="font-semibold text-lg leading-tight">{announcement.title}</h3>
++                  <p className="text-sm text-muted-foreground">{announcement.department}</p>
++                </div>
++                <span className="text-xs text-muted-foreground whitespace-nowrap ml-4">{announcement.date}</span>
++              </div>
++              <p className="text-sm mt-2 text-foreground/90">{announcement.content}</p>
++              {announcement.isImportant && (
++                <div className="mt-3">
++                  <span className="inline-flex items-center rounded-full border border-destructive/20 px-2.5 py-0.5 text-xs font-semibold bg-destructive/10 text-destructive">
++                    Important
++                  </span>
++                </div>
++              )}
++            </div>
++          ))
++        )}
++      </div>
++    </PageContainer>
++  )
++}
+diff --git a/src/routes/index.tsx b/src/routes/index.tsx
+index 8c2ddcb..cd786af 100644
+--- a/src/routes/index.tsx
++++ b/src/routes/index.tsx
+@@ -1,7 +1,12 @@
+ import { createFileRoute, redirect } from '@tanstack/react-router'
++import { getStoredAuthRole } from '../store'
+ 
+ export const Route = createFileRoute('/')({
+   beforeLoad: () => {
++    const role = getStoredAuthRole()
++    if (role === 'Student') {
++      throw redirect({ to: '/student-dashboard' })
++    }
+     throw redirect({ to: '/dashboard' })
+   },
+ })

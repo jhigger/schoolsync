@@ -9,6 +9,7 @@ import { useThemeSync } from '../hooks/use-theme-sync'
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
   '/dashboard': 'Dashboard',
+  '/student-dashboard': 'Student Dashboard',
   '/activity': 'Activity Log',
   '/devices': 'Rooms & Devices',
   '/alerts': 'Alerts',
