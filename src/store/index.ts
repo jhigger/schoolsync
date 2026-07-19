@@ -21,12 +21,20 @@ export interface LogbookConfig {
   createdAt: string;
 }
 
+export interface LogbookEntry {
+  id: string;
+  logbookId: string;
+  data: Record<string, string>;
+  createdAt: string;
+}
+
 interface AppState {
   authRole: AuthRole;
   theme: 'light' | 'dark' | 'system';
   viewMode: string;
   alertsCount: number | null;
   logbooks: LogbookConfig[];
+  logbookEntries: LogbookEntry[];
   sessionActivity: {
     reviewedAlertIds: string[];
     dismissedAlertIds: string[];
@@ -39,6 +47,7 @@ interface AppState {
   setViewMode: (mode: string) => void;
   setAlertsCount: (count: number | null) => void;
   addLogbook: (logbook: LogbookConfig) => void;
+  addLogbookEntry: (entry: LogbookEntry) => void;
   validateKioskPin: (id: string, pin: string) => boolean;
   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
   toggleHelp: () => void;
@@ -53,6 +62,7 @@ export const useStore = create<AppState>()(
       viewMode: 'simple',
       alertsCount: null,
       logbooks: [],
+      logbookEntries: [],
       sessionActivity: {
         reviewedAlertIds: [],
         dismissedAlertIds: [],
@@ -65,6 +75,7 @@ export const useStore = create<AppState>()(
       setViewMode: (mode) => set({ viewMode: mode }),
       setAlertsCount: (alertsCount) => set({ alertsCount }),
       addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
+      addLogbookEntry: (entry) => set((state) => ({ logbookEntries: [...state.logbookEntries, entry] })),
       validateKioskPin: (id, pin) => {
         const logbook = get().logbooks.find(l => l.id === id);
         return logbook?.kioskPin === pin;
@@ -85,7 +96,8 @@ export const useStore = create<AppState>()(
         theme: state.theme,
         viewMode: state.viewMode,
         isHelpOpen: state.isHelpOpen,
-        logbooks: state.logbooks
+        logbooks: state.logbooks,
+        logbookEntries: state.logbookEntries
       }),
     }
   )

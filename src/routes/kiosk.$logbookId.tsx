@@ -16,6 +16,7 @@ function KioskLogbookComponent() {
   const navigate = useNavigate()
   const logbooks = useStore((state) => state.logbooks)
   const validateKioskPin = useStore((state) => state.validateKioskPin)
+  const addLogbookEntry = useStore((state) => state.addLogbookEntry)
   const logbook = logbooks.find(l => l.id === logbookId)
 
   const [formData, setFormData] = useState<Record<string, string>>({})
@@ -45,8 +46,15 @@ function KioskLogbookComponent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, this would submit the logbook entry to an API/store.
-    // For now, just reset the form to simulate a successful submission.
+    if (!logbook) return
+    
+    addLogbookEntry({
+      id: crypto.randomUUID(),
+      logbookId: logbook.id,
+      data: formData,
+      createdAt: new Date().toISOString()
+    })
+    
     alert('Entry submitted successfully!')
     setFormData({})
   }
