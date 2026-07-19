@@ -5,10 +5,11 @@ import { enforceRoleAccess } from '../lib/auth'
 import { useStore } from '../store'
 import type { LogbookConfig, LogbookField } from '../store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/card'
-import { Button } from '../components/ui/button'
+import { Button, buttonVariants } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Plus, Trash2, Save } from 'lucide-react'
+import { Plus, Trash2, Save, MonitorPlay } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_app/staff-dashboard')({
   beforeLoad: () => enforceRoleAccess(['Admin', 'Staff']),
@@ -23,10 +24,13 @@ const PRESET_FIELDS: Omit<LogbookField, 'id'>[] = [
 
 function StaffDashboardComponent() {
   const addLogbook = useStore((state) => state.addLogbook)
+  const logbooks = useStore((state) => state.logbooks)
+  const deleteLogbook = useStore((state) => state.deleteLogbook)
   
   const [draft, setDraft] = useState({
     title: '',
     description: '',
+    kioskPin: '',
     fields: [] as LogbookField[]
   })
   
@@ -69,12 +73,13 @@ function StaffDashboardComponent() {
       id: crypto.randomUUID(),
       title: draft.title,
       description: draft.description,
+      kioskPin: draft.kioskPin,
       fields: draft.fields,
       createdAt: new Date().toISOString()
     }
     
     addLogbook(newLogbook)
-    setDraft({ title: '', description: '', fields: [] })
+    setDraft({ title: '', description: '', kioskPin: '', fields: [] })
     alert('Logbook saved successfully!')
   }
 
@@ -109,6 +114,15 @@ function StaffDashboardComponent() {
                   value={draft.description} 
                   onChange={(e) => setDraft(prev => ({ ...prev, description: e.target.value }))} 
                   placeholder="What is this logbook for?" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="kioskPin">Kiosk Exit PIN (Optional)</Label>
+                <Input 
+                  id="kioskPin" 
+                  value={draft.kioskPin} 
+                  onChange={(e) => setDraft(prev => ({ ...prev, kioskPin: e.target.value }))} 
+                  placeholder="e.g. 1234" 
                 />
               </div>
             </div>
@@ -190,6 +204,41 @@ function StaffDashboardComponent() {
               Save Logbook
             </Button>
           </CardFooter>
+        </Card>
+
+        <Card className="flex flex-col h-full">
+          <CardHeader>
+            <CardTitle>Configured Logbooks</CardTitle>
+            <CardDescription>Manage and launch active logbooks.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-y-auto">
+            {logbooks.length === 0 ? (
+              <div className="text-sm text-muted-foreground italic p-4 border border-dashed rounded-lg text-center">
+                No logbooks configured yet. Use the builder to create one.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {logbooks.map((logbook) => (
+                  <Card key={logbook.id} className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg">{logbook.title}</h3>
+                      {logbook.description && <p className="text-sm text-muted-foreground">{logbook.description}</p>}
+                      <p className="text-xs text-muted-foreground mt-1">{logbook.fields.length} fields configured</p>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                      <Button variant="destructive" size="sm" onClick={() => deleteLogbook(logbook.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                      <Link to="/kiosk/$logbookId" params={{ logbookId: logbook.id }} className={buttonVariants({ size: "sm" })}>
+                        <MonitorPlay className="w-4 h-4 mr-2" />
+                        Launch Kiosk
+                      </Link>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
     </PageContainer>

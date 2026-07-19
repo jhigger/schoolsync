@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KioskLogbookIdRouteImport } from './routes/kiosk.$logbookId'
 import { Route as AppStudentDashboardRouteImport } from './routes/_app.student-dashboard'
 import { Route as AppStaffDashboardRouteImport } from './routes/_app.staff-dashboard'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
@@ -38,6 +39,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KioskLogbookIdRoute = KioskLogbookIdRouteImport.update({
+  id: '/kiosk/$logbookId',
+  path: '/kiosk/$logbookId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/staff-dashboard': typeof AppStaffDashboardRoute
   '/student-dashboard': typeof AppStudentDashboardRoute
+  '/kiosk/$logbookId': typeof KioskLogbookIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/staff-dashboard': typeof AppStaffDashboardRoute
   '/student-dashboard': typeof AppStudentDashboardRoute
+  '/kiosk/$logbookId': typeof KioskLogbookIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/staff-dashboard': typeof AppStaffDashboardRoute
   '/_app/student-dashboard': typeof AppStudentDashboardRoute
+  '/kiosk/$logbookId': typeof KioskLogbookIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/staff-dashboard'
     | '/student-dashboard'
+    | '/kiosk/$logbookId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/staff-dashboard'
     | '/student-dashboard'
+    | '/kiosk/$logbookId'
   id:
     | '__root__'
     | '/'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/staff-dashboard'
     | '/_app/student-dashboard'
+    | '/kiosk/$logbookId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -159,6 +171,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AboutRoute: typeof AboutRoute
   SigninRoute: typeof SigninRoute
+  KioskLogbookIdRoute: typeof KioskLogbookIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kiosk/$logbookId': {
+      id: '/kiosk/$logbookId'
+      path: '/kiosk/$logbookId'
+      fullPath: '/kiosk/$logbookId'
+      preLoaderRoute: typeof KioskLogbookIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/student-dashboard': {
@@ -270,6 +290,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AboutRoute: AboutRoute,
   SigninRoute: SigninRoute,
+  KioskLogbookIdRoute: KioskLogbookIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
