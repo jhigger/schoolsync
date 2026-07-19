@@ -3,11 +3,29 @@ import { persist } from 'zustand/middleware';
 
 export type AuthRole = 'Admin' | 'Staff' | 'Student' | null;
 
+export interface LogbookField {
+  id: string;
+  type: 'text' | 'number' | 'date' | 'select' | 'checkbox';
+  label: string;
+  required: boolean;
+  options?: string[];
+  isPreset?: boolean;
+}
+
+export interface LogbookConfig {
+  id: string;
+  title: string;
+  description?: string;
+  fields: LogbookField[];
+  createdAt: string;
+}
+
 interface AppState {
   authRole: AuthRole;
   theme: 'light' | 'dark' | 'system';
   viewMode: string;
   alertsCount: number | null;
+  logbooks: LogbookConfig[];
   sessionActivity: {
     reviewedAlertIds: string[];
     dismissedAlertIds: string[];
@@ -19,6 +37,9 @@ interface AppState {
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setViewMode: (mode: string) => void;
   setAlertsCount: (count: number | null) => void;
+  addLogbook: (logbook: LogbookConfig) => void;
+  updateLogbook: (id: string, logbook: Partial<LogbookConfig>) => void;
+  deleteLogbook: (id: string) => void;
   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
   toggleHelp: () => void;
   setHelpOpen: (isOpen: boolean) => void;
@@ -31,6 +52,7 @@ export const useStore = create<AppState>()(
       theme: 'system',
       viewMode: 'simple',
       alertsCount: null,
+      logbooks: [],
       sessionActivity: {
         reviewedAlertIds: [],
         dismissedAlertIds: [],
@@ -42,6 +64,13 @@ export const useStore = create<AppState>()(
       setTheme: (theme) => set({ theme }),
       setViewMode: (mode) => set({ viewMode: mode }),
       setAlertsCount: (alertsCount) => set({ alertsCount }),
+      addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
+      updateLogbook: (id, updates) => set((state) => ({
+        logbooks: state.logbooks.map(lb => lb.id === id ? { ...lb, ...updates } : lb)
+      })),
+      deleteLogbook: (id) => set((state) => ({
+        logbooks: state.logbooks.filter(lb => lb.id !== id)
+      })),
       updateSessionActivity: (key, updater) => set((state) => ({
         sessionActivity: {
           ...state.sessionActivity,
@@ -57,7 +86,8 @@ export const useStore = create<AppState>()(
         authRole: state.authRole,
         theme: state.theme,
         viewMode: state.viewMode,
-        isHelpOpen: state.isHelpOpen
+        isHelpOpen: state.isHelpOpen,
+        logbooks: state.logbooks
       }),
     }
   )

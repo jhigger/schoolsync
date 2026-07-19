@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { LayoutDashboard, Activity, MonitorSmartphone, Bell, Settings } from 'lucide-react'
+import { LayoutDashboard, Activity, MonitorSmartphone, Bell, Settings, FileText } from 'lucide-react'
 import { useStore } from '../store'
 import { useEffect } from 'react'
 import { fetchAlertsData } from '../lib/mockData'
@@ -8,6 +8,7 @@ import { APP_TITLE } from '../lib/constants'
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Admin', 'Staff'] },
   { to: '/student-dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Student'] },
+  { to: '/staff-dashboard', label: 'Staff Logbook', icon: FileText, roles: ['Admin', 'Staff'] },
   { to: '/activity', label: 'Activity Log', icon: Activity, roles: ['Admin', 'Staff'] },
   { to: '/devices', label: 'Rooms & Devices', icon: MonitorSmartphone, roles: ['Admin', 'Staff'] },
   { to: '/alerts', label: 'Alerts', icon: Bell, roles: ['Admin', 'Staff'] },

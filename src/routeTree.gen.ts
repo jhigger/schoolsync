@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppStudentDashboardRouteImport } from './routes/_app.student-dashboard'
+import { Route as AppStaffDashboardRouteImport } from './routes/_app.staff-dashboard'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppDevicesRouteImport } from './routes/_app.devices'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -42,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
   id: '/student-dashboard',
   path: '/student-dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStaffDashboardRoute = AppStaffDashboardRouteImport.update({
+  id: '/staff-dashboard',
+  path: '/staff-dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/devices': typeof AppDevicesRoute
   '/settings': typeof AppSettingsRoute
+  '/staff-dashboard': typeof AppStaffDashboardRoute
   '/student-dashboard': typeof AppStudentDashboardRoute
 }
 export interface FileRoutesByTo {
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/devices': typeof AppDevicesRoute
   '/settings': typeof AppSettingsRoute
+  '/staff-dashboard': typeof AppStaffDashboardRoute
   '/student-dashboard': typeof AppStudentDashboardRoute
 }
 export interface FileRoutesById {
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/devices': typeof AppDevicesRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/_app/staff-dashboard': typeof AppStaffDashboardRoute
   '/_app/student-dashboard': typeof AppStudentDashboardRoute
 }
 export interface FileRouteTypes {
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/settings'
+    | '/staff-dashboard'
     | '/student-dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/settings'
+    | '/staff-dashboard'
     | '/student-dashboard'
   id:
     | '__root__'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/devices'
     | '/_app/settings'
+    | '/_app/staff-dashboard'
     | '/_app/student-dashboard'
   fileRoutesById: FileRoutesById
 }
@@ -186,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStudentDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/staff-dashboard': {
+      id: '/_app/staff-dashboard'
+      path: '/staff-dashboard'
+      fullPath: '/staff-dashboard'
+      preLoaderRoute: typeof AppStaffDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -230,6 +249,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppDevicesRoute: typeof AppDevicesRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppStaffDashboardRoute: typeof AppStaffDashboardRoute
   AppStudentDashboardRoute: typeof AppStudentDashboardRoute
 }
 
@@ -239,6 +259,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppDevicesRoute: AppDevicesRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppStaffDashboardRoute: AppStaffDashboardRoute,
   AppStudentDashboardRoute: AppStudentDashboardRoute,
 }
 
@@ -253,12 +274,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
