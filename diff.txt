@@ -1,285 +1,188 @@
-diff --git a/src/components/Sidebar.tsx b/src/components/Sidebar.tsx
-index 372f0fa..d9ba445 100644
---- a/src/components/Sidebar.tsx
-+++ b/src/components/Sidebar.tsx
-@@ -6,10 +6,11 @@ import { fetchAlertsData } from '../lib/mockData'
- import { APP_TITLE } from '../lib/constants'
- 
- const navItems = [
--  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Admin', 'Staff'] },
-+  { to: '/student-dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Student'] },
-   { to: '/activity', label: 'Activity Log', icon: Activity, roles: ['Admin', 'Staff'] },
-   { to: '/devices', label: 'Rooms & Devices', icon: MonitorSmartphone, roles: ['Admin', 'Staff'] },
--  { to: '/alerts', label: 'Alerts', icon: Bell },
-+  { to: '/alerts', label: 'Alerts', icon: Bell, roles: ['Admin', 'Staff'] },
-   { to: '/settings', label: 'Settings', icon: Settings, roles: ['Admin'] },
- ]
- 
-diff --git a/src/lib/mockData.ts b/src/lib/mockData.ts
-index 6186aca..3153719 100644
---- a/src/lib/mockData.ts
-+++ b/src/lib/mockData.ts
-@@ -403,3 +403,45 @@ export async function fetchRulesData(): Promise<RuleItem[]> {
-     }, 1000);
-   });
- }
-+
-+export interface DepartmentAnnouncement {
-+  id: string;
-+  department: string;
-+  title: string;
-+  content: string;
-+  date: string;
-+  isImportant?: boolean;
-+}
-+
-+export const mockAnnouncements: DepartmentAnnouncement[] = [
-+  {
-+    id: 'ann-1',
-+    department: 'Computer Science',
-+    title: 'Lab 3 closed for maintenance',
-+    content: 'Lab 3 will be closed for hardware upgrades this afternoon.',
-+    date: 'Today',
-+    isImportant: true,
-+  },
-+  {
-+    id: 'ann-2',
-+    department: 'Mathematics',
-+    title: 'Study group registration open',
-+    content: 'Sign up for the upcoming calculus study groups in the math department office.',
-+    date: 'Yesterday',
-+  },
-+  {
-+    id: 'ann-3',
-+    department: 'General',
-+    title: 'Welcome to the new semester',
-+    content: 'Please ensure your schedules are finalized by the end of the week.',
-+    date: 'Monday',
-+  }
-+];
-+
-+export async function fetchDepartmentAnnouncements(): Promise<DepartmentAnnouncement[]> {
-+  return new Promise((resolve) => {
-+    setTimeout(() => {
-+      resolve(mockAnnouncements);
-+    }, 1000);
-+  });
-+}
-diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
-index 49e1104..69e4b42 100644
---- a/src/routeTree.gen.ts
-+++ b/src/routeTree.gen.ts
-@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
- import { Route as AboutRouteImport } from './routes/about'
- import { Route as AppRouteImport } from './routes/_app'
- import { Route as IndexRouteImport } from './routes/index'
-+import { Route as AppStudentDashboardRouteImport } from './routes/_app.student-dashboard'
- import { Route as AppSettingsRouteImport } from './routes/_app.settings'
- import { Route as AppDevicesRouteImport } from './routes/_app.devices'
- import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
-@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
-   path: '/',
-   getParentRoute: () => rootRouteImport,
- } as any)
-+const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
-+  id: '/student-dashboard',
-+  path: '/student-dashboard',
-+  getParentRoute: () => AppRoute,
-+} as any)
- const AppSettingsRoute = AppSettingsRouteImport.update({
-   id: '/settings',
-   path: '/settings',
-@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
-   '/dashboard': typeof AppDashboardRoute
-   '/devices': typeof AppDevicesRoute
-   '/settings': typeof AppSettingsRoute
-+  '/student-dashboard': typeof AppStudentDashboardRoute
- }
- export interface FileRoutesByTo {
-   '/': typeof IndexRoute
-@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
-   '/dashboard': typeof AppDashboardRoute
-   '/devices': typeof AppDevicesRoute
-   '/settings': typeof AppSettingsRoute
-+  '/student-dashboard': typeof AppStudentDashboardRoute
- }
- export interface FileRoutesById {
-   __root__: typeof rootRouteImport
-@@ -95,6 +103,7 @@ export interface FileRoutesById {
-   '/_app/dashboard': typeof AppDashboardRoute
-   '/_app/devices': typeof AppDevicesRoute
-   '/_app/settings': typeof AppSettingsRoute
-+  '/_app/student-dashboard': typeof AppStudentDashboardRoute
- }
- export interface FileRouteTypes {
-   fileRoutesByFullPath: FileRoutesByFullPath
-@@ -107,6 +116,7 @@ export interface FileRouteTypes {
-     | '/dashboard'
-     | '/devices'
-     | '/settings'
-+    | '/student-dashboard'
-   fileRoutesByTo: FileRoutesByTo
-   to:
-     | '/'
-@@ -117,6 +127,7 @@ export interface FileRouteTypes {
-     | '/dashboard'
-     | '/devices'
-     | '/settings'
-+    | '/student-dashboard'
-   id:
-     | '__root__'
-     | '/'
-@@ -128,6 +139,7 @@ export interface FileRouteTypes {
-     | '/_app/dashboard'
-     | '/_app/devices'
-     | '/_app/settings'
-+    | '/_app/student-dashboard'
-   fileRoutesById: FileRoutesById
- }
- export interface RootRouteChildren {
-@@ -167,6 +179,13 @@ declare module '@tanstack/react-router' {
-       preLoaderRoute: typeof IndexRouteImport
-       parentRoute: typeof rootRouteImport
-     }
-+    '/_app/student-dashboard': {
-+      id: '/_app/student-dashboard'
-+      path: '/student-dashboard'
-+      fullPath: '/student-dashboard'
-+      preLoaderRoute: typeof AppStudentDashboardRouteImport
-+      parentRoute: typeof AppRoute
-+    }
-     '/_app/settings': {
-       id: '/_app/settings'
-       path: '/settings'
-@@ -211,6 +230,7 @@ interface AppRouteChildren {
-   AppDashboardRoute: typeof AppDashboardRoute
-   AppDevicesRoute: typeof AppDevicesRoute
-   AppSettingsRoute: typeof AppSettingsRoute
-+  AppStudentDashboardRoute: typeof AppStudentDashboardRoute
- }
- 
- const AppRouteChildren: AppRouteChildren = {
-@@ -219,6 +239,7 @@ const AppRouteChildren: AppRouteChildren = {
-   AppDashboardRoute: AppDashboardRoute,
-   AppDevicesRoute: AppDevicesRoute,
-   AppSettingsRoute: AppSettingsRoute,
-+  AppStudentDashboardRoute: AppStudentDashboardRoute,
- }
- 
- const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
-diff --git a/src/routes/_app.dashboard.tsx b/src/routes/_app.dashboard.tsx
-index 3a4af7e..f773aec 100644
---- a/src/routes/_app.dashboard.tsx
-+++ b/src/routes/_app.dashboard.tsx
-@@ -1,4 +1,4 @@
--import { createFileRoute } from '@tanstack/react-router'
-+import { createFileRoute, redirect } from '@tanstack/react-router'
- import { useQuery } from '@tanstack/react-query'
- import { StatusAlert } from '../components/dashboard/StatusAlert'
- import { SummaryStrip } from '../components/dashboard/SummaryStrip'
-@@ -8,8 +8,15 @@ import { ActivityFeed } from '../components/dashboard/ActivityFeed'
- import { Skeleton } from '../components/ui/skeleton'
+diff --git a/src/routes/_app.staff-dashboard.tsx b/src/routes/_app.staff-dashboard.tsx
+index fbf6348..4c2c4c1 100644
+--- a/src/routes/_app.staff-dashboard.tsx
++++ b/src/routes/_app.staff-dashboard.tsx
+@@ -1,5 +1,5 @@
+ import { createFileRoute } from '@tanstack/react-router'
+-import { useState } from 'react'
++import { useState, useMemo } from 'react'
  import { PageContainer } from '../components/PageContainer'
- import { fetchDashboardData } from '../lib/mockData'
-+import { getStoredAuthRole } from '../store'
+ import { enforceRoleAccess } from '../lib/auth'
+ import { useStore } from '../store'
+@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
+ import { Button, buttonVariants } from '../components/ui/button'
+ import { Input } from '../components/ui/input'
+ import { Label } from '../components/ui/label'
+-import { Plus, Save, MonitorPlay, Trash2 } from 'lucide-react'
++import { Plus, Save, MonitorPlay, Trash2, Search } from 'lucide-react'
+ import { Link } from '@tanstack/react-router'
  
- export const Route = createFileRoute('/_app/dashboard')({
-+  beforeLoad: () => {
-+    const role = getStoredAuthRole()
-+    if (role === 'Student') {
-+      throw redirect({ to: '/student-dashboard' })
-+    }
-+  },
-   component: DashboardComponent,
- })
+ export const Route = createFileRoute('/_app/staff-dashboard')({
+@@ -25,6 +25,21 @@ const PRESET_FIELDS: Omit<LogbookField, 'id'>[] = [
+ function StaffDashboardComponent() {
+   const addLogbook = useStore((state) => state.addLogbook)
+   const logbooks = useStore((state) => state.logbooks)
++  const logbookEntries = useStore((state) => state.logbookEntries)
++  
++  const [searchQuery, setSearchQuery] = useState('')
++  const searchResults = useMemo(() => {
++    if (!searchQuery.trim()) return []
++    const query = searchQuery.toLowerCase()
++    
++    return logbookEntries.map(entry => {
++      const logbook = logbooks.find(l => l.id === entry.logbookId)
++      return { entry, logbook }
++    }).filter(({ entry, logbook }) => {
++      if (!logbook) return false
++      return Object.values(entry.data).some(val => val.toLowerCase().includes(query))
++    })
++  }, [searchQuery, logbookEntries, logbooks])
+   
+   const [draft, setDraft] = useState<Omit<LogbookConfig, 'id' | 'createdAt'>>({
+     title: '',
+@@ -91,6 +106,56 @@ function StaffDashboardComponent() {
+         <p className="text-muted-foreground mt-2">Manage and create logbooks for the school.</p>
+       </div>
  
-diff --git a/src/routes/_app.student-dashboard.tsx b/src/routes/_app.student-dashboard.tsx
-new file mode 100644
-index 0000000..a64ebde
---- /dev/null
-+++ b/src/routes/_app.student-dashboard.tsx
-@@ -0,0 +1,66 @@
-+import { createFileRoute, redirect } from '@tanstack/react-router'
-+import { useQuery } from '@tanstack/react-query'
-+import { fetchDepartmentAnnouncements } from '../lib/mockData'
-+import { PageContainer } from '../components/PageContainer'
-+import { Skeleton } from '../components/ui/skeleton'
-+import { getStoredAuthRole } from '../store'
-+
-+export const Route = createFileRoute('/_app/student-dashboard')({
-+  beforeLoad: () => {
-+    if (getStoredAuthRole() !== 'Student') {
-+      throw redirect({ to: '/' })
-+    }
-+  },
-+  component: StudentDashboardComponent,
-+})
-+
-+function StudentDashboardComponent() {
-+  const { data: announcements, isLoading } = useQuery({
-+    queryKey: ['departmentAnnouncements'],
-+    queryFn: fetchDepartmentAnnouncements,
-+  })
-+
-+  if (isLoading || !announcements) {
-+    return (
-+      <PageContainer className="gap-6">
-+        <h1 className="text-2xl font-bold">Student Dashboard</h1>
-+        <div className="flex flex-col gap-4">
-+          <Skeleton className="h-24 w-full rounded-lg" />
-+          <Skeleton className="h-24 w-full rounded-lg" />
-+          <Skeleton className="h-24 w-full rounded-lg" />
-+        </div>
-+      </PageContainer>
-+    )
-+  }
-+
-+  return (
-+    <PageContainer className="gap-6 pb-8">
-+      <h1 className="text-2xl font-bold">Student Dashboard</h1>
-+      <div className="flex flex-col gap-4">
-+        {announcements.length === 0 ? (
-+          <p className="text-muted-foreground">No announcements at this time.</p>
-+        ) : (
-+          announcements.map((announcement) => (
-+            <div key={announcement.id} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col">
-+              <div className="flex justify-between items-start mb-1">
-+                <div>
-+                  <h3 className="font-semibold text-lg leading-tight">{announcement.title}</h3>
-+                  <p className="text-sm text-muted-foreground">{announcement.department}</p>
-+                </div>
-+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-4">{announcement.date}</span>
-+              </div>
-+              <p className="text-sm mt-2 text-foreground/90">{announcement.content}</p>
-+              {announcement.isImportant && (
-+                <div className="mt-3">
-+                  <span className="inline-flex items-center rounded-full border border-destructive/20 px-2.5 py-0.5 text-xs font-semibold bg-destructive/10 text-destructive">
-+                    Important
-+                  </span>
++      <Card className="mb-6">
++        <CardHeader>
++          <CardTitle className="flex items-center gap-2">
++            <Search className="w-5 h-5" />
++            Search Passes
++          </CardTitle>
++          <CardDescription>Search for active temporary passes by student name or other details.</CardDescription>
++        </CardHeader>
++        <CardContent>
++          <div className="relative">
++            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
++            <Input 
++              placeholder="Search passes..." 
++              className="pl-9 max-w-md"
++              value={searchQuery}
++              onChange={(e) => setSearchQuery(e.target.value)}
++            />
++          </div>
++          
++          {searchQuery.trim() && (
++            <div className="mt-4 space-y-4">
++              {searchResults.length === 0 ? (
++                <p className="text-sm text-muted-foreground">No passes found matching your search.</p>
++              ) : (
++                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
++                  {searchResults.map(({ entry, logbook }) => (
++                    <Card key={entry.id} className="bg-muted/30">
++                      <CardHeader className="pb-2">
++                        <CardTitle className="text-sm">{logbook?.title}</CardTitle>
++                        <CardDescription className="text-xs">
++                          {new Date(entry.createdAt).toLocaleString()}
++                        </CardDescription>
++                      </CardHeader>
++                      <CardContent className="text-sm space-y-1">
++                        {logbook?.fields.map(field => (
++                          <div key={field.id} className="flex flex-col">
++                            <span className="text-xs text-muted-foreground">{field.label}</span>
++                            <span className="font-medium">{entry.data[field.id] || 'N/A'}</span>
++                          </div>
++                        ))}
++                      </CardContent>
++                    </Card>
++                  ))}
 +                </div>
 +              )}
 +            </div>
-+          ))
-+        )}
-+      </div>
-+    </PageContainer>
-+  )
-+}
-diff --git a/src/routes/index.tsx b/src/routes/index.tsx
-index 8c2ddcb..cd786af 100644
---- a/src/routes/index.tsx
-+++ b/src/routes/index.tsx
-@@ -1,7 +1,12 @@
- import { createFileRoute, redirect } from '@tanstack/react-router'
-+import { getStoredAuthRole } from '../store'
++          )}
++        </CardContent>
++      </Card>
++
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+         <Card className="flex flex-col h-full">
+           <CardHeader>
+diff --git a/src/routes/kiosk.$logbookId.tsx b/src/routes/kiosk.$logbookId.tsx
+index b33c94d..b47c236 100644
+--- a/src/routes/kiosk.$logbookId.tsx
++++ b/src/routes/kiosk.$logbookId.tsx
+@@ -16,6 +16,7 @@ function KioskLogbookComponent() {
+   const navigate = useNavigate()
+   const logbooks = useStore((state) => state.logbooks)
+   const validateKioskPin = useStore((state) => state.validateKioskPin)
++  const addLogbookEntry = useStore((state) => state.addLogbookEntry)
+   const logbook = logbooks.find(l => l.id === logbookId)
  
- export const Route = createFileRoute('/')({
-   beforeLoad: () => {
-+    const role = getStoredAuthRole()
-+    if (role === 'Student') {
-+      throw redirect({ to: '/student-dashboard' })
-+    }
-     throw redirect({ to: '/dashboard' })
-   },
- })
+   const [formData, setFormData] = useState<Record<string, string>>({})
+@@ -45,8 +46,15 @@ function KioskLogbookComponent() {
+ 
+   const handleSubmit = (e: React.FormEvent) => {
+     e.preventDefault()
+-    // In a real app, this would submit the logbook entry to an API/store.
+-    // For now, just reset the form to simulate a successful submission.
++    if (!logbook) return
++    
++    addLogbookEntry({
++      id: crypto.randomUUID(),
++      logbookId: logbook.id,
++      data: formData,
++      createdAt: new Date().toISOString()
++    })
++    
+     alert('Entry submitted successfully!')
+     setFormData({})
+   }
+diff --git a/src/store/index.ts b/src/store/index.ts
+index f09e3b4..2f7d0f2 100644
+--- a/src/store/index.ts
++++ b/src/store/index.ts
+@@ -21,12 +21,20 @@ export interface LogbookConfig {
+   createdAt: string;
+ }
+ 
++export interface LogbookEntry {
++  id: string;
++  logbookId: string;
++  data: Record<string, string>;
++  createdAt: string;
++}
++
+ interface AppState {
+   authRole: AuthRole;
+   theme: 'light' | 'dark' | 'system';
+   viewMode: string;
+   alertsCount: number | null;
+   logbooks: LogbookConfig[];
++  logbookEntries: LogbookEntry[];
+   sessionActivity: {
+     reviewedAlertIds: string[];
+     dismissedAlertIds: string[];
+@@ -39,6 +47,7 @@ interface AppState {
+   setViewMode: (mode: string) => void;
+   setAlertsCount: (count: number | null) => void;
+   addLogbook: (logbook: LogbookConfig) => void;
++  addLogbookEntry: (entry: LogbookEntry) => void;
+   validateKioskPin: (id: string, pin: string) => boolean;
+   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
+   toggleHelp: () => void;
+@@ -53,6 +62,7 @@ export const useStore = create<AppState>()(
+       viewMode: 'simple',
+       alertsCount: null,
+       logbooks: [],
++      logbookEntries: [],
+       sessionActivity: {
+         reviewedAlertIds: [],
+         dismissedAlertIds: [],
+@@ -65,6 +75,7 @@ export const useStore = create<AppState>()(
+       setViewMode: (mode) => set({ viewMode: mode }),
+       setAlertsCount: (alertsCount) => set({ alertsCount }),
+       addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
++      addLogbookEntry: (entry) => set((state) => ({ logbookEntries: [...state.logbookEntries, entry] })),
+       validateKioskPin: (id, pin) => {
+         const logbook = get().logbooks.find(l => l.id === id);
+         return logbook?.kioskPin === pin;
+@@ -85,7 +96,8 @@ export const useStore = create<AppState>()(
+         theme: state.theme,
+         viewMode: state.viewMode,
+         isHelpOpen: state.isHelpOpen,
+-        logbooks: state.logbooks
++        logbooks: state.logbooks,
++        logbookEntries: state.logbookEntries
+       }),
+     }
+   )
