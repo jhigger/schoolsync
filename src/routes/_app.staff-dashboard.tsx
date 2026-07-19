@@ -10,6 +10,7 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Plus, Save, MonitorPlay, Trash2 } from 'lucide-react'
 import { SearchPasses } from '../components/dashboard/SearchPasses'
+import { AppointmentManager } from '../components/dashboard/AppointmentManager'
 import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_app/staff-dashboard')({
@@ -241,6 +242,8 @@ function StaffDashboardComponent() {
           </CardContent>
         </Card>
       </div>
+
+      <AppointmentManager />
     </PageContainer>
   )
 }

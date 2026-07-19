@@ -28,6 +28,20 @@ export interface LogbookEntry {
   createdAt: string;
 }
 
+export type AppointmentType = 'appointment' | 'requirement';
+export type AppointmentStatus = 'Pending' | "RSVP'd" | 'Cancelled' | 'Done';
+
+export interface Appointment {
+  id: string;
+  studentId: string;
+  studentName: string;
+  title: string;
+  date: string;
+  type: AppointmentType;
+  status: AppointmentStatus;
+  createdAt: string;
+}
+
 interface AppState {
   authRole: AuthRole;
   theme: 'light' | 'dark' | 'system';
@@ -35,6 +49,7 @@ interface AppState {
   alertsCount: number | null;
   logbooks: LogbookConfig[];
   logbookEntries: LogbookEntry[];
+  appointments: Appointment[];
   sessionActivity: {
     reviewedAlertIds: string[];
     dismissedAlertIds: string[];
@@ -48,6 +63,7 @@ interface AppState {
   setAlertsCount: (count: number | null) => void;
   addLogbook: (logbook: LogbookConfig) => void;
   addLogbookEntry: (entry: LogbookEntry) => void;
+  addAppointment: (appointment: Appointment) => void;
   validateKioskPin: (id: string, pin: string) => boolean;
   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
   toggleHelp: () => void;
@@ -63,6 +79,7 @@ export const useStore = create<AppState>()(
       alertsCount: null,
       logbooks: [],
       logbookEntries: [],
+      appointments: [],
       sessionActivity: {
         reviewedAlertIds: [],
         dismissedAlertIds: [],
@@ -76,6 +93,7 @@ export const useStore = create<AppState>()(
       setAlertsCount: (alertsCount) => set({ alertsCount }),
       addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
       addLogbookEntry: (entry) => set((state) => ({ logbookEntries: [...state.logbookEntries, entry] })),
+      addAppointment: (appointment) => set((state) => ({ appointments: [...state.appointments, appointment] })),
       validateKioskPin: (id, pin) => {
         const logbook = get().logbooks.find(l => l.id === id);
         return logbook?.kioskPin === pin;
@@ -97,7 +115,8 @@ export const useStore = create<AppState>()(
         viewMode: state.viewMode,
         isHelpOpen: state.isHelpOpen,
         logbooks: state.logbooks,
-        logbookEntries: state.logbookEntries
+        logbookEntries: state.logbookEntries,
+        appointments: state.appointments
       }),
     }
   )

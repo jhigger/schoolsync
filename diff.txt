@@ -1,188 +1,264 @@
-diff --git a/src/routes/_app.staff-dashboard.tsx b/src/routes/_app.staff-dashboard.tsx
-index fbf6348..4c2c4c1 100644
---- a/src/routes/_app.staff-dashboard.tsx
-+++ b/src/routes/_app.staff-dashboard.tsx
-@@ -1,5 +1,5 @@
- import { createFileRoute } from '@tanstack/react-router'
--import { useState } from 'react'
-+import { useState, useMemo } from 'react'
- import { PageContainer } from '../components/PageContainer'
- import { enforceRoleAccess } from '../lib/auth'
- import { useStore } from '../store'
-@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
- import { Button, buttonVariants } from '../components/ui/button'
- import { Input } from '../components/ui/input'
- import { Label } from '../components/ui/label'
--import { Plus, Save, MonitorPlay, Trash2 } from 'lucide-react'
-+import { Plus, Save, MonitorPlay, Trash2, Search } from 'lucide-react'
- import { Link } from '@tanstack/react-router'
- 
- export const Route = createFileRoute('/_app/staff-dashboard')({
-@@ -25,6 +25,21 @@ const PRESET_FIELDS: Omit<LogbookField, 'id'>[] = [
- function StaffDashboardComponent() {
-   const addLogbook = useStore((state) => state.addLogbook)
-   const logbooks = useStore((state) => state.logbooks)
-+  const logbookEntries = useStore((state) => state.logbookEntries)
+diff --git a/src/components/dashboard/AppointmentManager.tsx b/src/components/dashboard/AppointmentManager.tsx
+new file mode 100644
+index 0000000..f64a24d
+--- /dev/null
++++ b/src/components/dashboard/AppointmentManager.tsx
+@@ -0,0 +1,168 @@
++import { useState } from 'react'
++import { useStore } from '../../store'
++import type { Appointment } from '../../store'
++import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card'
++import { Button } from '../ui/button'
++import { Input } from '../ui/input'
++import { Label } from '../ui/label'
++import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
++import { Save, CalendarPlus } from 'lucide-react'
++
++export function AppointmentManager() {
++  const addAppointment = useStore((state) => state.addAppointment)
++  const appointments = useStore((state) => state.appointments)
++  const updateAppointmentStatus = useStore((state) => state.updateAppointmentStatus)
 +  
-+  const [searchQuery, setSearchQuery] = useState('')
-+  const searchResults = useMemo(() => {
-+    if (!searchQuery.trim()) return []
-+    const query = searchQuery.toLowerCase()
++  const [draft, setDraft] = useState({
++    studentId: '',
++    studentName: '',
++    title: '',
++    description: '',
++    date: '',
++    type: 'appointment' as 'appointment' | 'requirement'
++  })
++
++  const handleSave = () => {
++    if (!draft.studentName.trim() || !draft.title.trim() || !draft.date) {
++      alert('Please fill out student name, title, and date')
++      return
++    }
++
++    const newAppointment: Appointment = {
++      ...draft,
++      studentId: draft.studentId || crypto.randomUUID(), // Mock ID if not provided
++      id: crypto.randomUUID(),
++      status: 'Pending',
++      createdAt: new Date().toISOString()
++    }
 +    
-+    return logbookEntries.map(entry => {
-+      const logbook = logbooks.find(l => l.id === entry.logbookId)
-+      return { entry, logbook }
-+    }).filter(({ entry, logbook }) => {
-+      if (!logbook) return false
-+      return Object.values(entry.data).some(val => val.toLowerCase().includes(query))
-+    })
-+  }, [searchQuery, logbookEntries, logbooks])
-   
-   const [draft, setDraft] = useState<Omit<LogbookConfig, 'id' | 'createdAt'>>({
-     title: '',
-@@ -91,6 +106,56 @@ function StaffDashboardComponent() {
-         <p className="text-muted-foreground mt-2">Manage and create logbooks for the school.</p>
-       </div>
- 
-+      <Card className="mb-6">
++    addAppointment(newAppointment)
++    setDraft({ studentId: '', studentName: '', title: '', description: '', date: '', type: 'appointment' })
++    alert('Appointment/Requirement created successfully!')
++  }
++
++  return (
++    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
++      <Card className="flex flex-col h-full">
 +        <CardHeader>
-+          <CardTitle className="flex items-center gap-2">
-+            <Search className="w-5 h-5" />
-+            Search Passes
-+          </CardTitle>
-+          <CardDescription>Search for active temporary passes by student name or other details.</CardDescription>
++          <CardTitle>Create Appointment / Requirement</CardTitle>
++          <CardDescription>Target a specific student for a meeting or required action.</CardDescription>
 +        </CardHeader>
-+        <CardContent>
-+          <div className="relative">
-+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
++        <CardContent className="flex-1 space-y-4">
++          <div className="space-y-2">
++            <Label htmlFor="type">Type</Label>
++            <Select 
++              value={draft.type} 
++              onValueChange={(v) => setDraft(prev => ({ ...prev, type: v as 'appointment' | 'requirement' }))}
++            >
++              <SelectTrigger id="type">
++                <SelectValue placeholder="Select type" />
++              </SelectTrigger>
++              <SelectContent>
++                <SelectItem value="appointment">Appointment</SelectItem>
++                <SelectItem value="requirement">Requirement</SelectItem>
++              </SelectContent>
++            </Select>
++          </div>
++          <div className="space-y-2">
++            <Label htmlFor="studentName">Student Name</Label>
 +            <Input 
-+              placeholder="Search passes..." 
-+              className="pl-9 max-w-md"
-+              value={searchQuery}
-+              onChange={(e) => setSearchQuery(e.target.value)}
++              id="studentName" 
++              value={draft.studentName} 
++              onChange={(e) => setDraft(prev => ({ ...prev, studentName: e.target.value }))} 
++              placeholder="e.g. John Doe" 
 +            />
 +          </div>
-+          
-+          {searchQuery.trim() && (
-+            <div className="mt-4 space-y-4">
-+              {searchResults.length === 0 ? (
-+                <p className="text-sm text-muted-foreground">No passes found matching your search.</p>
-+              ) : (
-+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-+                  {searchResults.map(({ entry, logbook }) => (
-+                    <Card key={entry.id} className="bg-muted/30">
-+                      <CardHeader className="pb-2">
-+                        <CardTitle className="text-sm">{logbook?.title}</CardTitle>
-+                        <CardDescription className="text-xs">
-+                          {new Date(entry.createdAt).toLocaleString()}
-+                        </CardDescription>
-+                      </CardHeader>
-+                      <CardContent className="text-sm space-y-1">
-+                        {logbook?.fields.map(field => (
-+                          <div key={field.id} className="flex flex-col">
-+                            <span className="text-xs text-muted-foreground">{field.label}</span>
-+                            <span className="font-medium">{entry.data[field.id] || 'N/A'}</span>
-+                          </div>
-+                        ))}
-+                      </CardContent>
-+                    </Card>
-+                  ))}
-+                </div>
-+              )}
++          <div className="space-y-2">
++            <Label htmlFor="title">Title</Label>
++            <Input 
++              id="title" 
++              value={draft.title} 
++              onChange={(e) => setDraft(prev => ({ ...prev, title: e.target.value }))} 
++              placeholder="e.g. Guidance Counseling" 
++            />
++          </div>
++          <div className="space-y-2">
++            <Label htmlFor="description">Description (Optional)</Label>
++            <Input 
++              id="description" 
++              value={draft.description} 
++              onChange={(e) => setDraft(prev => ({ ...prev, description: e.target.value }))} 
++              placeholder="Brief details..." 
++            />
++          </div>
++          <div className="space-y-2">
++            <Label htmlFor="date">Date & Time</Label>
++            <Input 
++              id="date" 
++              type="datetime-local"
++              value={draft.date} 
++              onChange={(e) => setDraft(prev => ({ ...prev, date: e.target.value }))} 
++            />
++          </div>
++        </CardContent>
++        <CardFooter className="pt-6 border-t mt-auto">
++          <Button className="w-full" onClick={handleSave}>
++            <Save className="w-4 h-4 mr-2" />
++            Create
++          </Button>
++        </CardFooter>
++      </Card>
++
++      <Card className="flex flex-col h-full">
++        <CardHeader>
++          <CardTitle>Active Appointments</CardTitle>
++          <CardDescription>Track status of student appointments and requirements.</CardDescription>
++        </CardHeader>
++        <CardContent className="flex-1 overflow-y-auto">
++          {appointments.length === 0 ? (
++            <div className="text-sm text-muted-foreground italic p-4 border border-dashed rounded-lg text-center">
++              No appointments created yet.
++            </div>
++          ) : (
++            <div className="space-y-4">
++              {appointments.map((appt) => (
++                <Card key={appt.id} className="p-4 flex flex-col gap-3">
++                  <div className="flex justify-between items-start">
++                    <div>
++                      <h3 className="font-semibold text-lg flex items-center gap-2">
++                        <CalendarPlus className="w-4 h-4 text-muted-foreground" />
++                        {appt.title}
++                      </h3>
++                      <p className="text-sm text-muted-foreground">Student: {appt.studentName}</p>
++                      {appt.description && <p className="text-sm text-muted-foreground mt-1">{appt.description}</p>}
++                      <div className="flex items-center gap-2 mt-2">
++                        <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded uppercase">
++                          {appt.type}
++                        </span>
++                        <span className="text-xs text-muted-foreground">
++                          {new Date(appt.date).toLocaleString()}
++                        </span>
++                      </div>
++                    </div>
++                    <div>
++                      <Select 
++                        value={appt.status} 
++                        onValueChange={(v) => updateAppointmentStatus(appt.id, v as Appointment['status'])}
++                      >
++                        <SelectTrigger className="w-[120px] h-8 text-xs">
++                          <SelectValue placeholder="Status" />
++                        </SelectTrigger>
++                        <SelectContent>
++                          <SelectItem value="Pending">Pending</SelectItem>
++                          <SelectItem value="RSVP'd">RSVP'd</SelectItem>
++                          <SelectItem value="Cancelled">Cancelled</SelectItem>
++                          <SelectItem value="Done">Done</SelectItem>
++                        </SelectContent>
++                      </Select>
++                    </div>
++                  </div>
++                </Card>
++              ))}
 +            </div>
 +          )}
 +        </CardContent>
 +      </Card>
++    </div>
++  )
++}
+diff --git a/src/routes/_app.staff-dashboard.tsx b/src/routes/_app.staff-dashboard.tsx
+index eff10d0..a8ee499 100644
+--- a/src/routes/_app.staff-dashboard.tsx
++++ b/src/routes/_app.staff-dashboard.tsx
+@@ -10,6 +10,7 @@ import { Input } from '../components/ui/input'
+ import { Label } from '../components/ui/label'
+ import { Plus, Save, MonitorPlay, Trash2 } from 'lucide-react'
+ import { SearchPasses } from '../components/dashboard/SearchPasses'
++import { AppointmentManager } from '../components/dashboard/AppointmentManager'
+ import { Link } from '@tanstack/react-router'
+ 
+ export const Route = createFileRoute('/_app/staff-dashboard')({
+@@ -241,6 +242,8 @@ function StaffDashboardComponent() {
+           </CardContent>
+         </Card>
+       </div>
 +
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         <Card className="flex flex-col h-full">
-           <CardHeader>
-diff --git a/src/routes/kiosk.$logbookId.tsx b/src/routes/kiosk.$logbookId.tsx
-index b33c94d..b47c236 100644
---- a/src/routes/kiosk.$logbookId.tsx
-+++ b/src/routes/kiosk.$logbookId.tsx
-@@ -16,6 +16,7 @@ function KioskLogbookComponent() {
-   const navigate = useNavigate()
-   const logbooks = useStore((state) => state.logbooks)
-   const validateKioskPin = useStore((state) => state.validateKioskPin)
-+  const addLogbookEntry = useStore((state) => state.addLogbookEntry)
-   const logbook = logbooks.find(l => l.id === logbookId)
- 
-   const [formData, setFormData] = useState<Record<string, string>>({})
-@@ -45,8 +46,15 @@ function KioskLogbookComponent() {
- 
-   const handleSubmit = (e: React.FormEvent) => {
-     e.preventDefault()
--    // In a real app, this would submit the logbook entry to an API/store.
--    // For now, just reset the form to simulate a successful submission.
-+    if (!logbook) return
-+    
-+    addLogbookEntry({
-+      id: crypto.randomUUID(),
-+      logbookId: logbook.id,
-+      data: formData,
-+      createdAt: new Date().toISOString()
-+    })
-+    
-     alert('Entry submitted successfully!')
-     setFormData({})
-   }
++      <AppointmentManager />
+     </PageContainer>
+   )
+ }
 diff --git a/src/store/index.ts b/src/store/index.ts
-index f09e3b4..2f7d0f2 100644
+index 2f7d0f2..e9a5bce 100644
 --- a/src/store/index.ts
 +++ b/src/store/index.ts
-@@ -21,12 +21,20 @@ export interface LogbookConfig {
+@@ -28,6 +28,18 @@ export interface LogbookEntry {
    createdAt: string;
  }
  
-+export interface LogbookEntry {
++export interface Appointment {
 +  id: string;
-+  logbookId: string;
-+  data: Record<string, string>;
++  studentId: string;
++  studentName: string;
++  title: string;
++  description?: string;
++  date: string;
++  type: 'appointment' | 'requirement';
++  status: 'Pending' | "RSVP'd" | 'Cancelled' | 'Done';
 +  createdAt: string;
 +}
 +
  interface AppState {
    authRole: AuthRole;
    theme: 'light' | 'dark' | 'system';
-   viewMode: string;
+@@ -35,6 +47,7 @@ interface AppState {
    alertsCount: number | null;
    logbooks: LogbookConfig[];
-+  logbookEntries: LogbookEntry[];
+   logbookEntries: LogbookEntry[];
++  appointments: Appointment[];
    sessionActivity: {
      reviewedAlertIds: string[];
      dismissedAlertIds: string[];
-@@ -39,6 +47,7 @@ interface AppState {
-   setViewMode: (mode: string) => void;
+@@ -48,6 +61,8 @@ interface AppState {
    setAlertsCount: (count: number | null) => void;
    addLogbook: (logbook: LogbookConfig) => void;
-+  addLogbookEntry: (entry: LogbookEntry) => void;
+   addLogbookEntry: (entry: LogbookEntry) => void;
++  addAppointment: (appointment: Appointment) => void;
++  updateAppointmentStatus: (id: string, status: Appointment['status']) => void;
    validateKioskPin: (id: string, pin: string) => boolean;
    updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
    toggleHelp: () => void;
-@@ -53,6 +62,7 @@ export const useStore = create<AppState>()(
-       viewMode: 'simple',
+@@ -63,6 +78,7 @@ export const useStore = create<AppState>()(
        alertsCount: null,
        logbooks: [],
-+      logbookEntries: [],
+       logbookEntries: [],
++      appointments: [],
        sessionActivity: {
          reviewedAlertIds: [],
          dismissedAlertIds: [],
-@@ -65,6 +75,7 @@ export const useStore = create<AppState>()(
-       setViewMode: (mode) => set({ viewMode: mode }),
+@@ -76,6 +92,10 @@ export const useStore = create<AppState>()(
        setAlertsCount: (alertsCount) => set({ alertsCount }),
        addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
-+      addLogbookEntry: (entry) => set((state) => ({ logbookEntries: [...state.logbookEntries, entry] })),
+       addLogbookEntry: (entry) => set((state) => ({ logbookEntries: [...state.logbookEntries, entry] })),
++      addAppointment: (appointment) => set((state) => ({ appointments: [...state.appointments, appointment] })),
++      updateAppointmentStatus: (id, status) => set((state) => ({
++        appointments: state.appointments.map(a => a.id === id ? { ...a, status } : a)
++      })),
        validateKioskPin: (id, pin) => {
          const logbook = get().logbooks.find(l => l.id === id);
          return logbook?.kioskPin === pin;
-@@ -85,7 +96,8 @@ export const useStore = create<AppState>()(
-         theme: state.theme,
+@@ -97,7 +117,8 @@ export const useStore = create<AppState>()(
          viewMode: state.viewMode,
          isHelpOpen: state.isHelpOpen,
--        logbooks: state.logbooks
-+        logbooks: state.logbooks,
-+        logbookEntries: state.logbookEntries
+         logbooks: state.logbooks,
+-        logbookEntries: state.logbookEntries
++        logbookEntries: state.logbookEntries,
++        appointments: state.appointments
        }),
      }
    )
