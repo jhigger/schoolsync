@@ -29,7 +29,7 @@ export interface LogbookEntry {
 }
 
 export type AppointmentType = 'appointment' | 'requirement';
-export type AppointmentStatus = 'Pending' | "RSVP'd" | 'Cancelled' | 'Done';
+export type AppointmentStatus = 'Pending' | "RSVP'd" | 'Cancelled' | 'Done' | 'Reschedule Requested';
 
 export interface Appointment {
   id: string;
@@ -64,6 +64,7 @@ interface AppState {
   addLogbook: (logbook: LogbookConfig) => void;
   addLogbookEntry: (entry: LogbookEntry) => void;
   addAppointment: (appointment: Appointment) => void;
+  updateAppointmentStatus: (id: string, status: AppointmentStatus) => void;
   validateKioskPin: (id: string, pin: string) => boolean;
   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
   toggleHelp: () => void;
@@ -94,6 +95,9 @@ export const useStore = create<AppState>()(
       addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
       addLogbookEntry: (entry) => set((state) => ({ logbookEntries: [...state.logbookEntries, entry] })),
       addAppointment: (appointment) => set((state) => ({ appointments: [...state.appointments, appointment] })),
+      updateAppointmentStatus: (id, status) => set((state) => ({
+        appointments: state.appointments.map(appt => appt.id === id ? { ...appt, status } : appt)
+      })),
       validateKioskPin: (id, pin) => {
         const logbook = get().logbooks.find(l => l.id === id);
         return logbook?.kioskPin === pin;
