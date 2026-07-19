@@ -5,7 +5,7 @@ vi.mock('zustand/middleware', () => ({
   persist: (config: any) => config,
 }))
 import { useStore } from '../index'
-import type { Appointment } from '../index'
+import { createMockAppointment } from '../../lib/test-utils'
 
 describe('Store: Appointments', () => {
   beforeEach(() => {
@@ -14,16 +14,7 @@ describe('Store: Appointments', () => {
   })
 
   it('adds an appointment and updates its status', () => {
-    const appt: Appointment = {
-      id: 'test-1',
-      studentId: 's1',
-      studentName: 'Alice',
-      title: 'Meeting',
-      date: new Date().toISOString(),
-      type: 'appointment',
-      status: 'Pending',
-      createdAt: new Date().toISOString(),
-    }
+    const appt = createMockAppointment()
 
     useStore.getState().addAppointment(appt)
     let appointments = useStore.getState().appointments

@@ -4,7 +4,7 @@ import { fetchDepartmentAnnouncements } from '../lib/mockData'
 import { PageContainer } from '../components/PageContainer'
 import { Skeleton } from '../components/ui/skeleton'
 import { enforceRoleAccess } from '../lib/auth'
-import { useStore } from '../store'
+import { useStore, isAppointmentActionable, canRsvp } from '../store'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { CalendarPlus } from 'lucide-react'
@@ -14,13 +14,20 @@ export const Route = createFileRoute('/_app/student-dashboard')({
   component: StudentDashboardComponent,
 })
 
+function EmptyStateList({ message }: { message: string }) {
+  return <p className="text-muted-foreground">{message}</p>
+}
+
 function StudentDashboardComponent() {
   const { data: announcements, isLoading } = useQuery({
     queryKey: ['departmentAnnouncements'],
     queryFn: fetchDepartmentAnnouncements,
   })
 
-  const appointments = useStore((state) => state.appointments)
+  // Hardcode demo student for now so they only see their own appointments
+  const currentStudentId = 's1'
+  const allAppointments = useStore((state) => state.appointments)
+  const appointments = allAppointments.filter(a => a.studentId === currentStudentId)
   const updateAppointmentStatus = useStore((state) => state.updateAppointmentStatus)
 
   if (isLoading || !announcements) {
@@ -40,11 +47,11 @@ function StudentDashboardComponent() {
     <PageContainer className="gap-6 pb-8">
       <h1 className="text-2xl font-bold">Student Dashboard</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold">My Appointments</h2>
           {appointments.length === 0 ? (
-            <p className="text-muted-foreground">No appointments at this time.</p>
+            <EmptyStateList message="No appointments at this time." />
           ) : (
             appointments.map((appt) => (
               <Card key={appt.id} className="flex flex-col">
@@ -69,9 +76,9 @@ function StudentDashboardComponent() {
                     </span>
                   </div>
                   
-                  {['Pending', "RSVP'd"].includes(appt.status) && (
+                  {isAppointmentActionable(appt.status) && (
                     <div className="flex gap-2 flex-wrap">
-                      {appt.status !== "RSVP'd" && (
+                      {canRsvp(appt.status) && (
                         <Button 
                           size="sm" 
                           onClick={() => updateAppointmentStatus(appt.id, "RSVP'd")}
@@ -104,7 +111,7 @@ function StudentDashboardComponent() {
         <div className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold">Announcements</h2>
           {announcements.length === 0 ? (
-            <p className="text-muted-foreground">No announcements at this time.</p>
+            <EmptyStateList message="No announcements at this time." />
           ) : (
             announcements.map((announcement) => (
               <div key={announcement.id} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col">

@@ -19,6 +19,7 @@ type AppointmentDraft = Omit<Appointment, 'id' | 'status' | 'createdAt'>
 export function AppointmentManager() {
   const addAppointment = useStore((state) => state.addAppointment)
   const appointments = useStore((state) => state.appointments)
+  const updateAppointmentStatus = useStore((state) => state.updateAppointmentStatus)
   
   const [draft, setDraft] = useState<AppointmentDraft>({
     studentId: '',
@@ -153,6 +154,16 @@ export function AppointmentManager() {
                       </span>
                     </div>
                   </div>
+                  {appt.status === 'Reschedule Requested' && (
+                    <div className="flex gap-2 pt-2 border-t border-border/50">
+                      <Button size="sm" onClick={() => updateAppointmentStatus(appt.id, 'Pending')}>
+                        Re-open Slot
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => updateAppointmentStatus(appt.id, 'Cancelled')}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
                 </Card>
               ))}
             </div>

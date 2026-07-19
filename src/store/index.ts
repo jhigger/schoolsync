@@ -42,6 +42,14 @@ export interface Appointment {
   createdAt: string;
 }
 
+export function isAppointmentActionable(status: AppointmentStatus): boolean {
+  return status === 'Pending' || status === "RSVP'd";
+}
+
+export function canRsvp(status: AppointmentStatus): boolean {
+  return status === 'Pending';
+}
+
 interface AppState {
   authRole: AuthRole;
   theme: 'light' | 'dark' | 'system';

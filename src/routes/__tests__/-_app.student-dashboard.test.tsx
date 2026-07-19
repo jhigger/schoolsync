@@ -13,6 +13,7 @@ import { createRootRoute, createRoute, createRouter, RouterProvider } from '@tan
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Route } from '../_app.student-dashboard'
 import { useStore } from '../../store'
+import { createMockAppointment } from '../../lib/test-utils'
 
 const rootRoute = createRootRoute()
 const testRoute = createRoute({
@@ -45,16 +46,12 @@ describe('StudentDashboard', () => {
 
   it('renders dashboard with appointments and allows RSVP', async () => {
     useStore.setState({
-      appointments: [{
-        id: '1',
-        studentId: 's1',
-        studentName: 'Alice',
-        title: 'Guidance',
-        date: new Date().toISOString(),
-        type: 'appointment',
-        status: 'Pending',
-        createdAt: new Date().toISOString(),
-      }]
+      appointments: [
+        createMockAppointment({
+          id: '1',
+          title: 'Guidance'
+        })
+      ]
     })
 
     render(
