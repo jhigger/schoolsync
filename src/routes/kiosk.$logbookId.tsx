@@ -15,6 +15,7 @@ function KioskLogbookComponent() {
   const { logbookId } = Route.useParams()
   const navigate = useNavigate()
   const logbooks = useStore((state) => state.logbooks)
+  const validateKioskPin = useStore((state) => state.validateKioskPin)
   const logbook = logbooks.find(l => l.id === logbookId)
 
   const [formData, setFormData] = useState<Record<string, string>>({})
@@ -52,7 +53,7 @@ function KioskLogbookComponent() {
 
   const handleExitAttempt = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!logbook.kioskPin || exitPin === logbook.kioskPin) {
+    if (validateKioskPin(logbook.id, exitPin)) {
       navigate({ to: '/staff-dashboard' })
     } else {
       setPinError(true)
@@ -114,28 +115,26 @@ function KioskLogbookComponent() {
                 Exit Kiosk Mode
               </CardTitle>
               <CardDescription>
-                {logbook.kioskPin ? 'Enter the staff PIN to exit.' : 'Confirm you want to exit Kiosk Mode.'}
+                Enter the staff PIN to exit.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form id="exit-form" onSubmit={handleExitAttempt} className="space-y-4">
-                {logbook.kioskPin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="pin">PIN Code</Label>
-                    <Input
-                      id="pin"
-                      type="password"
-                      autoFocus
-                      value={exitPin}
-                      onChange={(e) => {
-                        setExitPin(e.target.value)
-                        setPinError(false)
-                      }}
-                      className={pinError ? 'border-destructive' : ''}
-                    />
-                    {pinError && <p className="text-sm text-destructive font-medium">Incorrect PIN</p>}
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="pin">PIN Code</Label>
+                  <Input
+                    id="pin"
+                    type="password"
+                    autoFocus
+                    value={exitPin}
+                    onChange={(e) => {
+                      setExitPin(e.target.value)
+                      setPinError(false)
+                    }}
+                    className={pinError ? 'border-destructive' : ''}
+                  />
+                  {pinError && <p className="text-sm text-destructive font-medium">Incorrect PIN</p>}
+                </div>
               </form>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">

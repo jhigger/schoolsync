@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button, buttonVariants } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Plus, Trash2, Save, MonitorPlay } from 'lucide-react'
+import { Plus, Save, MonitorPlay, Trash2 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_app/staff-dashboard')({
@@ -25,13 +25,12 @@ const PRESET_FIELDS: Omit<LogbookField, 'id'>[] = [
 function StaffDashboardComponent() {
   const addLogbook = useStore((state) => state.addLogbook)
   const logbooks = useStore((state) => state.logbooks)
-  const deleteLogbook = useStore((state) => state.deleteLogbook)
   
-  const [draft, setDraft] = useState({
+  const [draft, setDraft] = useState<Omit<LogbookConfig, 'id' | 'createdAt'>>({
     title: '',
     description: '',
     kioskPin: '',
-    fields: [] as LogbookField[]
+    fields: []
   })
   
   const addField = (fieldData: Partial<LogbookField>) => {
@@ -68,13 +67,15 @@ function StaffDashboardComponent() {
       alert('Please add at least one field')
       return
     }
+
+    if (!draft.kioskPin.trim()) {
+      alert('Please enter a Kiosk Exit PIN')
+      return
+    }
     
     const newLogbook: LogbookConfig = {
+      ...draft,
       id: crypto.randomUUID(),
-      title: draft.title,
-      description: draft.description,
-      kioskPin: draft.kioskPin,
-      fields: draft.fields,
       createdAt: new Date().toISOString()
     }
     
@@ -117,7 +118,7 @@ function StaffDashboardComponent() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="kioskPin">Kiosk Exit PIN (Optional)</Label>
+                <Label htmlFor="kioskPin">Kiosk Exit PIN</Label>
                 <Input 
                   id="kioskPin" 
                   value={draft.kioskPin} 
@@ -226,9 +227,6 @@ function StaffDashboardComponent() {
                       <p className="text-xs text-muted-foreground mt-1">{logbook.fields.length} fields configured</p>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                      <Button variant="destructive" size="sm" onClick={() => deleteLogbook(logbook.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                       <Link to="/kiosk/$logbookId" params={{ logbookId: logbook.id }} className={buttonVariants({ size: "sm" })}>
                         <MonitorPlay className="w-4 h-4 mr-2" />
                         Launch Kiosk

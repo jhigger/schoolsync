@@ -1,0 +1,399 @@
+diff --git a/src/routeTree.gen.ts b/src/routeTree.gen.ts
+index 3c8b8fc..343f3ea 100644
+--- a/src/routeTree.gen.ts
++++ b/src/routeTree.gen.ts
+@@ -13,6 +13,7 @@ import { Route as SigninRouteImport } from './routes/signin'
+ import { Route as AboutRouteImport } from './routes/about'
+ import { Route as AppRouteImport } from './routes/_app'
+ import { Route as IndexRouteImport } from './routes/index'
++import { Route as KioskLogbookIdRouteImport } from './routes/kiosk.$logbookId'
+ import { Route as AppStudentDashboardRouteImport } from './routes/_app.student-dashboard'
+ import { Route as AppStaffDashboardRouteImport } from './routes/_app.staff-dashboard'
+ import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
+   path: '/',
+   getParentRoute: () => rootRouteImport,
+ } as any)
++const KioskLogbookIdRoute = KioskLogbookIdRouteImport.update({
++  id: '/kiosk/$logbookId',
++  path: '/kiosk/$logbookId',
++  getParentRoute: () => rootRouteImport,
++} as any)
+ const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
+   id: '/student-dashboard',
+   path: '/student-dashboard',
+@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
+   '/settings': typeof AppSettingsRoute
+   '/staff-dashboard': typeof AppStaffDashboardRoute
+   '/student-dashboard': typeof AppStudentDashboardRoute
++  '/kiosk/$logbookId': typeof KioskLogbookIdRoute
+ }
+ export interface FileRoutesByTo {
+   '/': typeof IndexRoute
+@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
+   '/settings': typeof AppSettingsRoute
+   '/staff-dashboard': typeof AppStaffDashboardRoute
+   '/student-dashboard': typeof AppStudentDashboardRoute
++  '/kiosk/$logbookId': typeof KioskLogbookIdRoute
+ }
+ export interface FileRoutesById {
+   __root__: typeof rootRouteImport
+@@ -113,6 +121,7 @@ export interface FileRoutesById {
+   '/_app/settings': typeof AppSettingsRoute
+   '/_app/staff-dashboard': typeof AppStaffDashboardRoute
+   '/_app/student-dashboard': typeof AppStudentDashboardRoute
++  '/kiosk/$logbookId': typeof KioskLogbookIdRoute
+ }
+ export interface FileRouteTypes {
+   fileRoutesByFullPath: FileRoutesByFullPath
+@@ -127,6 +136,7 @@ export interface FileRouteTypes {
+     | '/settings'
+     | '/staff-dashboard'
+     | '/student-dashboard'
++    | '/kiosk/$logbookId'
+   fileRoutesByTo: FileRoutesByTo
+   to:
+     | '/'
+@@ -139,6 +149,7 @@ export interface FileRouteTypes {
+     | '/settings'
+     | '/staff-dashboard'
+     | '/student-dashboard'
++    | '/kiosk/$logbookId'
+   id:
+     | '__root__'
+     | '/'
+@@ -152,6 +163,7 @@ export interface FileRouteTypes {
+     | '/_app/settings'
+     | '/_app/staff-dashboard'
+     | '/_app/student-dashboard'
++    | '/kiosk/$logbookId'
+   fileRoutesById: FileRoutesById
+ }
+ export interface RootRouteChildren {
+@@ -159,6 +171,7 @@ export interface RootRouteChildren {
+   AppRoute: typeof AppRouteWithChildren
+   AboutRoute: typeof AboutRoute
+   SigninRoute: typeof SigninRoute
++  KioskLogbookIdRoute: typeof KioskLogbookIdRoute
+ }
+ 
+ declare module '@tanstack/react-router' {
+@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
+       preLoaderRoute: typeof IndexRouteImport
+       parentRoute: typeof rootRouteImport
+     }
++    '/kiosk/$logbookId': {
++      id: '/kiosk/$logbookId'
++      path: '/kiosk/$logbookId'
++      fullPath: '/kiosk/$logbookId'
++      preLoaderRoute: typeof KioskLogbookIdRouteImport
++      parentRoute: typeof rootRouteImport
++    }
+     '/_app/student-dashboard': {
+       id: '/_app/student-dashboard'
+       path: '/student-dashboard'
+@@ -270,6 +290,7 @@ const rootRouteChildren: RootRouteChildren = {
+   AppRoute: AppRouteWithChildren,
+   AboutRoute: AboutRoute,
+   SigninRoute: SigninRoute,
++  KioskLogbookIdRoute: KioskLogbookIdRoute,
+ }
+ export const routeTree = rootRouteImport
+   ._addFileChildren(rootRouteChildren)
+diff --git a/src/routes/_app.staff-dashboard.tsx b/src/routes/_app.staff-dashboard.tsx
+index 9c6d482..af8b0e8 100644
+--- a/src/routes/_app.staff-dashboard.tsx
++++ b/src/routes/_app.staff-dashboard.tsx
+@@ -5,10 +5,11 @@ import { enforceRoleAccess } from '../lib/auth'
+ import { useStore } from '../store'
+ import type { LogbookConfig, LogbookField } from '../store'
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/card'
+-import { Button } from '../components/ui/button'
++import { Button, buttonVariants } from '../components/ui/button'
+ import { Input } from '../components/ui/input'
+ import { Label } from '../components/ui/label'
+-import { Plus, Trash2, Save } from 'lucide-react'
++import { Plus, Trash2, Save, MonitorPlay } from 'lucide-react'
++import { Link } from '@tanstack/react-router'
+ 
+ export const Route = createFileRoute('/_app/staff-dashboard')({
+   beforeLoad: () => enforceRoleAccess(['Admin', 'Staff']),
+@@ -23,10 +24,13 @@ const PRESET_FIELDS: Omit<LogbookField, 'id'>[] = [
+ 
+ function StaffDashboardComponent() {
+   const addLogbook = useStore((state) => state.addLogbook)
++  const logbooks = useStore((state) => state.logbooks)
++  const deleteLogbook = useStore((state) => state.deleteLogbook)
+   
+   const [draft, setDraft] = useState({
+     title: '',
+     description: '',
++    kioskPin: '',
+     fields: [] as LogbookField[]
+   })
+   
+@@ -69,12 +73,13 @@ function StaffDashboardComponent() {
+       id: crypto.randomUUID(),
+       title: draft.title,
+       description: draft.description,
++      kioskPin: draft.kioskPin,
+       fields: draft.fields,
+       createdAt: new Date().toISOString()
+     }
+     
+     addLogbook(newLogbook)
+-    setDraft({ title: '', description: '', fields: [] })
++    setDraft({ title: '', description: '', kioskPin: '', fields: [] })
+     alert('Logbook saved successfully!')
+   }
+ 
+@@ -111,6 +116,15 @@ function StaffDashboardComponent() {
+                   placeholder="What is this logbook for?" 
+                 />
+               </div>
++              <div className="space-y-2">
++                <Label htmlFor="kioskPin">Kiosk Exit PIN (Optional)</Label>
++                <Input 
++                  id="kioskPin" 
++                  value={draft.kioskPin} 
++                  onChange={(e) => setDraft(prev => ({ ...prev, kioskPin: e.target.value }))} 
++                  placeholder="e.g. 1234" 
++                />
++              </div>
+             </div>
+             
+             <div className="space-y-4">
+@@ -191,6 +205,41 @@ function StaffDashboardComponent() {
+             </Button>
+           </CardFooter>
+         </Card>
++
++        <Card className="flex flex-col h-full">
++          <CardHeader>
++            <CardTitle>Configured Logbooks</CardTitle>
++            <CardDescription>Manage and launch active logbooks.</CardDescription>
++          </CardHeader>
++          <CardContent className="flex-1 overflow-y-auto">
++            {logbooks.length === 0 ? (
++              <div className="text-sm text-muted-foreground italic p-4 border border-dashed rounded-lg text-center">
++                No logbooks configured yet. Use the builder to create one.
++              </div>
++            ) : (
++              <div className="space-y-4">
++                {logbooks.map((logbook) => (
++                  <Card key={logbook.id} className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
++                    <div>
++                      <h3 className="font-semibold text-lg">{logbook.title}</h3>
++                      {logbook.description && <p className="text-sm text-muted-foreground">{logbook.description}</p>}
++                      <p className="text-xs text-muted-foreground mt-1">{logbook.fields.length} fields configured</p>
++                    </div>
++                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
++                      <Button variant="destructive" size="sm" onClick={() => deleteLogbook(logbook.id)}>
++                        <Trash2 className="w-4 h-4" />
++                      </Button>
++                      <Link to="/kiosk/$logbookId" params={{ logbookId: logbook.id }} className={buttonVariants({ size: "sm" })}>
++                        <MonitorPlay className="w-4 h-4 mr-2" />
++                        Launch Kiosk
++                      </Link>
++                    </div>
++                  </Card>
++                ))}
++              </div>
++            )}
++          </CardContent>
++        </Card>
+       </div>
+     </PageContainer>
+   )
+diff --git a/src/routes/kiosk.$logbookId.tsx b/src/routes/kiosk.$logbookId.tsx
+new file mode 100644
+index 0000000..97f4374
+--- /dev/null
++++ b/src/routes/kiosk.$logbookId.tsx
+@@ -0,0 +1,158 @@
++import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
++import { useState } from 'react'
++import { useStore } from '../store'
++import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/card'
++import { Button, buttonVariants } from '../components/ui/button'
++import { Input } from '../components/ui/input'
++import { Label } from '../components/ui/label'
++import { Lock, LogOut } from 'lucide-react'
++
++export const Route = createFileRoute('/kiosk/$logbookId')({
++  component: KioskLogbookComponent,
++})
++
++function KioskLogbookComponent() {
++  const { logbookId } = Route.useParams()
++  const navigate = useNavigate()
++  const logbooks = useStore((state) => state.logbooks)
++  const logbook = logbooks.find(l => l.id === logbookId)
++
++  const [formData, setFormData] = useState<Record<string, string>>({})
++  const [showExitModal, setShowExitModal] = useState(false)
++  const [exitPin, setExitPin] = useState('')
++  const [pinError, setPinError] = useState(false)
++
++  if (!logbook) {
++    return (
++      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
++        <Card className="max-w-md w-full">
++          <CardHeader>
++            <CardTitle>Logbook Not Found</CardTitle>
++            <CardDescription>The requested logbook configuration does not exist.</CardDescription>
++          </CardHeader>
++          <CardFooter>
++            <Link to="/" className={buttonVariants({ className: "w-full" })}>Go Home</Link>
++          </CardFooter>
++        </Card>
++      </div>
++    )
++  }
++
++  const handleInputChange = (fieldId: string, value: string) => {
++    setFormData(prev => ({ ...prev, [fieldId]: value }))
++  }
++
++  const handleSubmit = (e: React.FormEvent) => {
++    e.preventDefault()
++    // In a real app, this would submit the logbook entry to an API/store.
++    // For now, just reset the form to simulate a successful submission.
++    alert('Entry submitted successfully!')
++    setFormData({})
++  }
++
++  const handleExitAttempt = (e: React.FormEvent) => {
++    e.preventDefault()
++    if (!logbook.kioskPin || exitPin === logbook.kioskPin) {
++      navigate({ to: '/staff-dashboard' })
++    } else {
++      setPinError(true)
++      setExitPin('')
++    }
++  }
++
++  return (
++    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative">
++      <Button 
++        variant="ghost" 
++        size="sm" 
++        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
++        onClick={() => setShowExitModal(true)}
++      >
++        <LogOut className="w-4 h-4 mr-2" />
++        Exit Kiosk
++      </Button>
++
++      <Card className="w-full max-w-2xl shadow-lg border-primary/20">
++        <CardHeader className="text-center pb-8 border-b">
++          <CardTitle className="text-3xl font-bold tracking-tight">{logbook.title}</CardTitle>
++          {logbook.description && (
++            <CardDescription className="text-lg mt-2">{logbook.description}</CardDescription>
++          )}
++        </CardHeader>
++        <CardContent className="pt-8">
++          <form id="logbook-form" onSubmit={handleSubmit} className="space-y-6">
++            {logbook.fields.map(field => (
++              <div key={field.id} className="space-y-2">
++                <Label htmlFor={field.id} className="text-base">
++                  {field.label} {field.required && <span className="text-destructive">*</span>}
++                </Label>
++                <Input
++                  id={field.id}
++                  type={field.type === 'date' ? 'datetime-local' : field.type === 'number' ? 'number' : 'text'}
++                  required={field.required}
++                  value={formData[field.id] || ''}
++                  onChange={(e) => handleInputChange(field.id, e.target.value)}
++                  className="h-12 text-lg"
++                />
++              </div>
++            ))}
++          </form>
++        </CardContent>
++        <CardFooter className="pt-6 border-t bg-muted/10 rounded-b-lg">
++          <Button type="submit" form="logbook-form" className="w-full h-14 text-lg">
++            Submit Entry
++          </Button>
++        </CardFooter>
++      </Card>
++
++      {showExitModal && (
++        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
++          <Card className="w-full max-w-sm shadow-xl">
++            <CardHeader>
++              <CardTitle className="flex items-center gap-2">
++                <Lock className="w-5 h-5 text-primary" />
++                Exit Kiosk Mode
++              </CardTitle>
++              <CardDescription>
++                {logbook.kioskPin ? 'Enter the staff PIN to exit.' : 'Confirm you want to exit Kiosk Mode.'}
++              </CardDescription>
++            </CardHeader>
++            <CardContent>
++              <form id="exit-form" onSubmit={handleExitAttempt} className="space-y-4">
++                {logbook.kioskPin && (
++                  <div className="space-y-2">
++                    <Label htmlFor="pin">PIN Code</Label>
++                    <Input
++                      id="pin"
++                      type="password"
++                      autoFocus
++                      value={exitPin}
++                      onChange={(e) => {
++                        setExitPin(e.target.value)
++                        setPinError(false)
++                      }}
++                      className={pinError ? 'border-destructive' : ''}
++                    />
++                    {pinError && <p className="text-sm text-destructive font-medium">Incorrect PIN</p>}
++                  </div>
++                )}
++              </form>
++            </CardContent>
++            <CardFooter className="flex justify-end gap-2">
++              <Button variant="ghost" onClick={() => {
++                setShowExitModal(false)
++                setExitPin('')
++                setPinError(false)
++              }}>
++                Cancel
++              </Button>
++              <Button type="submit" form="exit-form" variant="destructive">
++                Exit
++              </Button>
++            </CardFooter>
++          </Card>
++        </div>
++      )}
++    </div>
++  )
++}
+diff --git a/src/store/index.ts b/src/store/index.ts
+index 776ed37..f57e826 100644
+--- a/src/store/index.ts
++++ b/src/store/index.ts
+@@ -17,6 +17,7 @@ export interface LogbookConfig {
+   title: string;
+   description?: string;
+   fields: LogbookField[];
++  kioskPin?: string;
+   createdAt: string;
+ }
+ 
+@@ -38,6 +39,7 @@ interface AppState {
+   setViewMode: (mode: string) => void;
+   setAlertsCount: (count: number | null) => void;
+   addLogbook: (logbook: LogbookConfig) => void;
++  deleteLogbook: (id: string) => void;
+   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
+   toggleHelp: () => void;
+   setHelpOpen: (isOpen: boolean) => void;
+@@ -63,6 +65,7 @@ export const useStore = create<AppState>()(
+       setViewMode: (mode) => set({ viewMode: mode }),
+       setAlertsCount: (alertsCount) => set({ alertsCount }),
+       addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
++      deleteLogbook: (id) => set((state) => ({ logbooks: state.logbooks.filter(l => l.id !== id) })),
+       updateSessionActivity: (key, updater) => set((state) => ({
+         sessionActivity: {
+           ...state.sessionActivity,

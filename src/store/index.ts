@@ -17,7 +17,7 @@ export interface LogbookConfig {
   title: string;
   description?: string;
   fields: LogbookField[];
-  kioskPin?: string;
+  kioskPin: string;
   createdAt: string;
 }
 
@@ -39,7 +39,7 @@ interface AppState {
   setViewMode: (mode: string) => void;
   setAlertsCount: (count: number | null) => void;
   addLogbook: (logbook: LogbookConfig) => void;
-  deleteLogbook: (id: string) => void;
+  validateKioskPin: (id: string, pin: string) => boolean;
   updateSessionActivity: (key: keyof AppState['sessionActivity'], updater: string[] | ((prev: string[]) => string[])) => void;
   toggleHelp: () => void;
   setHelpOpen: (isOpen: boolean) => void;
@@ -47,7 +47,7 @@ interface AppState {
 
 export const useStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       authRole: null,
       theme: 'system',
       viewMode: 'simple',
@@ -65,7 +65,10 @@ export const useStore = create<AppState>()(
       setViewMode: (mode) => set({ viewMode: mode }),
       setAlertsCount: (alertsCount) => set({ alertsCount }),
       addLogbook: (logbook) => set((state) => ({ logbooks: [...state.logbooks, logbook] })),
-      deleteLogbook: (id) => set((state) => ({ logbooks: state.logbooks.filter(l => l.id !== id) })),
+      validateKioskPin: (id, pin) => {
+        const logbook = get().logbooks.find(l => l.id === id);
+        return logbook?.kioskPin === pin;
+      },
       updateSessionActivity: (key, updater) => set((state) => ({
         sessionActivity: {
           ...state.sessionActivity,
