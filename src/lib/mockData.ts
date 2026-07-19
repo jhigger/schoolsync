@@ -403,3 +403,45 @@ export async function fetchRulesData(): Promise<RuleItem[]> {
     }, 1000);
   });
 }
+
+export interface DepartmentAnnouncement {
+  id: string;
+  department: string;
+  title: string;
+  content: string;
+  date: string;
+  isImportant?: boolean;
+}
+
+export const mockAnnouncements: DepartmentAnnouncement[] = [
+  {
+    id: 'ann-1',
+    department: 'Computer Science',
+    title: 'Lab 3 closed for maintenance',
+    content: 'Lab 3 will be closed for hardware upgrades this afternoon.',
+    date: 'Today',
+    isImportant: true,
+  },
+  {
+    id: 'ann-2',
+    department: 'Mathematics',
+    title: 'Study group registration open',
+    content: 'Sign up for the upcoming calculus study groups in the math department office.',
+    date: 'Yesterday',
+  },
+  {
+    id: 'ann-3',
+    department: 'General',
+    title: 'Welcome to the new semester',
+    content: 'Please ensure your schedules are finalized by the end of the week.',
+    date: 'Monday',
+  }
+];
+
+export async function fetchDepartmentAnnouncements(): Promise<DepartmentAnnouncement[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockAnnouncements);
+    }, 1000);
+  });
+}

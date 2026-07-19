@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { StatusAlert } from '../components/dashboard/StatusAlert'
 import { SummaryStrip } from '../components/dashboard/SummaryStrip'
@@ -8,8 +8,15 @@ import { ActivityFeed } from '../components/dashboard/ActivityFeed'
 import { Skeleton } from '../components/ui/skeleton'
 import { PageContainer } from '../components/PageContainer'
 import { fetchDashboardData } from '../lib/mockData'
+import { getStoredAuthRole } from '../store'
 
 export const Route = createFileRoute('/_app/dashboard')({
+  beforeLoad: () => {
+    const role = getStoredAuthRole()
+    if (role === 'Student') {
+      throw redirect({ to: '/student-dashboard' })
+    }
+  },
   component: DashboardComponent,
 })
 
